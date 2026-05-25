@@ -2,15 +2,26 @@
 struct CounterModel {
   mut count : Int
   view : Element
-  client : @desktop.Client
+  mut client : @desktop.Client
 }
 
 ///|
-fn CounterModel::send(
+fn CounterModel::send_command(
   self : CounterModel,
   command : @shared.CounterAppCommand,
 ) -> Unit {
-  post_message(self.client.event(command))
+  self.client = self.client.request_with_callback("moonbitDesktop", command, (
+    response : @ipc.Response[@shared.CounterEvent],
+  ) => {
+    match response {
+      Ok(CountChanged(count)) => {
+        self.count = count
+        self.render()
+      }
+      Ok(WindowTitleChanged(title)) => set_document_title(title)
+      Err(_) => ()
+    }
+  })
 }
 
 ///|
@@ -25,9 +36,7 @@ fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
   let command = @shared.CounterAppCommand::Counter(
     @shared.CounterCommand::Increment(amount~),
   )
-  self.send(command)
-  self.count += amount
-  self.render()
+  self.send_command(command)
 }
 
 ///|
@@ -35,9 +44,7 @@ fn CounterModel::reset(self : CounterModel) -> Unit {
   let command = @shared.CounterAppCommand::Counter(
     @shared.CounterCommand::Reset,
   )
-  self.send(command)
-  self.count = 0
-  self.render()
+  self.send_command(command)
 }
 
 ///|

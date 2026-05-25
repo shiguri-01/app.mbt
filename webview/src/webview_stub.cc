@@ -3,10 +3,22 @@
 #include <moonbit.h>
 
 #include <cstring>
+#include <string>
+#include <vector>
+
+typedef void (*MoonBitWebViewBindingCallback)(void *, moonbit_bytes_t,
+                                              moonbit_bytes_t);
+
+struct MoonBitWebViewBinding {
+  std::string name;
+  MoonBitWebViewBindingCallback callback;
+  void *closure;
+};
 
 struct MoonBitWebView {
   webview_t handle;
   int destroyed;
+  std::vector<MoonBitWebViewBinding *> bindings;
 };
 
 static webview_error_t require_handle(MoonBitWebView *view) {
@@ -23,6 +35,16 @@ static webview_error_t destroy_handle(MoonBitWebView *view) {
   webview_error_t status = webview_destroy(view->handle);
   view->handle = nullptr;
   view->destroyed = 1;
+  for (auto *binding : view->bindings) {
+    if (binding != nullptr) {
+      if (binding->closure != nullptr) {
+        moonbit_decref(binding->closure);
+        binding->closure = nullptr;
+      }
+      delete binding;
+    }
+  }
+  view->bindings.clear();
   return status;
 }
 
@@ -42,6 +64,22 @@ static moonbit_bytes_t make_bytes_from_c_string(const char *text) {
   moonbit_bytes_t bytes = moonbit_make_bytes(len, 0);
   std::memcpy(bytes, text, static_cast<size_t>(len));
   return bytes;
+}
+
+static void moonbit_webview_binding_trampoline(const char *id, const char *req,
+                                               void *arg) {
+  auto *binding = static_cast<MoonBitWebViewBinding *>(arg);
+  if (binding == nullptr || binding->callback == nullptr ||
+      binding->closure == nullptr) {
+    return;
+  }
+  moonbit_bytes_t id_bytes = make_bytes_from_c_string(id);
+  moonbit_bytes_t req_bytes = make_bytes_from_c_string(req);
+  moonbit_incref(binding->closure);
+  binding->callback(binding->closure, id_bytes, req_bytes);
+  moonbit_decref(binding->closure);
+  moonbit_decref(id_bytes);
+  moonbit_decref(req_bytes);
 }
 
 extern "C" {
@@ -137,6 +175,64 @@ int32_t moonbit_webview_eval(MoonBitWebView *view, moonbit_bytes_t js) {
     return status;
   }
   return webview_eval(view->handle, as_c_string(js));
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_bind(MoonBitWebView *view, moonbit_bytes_t name,
+                             MoonBitWebViewBindingCallback callback,
+                             void *closure) {
+  webview_error_t status = require_handle(view);
+  if (status != WEBVIEW_ERROR_OK) {
+    moonbit_decref(closure);
+    return status;
+  }
+  const char *name_text = as_c_string(name);
+  auto *binding = new MoonBitWebViewBinding{name_text, callback, closure};
+  view->bindings.push_back(binding);
+  status = webview_bind(view->handle, name_text,
+                        moonbit_webview_binding_trampoline, binding);
+  if (status != WEBVIEW_ERROR_OK) {
+    moonbit_decref(closure);
+    view->bindings.pop_back();
+    delete binding;
+  }
+  return status;
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_unbind(MoonBitWebView *view, moonbit_bytes_t name) {
+  webview_error_t status = require_handle(view);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+  const char *name_text = as_c_string(name);
+  status = webview_unbind(view->handle, name_text);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+  for (auto it = view->bindings.begin(); it != view->bindings.end(); ++it) {
+    auto *binding = *it;
+    if (binding != nullptr && binding->name == name_text) {
+      if (binding->closure != nullptr) {
+        moonbit_decref(binding->closure);
+      }
+      view->bindings.erase(it);
+      delete binding;
+      break;
+    }
+  }
+  return status;
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_return(MoonBitWebView *view, moonbit_bytes_t id,
+                               int32_t status, moonbit_bytes_t result) {
+  webview_error_t view_status = require_handle(view);
+  if (view_status != WEBVIEW_ERROR_OK) {
+    return view_status;
+  }
+  return webview_return(view->handle, as_c_string(id), status,
+                        as_c_string(result));
 }
 
 MOONBIT_FFI_EXPORT

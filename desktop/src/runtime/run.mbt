@@ -1,7 +1,8 @@
 ///|
 /// Run a single-window desktop application.
 ///
-/// `on_ready` runs before entering the blocking native webview event loop.
+/// `on_ready` runs before loading content and entering the blocking native
+/// webview event loop so applications can register IPC handlers first.
 pub async fn run(
   title~ : String,
   width? : Int = 800,
@@ -35,11 +36,11 @@ pub async fn run_with_options(
   view.set_size(options.width, options.height) catch {
     err => raise_webview(err)
   }
+  on_ready(window)
   match options.load {
     Some(load) => load.apply(window)
     None => ()
   }
-  on_ready(window)
   view.run() catch {
     err => raise_webview(err)
   }

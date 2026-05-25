@@ -23,13 +23,3 @@ extern "js" fn set_document_title(title : String) -> Unit =
   #| (title) => {
   #|   document.title = title
   #| }
-
-///|
-extern "js" fn post_message(raw : String) -> Unit =
-  #| (raw) => {
-  #|   if (globalThis.__moonbitDesktopPostMessage) {
-  #|     globalThis.__moonbitDesktopPostMessage(raw)
-  #|   } else {
-  #|     console.log("[desktop ipc pending]", raw)
-  #|   }
-  #| }

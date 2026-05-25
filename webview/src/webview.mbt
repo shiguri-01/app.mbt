@@ -84,6 +84,49 @@ pub fn WebView::eval(self : WebView, js : String) -> Unit raise WebViewError {
 }
 
 ///|
+/// Bind a JavaScript function to a native MoonBit callback.
+///
+/// The callback receives the webview request id and the raw JSON argument array
+/// supplied by `webview_bind`.
+pub fn WebView::bind(
+  self : WebView,
+  name : String,
+  handler : (String, String) -> Unit,
+) -> Unit raise WebViewError {
+  check_status(
+    ffi_bind(
+      self,
+      @utf8.encode(name),
+      (callback, id, req) => callback(id, req),
+      (id, req) => handler(@utf8.decode_lossy(id), @utf8.decode_lossy(req)),
+    ),
+  )
+}
+
+///|
+/// Remove a JavaScript binding created by `bind`.
+pub fn WebView::unbind(
+  self : WebView,
+  name : String,
+) -> Unit raise WebViewError {
+  check_status(ffi_unbind(self, @utf8.encode(name)))
+}
+
+///|
+/// Resolve or reject a JavaScript binding call.
+///
+/// `result` must be a JSON value, or the empty string for JavaScript
+/// `undefined`.
+pub fn WebView::return_(
+  self : WebView,
+  id : String,
+  status : Int,
+  result : String,
+) -> Unit raise WebViewError {
+  check_status(ffi_return(self, @utf8.encode(id), status, @utf8.encode(result)))
+}
+
+///|
 /// Return the bundled webview library version string.
 pub fn version_number() -> String {
   @utf8.decode_lossy(ffi_version_number())

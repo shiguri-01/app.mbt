@@ -1,5 +1,6 @@
 import {
   "shiguri-01/desktop/frontend" @desktop,
+  "shiguri-01/desktop/ipc",
   "shiguri-01/desktop-counter-example/shared",
 }
 

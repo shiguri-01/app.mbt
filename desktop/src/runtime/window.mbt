@@ -43,6 +43,30 @@ pub fn Window::eval(self : Window, js : String) -> Unit raise DesktopError {
 }
 
 ///|
+pub fn Window::set_html(
+  self : Window,
+  html : String,
+) -> Unit raise DesktopError {
+  self.view.set_html(html) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
+pub fn Window::navigate(self : Window, url : String) -> Unit raise DesktopError {
+  self.view.navigate(url) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
+pub fn Window::unbind(self : Window, name : String) -> Unit raise DesktopError {
+  self.view.unbind(name) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
 pub fn Window::terminate(self : Window) -> Unit raise DesktopError {
   self.view.terminate() catch {
     err => raise_webview(err)

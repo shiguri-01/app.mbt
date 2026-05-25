@@ -47,4 +47,26 @@ extern "C" fn ffi_init(view : WebView, js : Bytes) -> Int = "moonbit_webview_ini
 extern "C" fn ffi_eval(view : WebView, js : Bytes) -> Int = "moonbit_webview_eval"
 
 ///|
+#borrow(view, name)
+extern "C" fn ffi_bind(
+  view : WebView,
+  name : Bytes,
+  call_handler : FuncRef[((Bytes, Bytes) -> Unit, Bytes, Bytes) -> Unit],
+  handler : (Bytes, Bytes) -> Unit,
+) -> Int = "moonbit_webview_bind"
+
+///|
+#borrow(view, name)
+extern "C" fn ffi_unbind(view : WebView, name : Bytes) -> Int = "moonbit_webview_unbind"
+
+///|
+#borrow(view, id, result)
+extern "C" fn ffi_return(
+  view : WebView,
+  id : Bytes,
+  status : Int,
+  result : Bytes,
+) -> Int = "moonbit_webview_return"
+
+///|
 extern "C" fn ffi_version_number() -> Bytes = "moonbit_webview_version_number"

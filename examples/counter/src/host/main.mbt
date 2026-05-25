@@ -44,22 +44,12 @@ async fn main {
     load=Html(html),
     on_ready=window => {
       window.set_title("MoonBit Counter")
-      window.eval(
-        (
-          #|globalThis.__moonbitDesktopPostMessage = (raw) => {
-          #|  console.log("[desktop ipc pending]", raw);
-          #|};
-          #|,
-        ),
-      )
-      let (count, event) = handle_command(
-        0,
-        @shared.CounterAppCommand::Counter(
-          @shared.CounterCommand::Increment(amount=1),
-        ),
-      )
-      ignore(count)
-      window.eval("console.log(" + event.to_json().stringify().escape() + ")")
+      let count = Ref(0)
+      window.handle_sync("moonbitDesktop", command => {
+        let (next, event) = handle_command(count.val, command)
+        count.val = next
+        event
+      })
     },
   ) catch {
     _ => println("desktop runtime failed")
