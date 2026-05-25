@@ -1,6 +1,10 @@
 import {
   "shiguri-01/desktop/frontend" @desktop,
-  "shiguri-01/desktop-examples/counter/shared",
+  "shiguri-01/desktop-counter-example/shared",
 }
 
 supported_targets = "+js"
+
+options(
+  "is-main": true,
+)

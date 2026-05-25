@@ -1,4 +1,17 @@
 ///|
+async fn counter_html() -> String {
+  guard @env.current_dir() is Some(cwd) else {
+    fail("could not determine current directory")
+  }
+  let html = @fs.read_file(cwd + "/examples/counter/static/index.html").text()
+  let frontend = @fs.read_file(
+    cwd +
+    "/_build/js/debug/build/shiguri-01/desktop-counter-example/frontend/frontend.js",
+  ).text()
+  html.replace(old="__MOONBIT_COUNTER_FRONTEND__", new=frontend)
+}
+
+///|
 fn handle_command(
   count : Int,
   command : @shared.CounterAppCommand,
@@ -16,13 +29,14 @@ fn handle_command(
 
 ///|
 async fn main {
-  let html =
-    #|<!doctype html>
-    #|<meta charset="utf-8">
-    #|<title>MoonBit Counter</title>
-    #|<h1>MoonBit Counter</h1>
-    #|<p>This example is loaded by the desktop runtime.</p>
-    #|
+  let html = counter_html() catch {
+    _ => {
+      println(
+        "failed to load counter frontend; run `just build-counter-example-frontend` first",
+      )
+      return
+    }
+  }
   @desktop.run(
     title="MoonBit Counter",
     width=640,
@@ -30,6 +44,14 @@ async fn main {
     load=Html(html),
     on_ready=window => {
       window.set_title("MoonBit Counter")
+      window.eval(
+        (
+          #|globalThis.__moonbitDesktopPostMessage = (raw) => {
+          #|  console.log("[desktop ipc pending]", raw);
+          #|};
+          #|,
+        ),
+      )
       let (count, event) = handle_command(
         0,
         @shared.CounterAppCommand::Counter(

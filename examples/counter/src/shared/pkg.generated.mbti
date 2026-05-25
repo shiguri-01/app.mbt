@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "shiguri-01/desktop-examples/counter/shared"
+package "shiguri-01/desktop-counter-example/shared"
 
 import {
   "moonbitlang/core/debug",

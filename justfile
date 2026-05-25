@@ -15,9 +15,13 @@ test:
 run-webview-example:
     cmd.exe /C tools\msvc-native.cmd moon run webview/src/examples/basic --target native
 
+# Build the MoonBit JS frontend for the counter desktop example.
+build-counter-example-frontend:
+    moon build examples/counter/src/frontend --target js
+
 # Run the desktop framework counter example.
-run-counter-example:
-    cmd.exe /C tools\msvc-native.cmd moon run examples/src/counter/host --target native
+run-counter-example: build-counter-example-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/counter/src/host --target native
 
 # Refresh generated package interfaces.
 info:
