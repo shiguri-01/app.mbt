@@ -6,9 +6,9 @@ options(
   "native-stub": [ "webview_stub.cc" ],
   link: {
     "native": {
-      "stub-cc": "g++",
-      "stub-cc-flags": "-std=c++14",
-      "cc-link-flags": "-lstdc++ -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion",
+      "stub-cc": "cl",
+      "stub-cc-flags": "/std:c++14 /EHsc /utf-8",
+      "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",
     },
   },
 )

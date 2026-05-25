@@ -1,9 +1,13 @@
 import {
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+  "shiguri-01/desktop/ipc",
   "shiguri-01/webview",
 }
 
+supported_targets = "+native"
+
 options(
-  "is-main": true,
   link: {
     "native": {
       "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",

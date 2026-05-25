@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-examples/counter/shared"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum CounterAppCommand {
+  Counter(CounterCommand)
+  Window(WindowCommand)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum CounterCommand {
+  Increment(amount~ : Int)
+  Reset
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum CounterEvent {
+  CountChanged(Int)
+  WindowTitleChanged(String)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum WindowCommand {
+  SetTitle(String)
+  Close
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

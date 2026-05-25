@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop/ipc"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn parse_envelope(String) -> Envelope raise IpcError
+
+// Errors
+pub(all) suberror IpcError {
+  DecodeError(String)
+  EncodeError(String)
+  MissingRequestId
+  HandlerError(String)
+  TransportClosed
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Types and methods
+pub(all) struct Envelope {
+  id : String?
+  payload : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T : @json.FromJson] Envelope::decode(Self) -> T raise IpcError
+pub fn[T : ToJson] Envelope::new(T, id? : String) -> Self
+pub fn Envelope::stringify(Self) -> String
+
+pub(all) struct Event[T] {
+  body : T
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T : ToJson] Event::to_envelope(Self[T]) -> Envelope
+
+pub(all) struct Request[T] {
+  id : String
+  body : T
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T : ToJson] Request::to_envelope(Self[T]) -> Envelope
+
+pub(all) enum Response[T] {
+  Ok(T)
+  Err(IpcError)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T : ToJson] Response::to_envelope(Self[T], String) -> Envelope
+
+// Type aliases
+
+// Traits
+

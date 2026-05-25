@@ -1,6 +1,10 @@
 import {
-  "shiguri-01/webview",
+  "moonbitlang/async",
+  "shiguri-01/desktop/runtime" @desktop,
+  "shiguri-01/desktop-examples/counter/shared",
 }
+
+supported_targets = "+native"
 
 options(
   "is-main": true,
