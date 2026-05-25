@@ -1,0 +1,14 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+}
+
+options(
+  "native-stub": [ "webview_stub.cc" ],
+  link: {
+    "native": {
+      "stub-cc": "g++",
+      "stub-cc-flags": "-std=c++14",
+      "cc-link-flags": "-lstdc++ -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion",
+    },
+  },
+)

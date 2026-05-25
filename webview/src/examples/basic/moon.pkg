@@ -1,0 +1,12 @@
+import {
+  "shiguri-01/webview",
+}
+
+options(
+  "is-main": true,
+  link: {
+    "native": {
+      "cc-link-flags": "-lstdc++ -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion",
+    },
+  },
+)
