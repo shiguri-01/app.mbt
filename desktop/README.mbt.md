@@ -14,8 +14,9 @@ Applications define their own nested enum protocol and derive `ToJson` /
 
 Native applications start with `@desktop.run`, receive an `App`, and create one
 or more windows with `App::create_window`. Native code should use
-`Window::handle_ipc_default` with an `IpcPolicy`; frontend code can use
-`Client::request_async_default` or the callback helper.
+`Window::handle_ipc_endpoint` with shared command endpoints such as
+`IpcEndpoint[IncrementRequest, CountChangedReply]`; frontend code can use
+`Client::request_endpoint_async` or the endpoint callback helper.
 
 For long-running host work that must finish after the callback returns,
 `Window::handle_deferred` remains available as a lower-level escape hatch.

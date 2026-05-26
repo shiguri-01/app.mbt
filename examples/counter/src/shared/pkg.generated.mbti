@@ -8,29 +8,29 @@ import {
 }
 
 // Values
-pub fn command_id(CounterAppCommand) -> @ipc.CommandId
+pub let increment_endpoint : @ipc.IpcEndpoint[IncrementRequest, CountChangedReply]
+
+pub let reset_endpoint : @ipc.IpcEndpoint[Unit, CountChangedReply]
+
+pub let set_title_endpoint : @ipc.IpcEndpoint[SetTitleRequest, WindowTitleChangedReply]
 
 // Errors
 
 // Types and methods
-pub(all) enum CounterAppCommand {
-  Counter(CounterCommand)
-  Window(WindowCommand)
+pub(all) struct CountChangedReply {
+  count : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-pub(all) enum CounterCommand {
-  Increment(amount~ : Int)
-  Reset
+pub(all) struct IncrementRequest {
+  amount : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-pub(all) enum CounterEvent {
-  CountChanged(Int)
-  WindowTitleChanged(String)
+pub(all) struct SetTitleRequest {
+  title : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-pub(all) enum WindowCommand {
-  SetTitle(String)
-  Close
+pub(all) struct WindowTitleChangedReply {
+  title : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases

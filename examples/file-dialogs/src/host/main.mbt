@@ -100,19 +100,6 @@ fn filters() -> Array[@desktop.FileFilter] {
 }
 
 ///|
-fn handle_command(
-  window : @desktop.Window,
-  command : @shared.FileDialogCommand,
-) -> @shared.FileDialogEvent raise @desktop.DesktopError {
-  match command {
-    OpenFile => selected_path(window.open_file_dialog(filters=filters()))
-    OpenFiles => selected_paths(window.open_files_dialog(filters=filters()))
-    SaveFile => save_sample_file(window)
-    OpenFolder => selected_path(window.open_folder_dialog())
-  }
-}
-
-///|
 fn main {
   let html = match load_file_dialog_html() {
     Ok(html) => html
@@ -134,14 +121,17 @@ fn main {
         load=Html(html),
       ),
     )
-    let policy = @ipc.IpcPolicy::allow(classify=@shared.command_id, allowed=[
-      @ipc.CommandId("file_dialog.open_file"),
-      @ipc.CommandId("file_dialog.open_files"),
-      @ipc.CommandId("file_dialog.save_file"),
-      @ipc.CommandId("file_dialog.open_folder"),
-    ])
-    window.handle_ipc_default(policy~, handler=command => {
-      handle_command(window, command)
+    window.handle_ipc_endpoint(@shared.open_file_endpoint, handler=_request => {
+      selected_path(window.open_file_dialog(filters=filters()))
+    })
+    window.handle_ipc_endpoint(@shared.open_files_endpoint, handler=_request => {
+      selected_paths(window.open_files_dialog(filters=filters()))
+    })
+    window.handle_ipc_endpoint(@shared.save_file_endpoint, handler=_request => {
+      save_sample_file(window)
+    })
+    window.handle_ipc_endpoint(@shared.open_folder_endpoint, handler=_request => {
+      selected_path(window.open_folder_dialog())
     })
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")

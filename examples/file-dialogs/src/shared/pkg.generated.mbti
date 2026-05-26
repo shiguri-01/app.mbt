@@ -8,18 +8,19 @@ import {
 }
 
 // Values
-pub fn command_id(FileDialogCommand) -> @ipc.CommandId
+pub let event_endpoint : @ipc.IpcEvent[FileDialogEvent]
+
+pub let open_file_endpoint : @ipc.IpcEndpoint[Unit, FileDialogEvent]
+
+pub let open_files_endpoint : @ipc.IpcEndpoint[Unit, FileDialogEvent]
+
+pub let open_folder_endpoint : @ipc.IpcEndpoint[Unit, FileDialogEvent]
+
+pub let save_file_endpoint : @ipc.IpcEndpoint[Unit, FileDialogEvent]
 
 // Errors
 
 // Types and methods
-pub(all) enum FileDialogCommand {
-  OpenFile
-  OpenFiles
-  SaveFile
-  OpenFolder
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 pub(all) enum FileDialogEvent {
   Selected(Array[String])
   Canceled

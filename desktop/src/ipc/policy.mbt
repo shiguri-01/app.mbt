@@ -16,6 +16,32 @@ pub fn[T] IpcPolicy::allow(
 }
 
 ///|
+pub fn[T, R] IpcPolicy::allow_endpoint(
+  classify~ : (T) -> CommandId,
+  endpoint : IpcEndpoint[T, R],
+  max_payload_bytes? : Int = 65536,
+) -> IpcPolicy[T] {
+  IpcPolicy::allow(
+    classify~,
+    allowed=[endpoint.command_id()],
+    max_payload_bytes~,
+  )
+}
+
+///|
+pub fn[T, R] IpcPolicy::allow_endpoints(
+  classify~ : (T) -> CommandId,
+  endpoints~ : Array[IpcEndpoint[T, R]],
+  max_payload_bytes? : Int = 65536,
+) -> IpcPolicy[T] {
+  IpcPolicy::allow(
+    classify~,
+    allowed=[ for endpoint in endpoints => endpoint.command_id() ],
+    max_payload_bytes~,
+  )
+}
+
+///|
 pub fn[T] IpcPolicy::allow_all(
   classify~ : (T) -> CommandId,
   max_payload_bytes? : Int = 65536,

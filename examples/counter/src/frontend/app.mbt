@@ -6,22 +6,17 @@ struct CounterModel {
 }
 
 ///|
-fn CounterModel::send_command(
+fn CounterModel::handle_count_response(
   self : CounterModel,
-  command : @shared.CounterAppCommand,
+  response : @ipc.IpcResponse[@shared.CountChangedReply],
 ) -> Unit {
-  self.client.request_with_callback_default(command, (
-    response : @ipc.IpcResponse[@shared.CounterEvent],
-  ) => {
-    match response {
-      Ok(CountChanged(count)) => {
-        self.count = count
-        self.render()
-      }
-      Ok(WindowTitleChanged(title)) => set_document_title(title)
-      Err(_) => ()
+  match response {
+    Ok(reply) => {
+      self.count = reply.count
+      self.render()
     }
-  })
+    Err(_) => ()
+  }
 }
 
 ///|
@@ -33,14 +28,18 @@ fn CounterModel::render(self : CounterModel) -> Unit {
 
 ///|
 fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
-  let command = @shared.CounterAppCommand::Counter(Increment(amount~))
-  self.send_command(command)
+  self.client.request_endpoint_with_callback(
+    @shared.increment_endpoint,
+    @shared.IncrementRequest::{ amount, },
+    response => self.handle_count_response(response),
+  )
 }
 
 ///|
 fn CounterModel::reset(self : CounterModel) -> Unit {
-  let command = @shared.CounterAppCommand::Counter(Reset)
-  self.send_command(command)
+  self.client.request_endpoint_with_callback(@shared.reset_endpoint, (), response => {
+    self.handle_count_response(response)
+  })
 }
 
 ///|

@@ -29,9 +29,9 @@ command allowlists, payload size limits, host-to-frontend events, and deferred
 responses through `ResponseSender`.
 
 Async IPC handlers currently run inside the webview callback path. Use
-`Window::handle_ipc_default` for ordinary typed commands and
-`Window::handle_deferred` only for host work that must complete later without
-blocking that callback.
+shared `IpcEndpoint[T, R]` values with `Window::handle_ipc_endpoint` for
+ordinary typed commands, and `Window::handle_deferred` only for host work that
+must complete later without blocking that callback.
 
 ## Common Commands
 

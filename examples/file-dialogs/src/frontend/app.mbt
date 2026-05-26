@@ -16,10 +16,10 @@ fn describe_paths(paths : Array[String]) -> String {
 ///|
 fn FileDialogModel::send_command(
   self : FileDialogModel,
-  command : @shared.FileDialogCommand,
+  endpoint : @ipc.IpcEndpoint[Unit, @shared.FileDialogEvent],
 ) -> Unit {
   self.status.set_text("Waiting for native file dialog...")
-  self.client.request_with_callback_default(command, (
+  self.client.request_endpoint_with_callback(endpoint, (), (
     response : @ipc.IpcResponse[@shared.FileDialogEvent],
   ) => {
     match response {
@@ -33,8 +33,16 @@ fn FileDialogModel::send_command(
 ///|
 fn main {
   let model = { status: element_by_id("status"), client: Client() }
-  element_by_id("open-file").on_click(() => model.send_command(OpenFile))
-  element_by_id("open-files").on_click(() => model.send_command(OpenFiles))
-  element_by_id("save-file").on_click(() => model.send_command(SaveFile))
-  element_by_id("open-folder").on_click(() => model.send_command(OpenFolder))
+  element_by_id("open-file").on_click(() => {
+    model.send_command(@shared.open_file_endpoint)
+  })
+  element_by_id("open-files").on_click(() => {
+    model.send_command(@shared.open_files_endpoint)
+  })
+  element_by_id("save-file").on_click(() => {
+    model.send_command(@shared.save_file_endpoint)
+  })
+  element_by_id("open-folder").on_click(() => {
+    model.send_command(@shared.open_folder_endpoint)
+  })
 }

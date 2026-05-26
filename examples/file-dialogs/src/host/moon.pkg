@@ -3,7 +3,6 @@ import {
   "moonbitlang/async/fs",
   "moonbitlang/async/io",
   "moonbitlang/core/env",
-  "shiguri-01/desktop/ipc",
   "shiguri-01/desktop-file-dialog-example/shared",
   "shiguri-01/desktop/runtime" @desktop,
 }

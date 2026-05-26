@@ -113,12 +113,14 @@ pub struct Window {
 pub fn Window::close(Self) -> Unit raise DesktopError
 pub fn[T : ToJson] Window::emit_event(Self, String, T) -> Unit raise DesktopError
 pub fn[T : ToJson] Window::emit_event_default(Self, T) -> Unit raise DesktopError
+pub fn[T : ToJson] Window::emit_event_endpoint(Self, @ipc.IpcEvent[T], T) -> Unit raise DesktopError
 pub fn Window::eval(Self, String) -> Unit raise DesktopError
 pub fn Window::focus(Self) -> Unit raise DesktopError
 pub fn[T : @json.FromJson] Window::handle_deferred(Self, String, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson] Window::handle_deferred_default(Self, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc(Self, String, policy~ : @ipc.IpcPolicy[T], handler~ : async (T) -> R) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc_default(Self, policy~ : @ipc.IpcPolicy[T], handler~ : async (T) -> R) -> Unit raise DesktopError
+pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc_endpoint(Self, @ipc.IpcEndpoint[T, R], max_payload_bytes? : Int, handler~ : async (T) -> R) -> Unit raise DesktopError
 pub fn Window::hide(Self) -> Unit raise DesktopError
 pub fn Window::id(Self) -> WindowId
 pub fn Window::is_closed(Self) -> Bool

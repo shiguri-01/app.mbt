@@ -1,11 +1,4 @@
 ///|
-pub(all) enum DialogCommand {
-  ShowInfo
-  ShowWarning
-  AskQuestion
-} derive(Debug, Eq, ToJson, FromJson)
-
-///|
 pub(all) enum DialogChoice {
   ChoiceOk
   ChoiceCancel
@@ -19,10 +12,19 @@ pub(all) enum DialogEvent {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub fn command_id(command : DialogCommand) -> @ipc.CommandId {
-  match command {
-    ShowInfo => @ipc.CommandId("dialog.show_info")
-    ShowWarning => @ipc.CommandId("dialog.show_warning")
-    AskQuestion => @ipc.CommandId("dialog.ask_question")
-  }
-}
+pub let event_endpoint : @ipc.IpcEvent[DialogEvent] = @ipc.IpcEvent::default()
+
+///|
+pub let show_info_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent] = @ipc.IpcEndpoint::named(
+  "dialog.show_info",
+)
+
+///|
+pub let show_warning_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent] = @ipc.IpcEndpoint::named(
+  "dialog.show_warning",
+)
+
+///|
+pub let ask_question_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent] = @ipc.IpcEndpoint::named(
+  "dialog.ask_question",
+)

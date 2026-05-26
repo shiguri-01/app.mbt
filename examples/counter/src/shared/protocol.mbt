@@ -1,33 +1,36 @@
 ///|
-pub(all) enum CounterCommand {
-  Increment(amount~ : Int)
-  Reset
+pub(all) struct IncrementRequest {
+  amount : Int
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) enum WindowCommand {
-  SetTitle(String)
-  Close
+pub(all) struct SetTitleRequest {
+  title : String
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) enum CounterAppCommand {
-  Counter(CounterCommand)
-  Window(WindowCommand)
+pub(all) struct CountChangedReply {
+  count : Int
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) enum CounterEvent {
-  CountChanged(Int)
-  WindowTitleChanged(String)
+pub(all) struct WindowTitleChangedReply {
+  title : String
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub fn command_id(command : CounterAppCommand) -> @ipc.CommandId {
-  match command {
-    Counter(Increment(_)) => @ipc.CommandId("counter.increment")
-    Counter(Reset) => @ipc.CommandId("counter.reset")
-    Window(SetTitle(_)) => @ipc.CommandId("window.set_title")
-    Window(Close) => @ipc.CommandId("window.close")
-  }
-}
+pub let increment_endpoint : @ipc.IpcEndpoint[
+  IncrementRequest,
+  CountChangedReply,
+] = @ipc.IpcEndpoint::named("counter.increment")
+
+///|
+pub let reset_endpoint : @ipc.IpcEndpoint[Unit, CountChangedReply] = @ipc.IpcEndpoint::named(
+  "counter.reset",
+)
+
+///|
+pub let set_title_endpoint : @ipc.IpcEndpoint[
+  SetTitleRequest,
+  WindowTitleChangedReply,
+] = @ipc.IpcEndpoint::named("window.set_title")

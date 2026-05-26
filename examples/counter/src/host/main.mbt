@@ -32,17 +32,10 @@ fn load_counter_html() -> Result[String, String] {
 ///|
 fn handle_command(
   count : Int,
-  command : @shared.CounterAppCommand,
-) -> (Int, @shared.CounterEvent) {
-  match command {
-    Counter(Increment(amount~)) => {
-      let next = count + amount
-      (next, CountChanged(next))
-    }
-    Counter(Reset) => (0, CountChanged(0))
-    Window(SetTitle(title)) => (count, WindowTitleChanged(title))
-    Window(Close) => (count, CountChanged(count))
-  }
+  request : @shared.IncrementRequest,
+) -> (Int, @shared.CountChangedReply) {
+  let next = count + request.amount
+  (next, @shared.CountChangedReply::{ count: next })
 }
 
 ///|
@@ -69,17 +62,19 @@ fn main {
     )
     window.set_title("MoonBit Counter")
     let count = Ref(0)
-    let policy = @ipc.IpcPolicy::allow(classify=@shared.command_id, allowed=[
-      @ipc.CommandId("counter.increment"),
-      @ipc.CommandId("counter.reset"),
-      @ipc.CommandId("window.set_title"),
-      @ipc.CommandId("window.close"),
-    ])
-    window.handle_ipc_default(policy~, handler=command => {
+    window.handle_ipc_endpoint(@shared.increment_endpoint, handler=request => {
       @async.sleep(1)
-      let (next, event) = handle_command(count.val, command)
+      let (next, event) = handle_command(count.val, request)
       count.val = next
       event
+    })
+    window.handle_ipc_endpoint(@shared.reset_endpoint, handler=_request => {
+      @async.sleep(1)
+      count.val = 0
+      @shared.CountChangedReply::{ count: 0 }
+    })
+    window.handle_ipc_endpoint(@shared.set_title_endpoint, handler=request => @shared.WindowTitleChangedReply::{
+      title: request.title,
     })
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")

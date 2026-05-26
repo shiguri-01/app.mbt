@@ -88,6 +88,16 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback_default(
 }
 
 ///|
+pub fn[T : ToJson, R : FromJson] Client::request_endpoint_with_callback(
+  self : Client,
+  endpoint : @ipc.IpcEndpoint[T, R],
+  body : T,
+  callback : (@ipc.IpcResponse[R]) -> Unit,
+) -> Unit {
+  self.request_with_callback(endpoint.name(), body, callback)
+}
+
+///|
 pub async fn[T : ToJson, R : FromJson] Client::request_async(
   self : Client,
   name : String,
@@ -105,6 +115,15 @@ pub async fn[T : ToJson, R : FromJson] Client::request_async_default(
   body : T,
 ) -> @ipc.IpcResponse[R] {
   self.request_async(@ipc.default_bridge_name(), body)
+}
+
+///|
+pub async fn[T : ToJson, R : FromJson] Client::request_endpoint_async(
+  self : Client,
+  endpoint : @ipc.IpcEndpoint[T, R],
+  body : T,
+) -> @ipc.IpcResponse[R] {
+  self.request_async(endpoint.name(), body)
 }
 
 ///|
@@ -127,4 +146,13 @@ pub fn[E : FromJson] Client::listen_default(
   callback : (E) -> Unit,
 ) -> Unit {
   self.listen(@ipc.default_event_name(), callback)
+}
+
+///|
+pub fn[E : FromJson] Client::listen_event(
+  self : Client,
+  event : @ipc.IpcEvent[E],
+  callback : (E) -> Unit,
+) -> Unit {
+  self.listen(event.name(), callback)
 }

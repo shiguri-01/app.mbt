@@ -8,7 +8,13 @@ import {
 }
 
 // Values
-pub fn command_id(DialogCommand) -> @ipc.CommandId
+pub let ask_question_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent]
+
+pub let event_endpoint : @ipc.IpcEvent[DialogEvent]
+
+pub let show_info_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent]
+
+pub let show_warning_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent]
 
 // Errors
 
@@ -18,12 +24,6 @@ pub(all) enum DialogChoice {
   ChoiceCancel
   ChoiceYes
   ChoiceNo
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) enum DialogCommand {
-  ShowInfo
-  ShowWarning
-  AskQuestion
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) enum DialogEvent {

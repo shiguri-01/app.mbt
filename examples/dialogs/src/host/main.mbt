@@ -42,33 +42,41 @@ fn dialog_choice_from_runtime(
 }
 
 ///|
-fn handle_command(
+fn show_info_dialog(
   window : @desktop.Window,
-  command : @shared.DialogCommand,
 ) -> @shared.DialogEvent raise @desktop.DesktopError {
-  let choice = match command {
-    ShowInfo =>
-      window.show_message_dialog(
-        "The host handled this request with a native message box.",
-        title="MoonBit Dialogs",
-        kind=Info,
-        buttons=Ok,
-      )
-    ShowWarning =>
-      window.show_message_dialog(
-        "This demonstrates a warning dialog with OK and Cancel buttons.",
-        title="Warning",
-        kind=Warning,
-        buttons=OkCancel,
-      )
-    AskQuestion =>
-      window.show_message_dialog(
-        "Do you want to keep using typed IPC for native dialogs?",
-        title="Question",
-        kind=Question,
-        buttons=YesNoCancel,
-      )
-  }
+  let choice = window.show_message_dialog(
+    "The host handled this request with a native message box.",
+    title="MoonBit Dialogs",
+    kind=Info,
+    buttons=Ok,
+  )
+  DialogClosed(dialog_choice_from_runtime(choice))
+}
+
+///|
+fn show_warning_dialog(
+  window : @desktop.Window,
+) -> @shared.DialogEvent raise @desktop.DesktopError {
+  let choice = window.show_message_dialog(
+    "This demonstrates a warning dialog with OK and Cancel buttons.",
+    title="Warning",
+    kind=Warning,
+    buttons=OkCancel,
+  )
+  DialogClosed(dialog_choice_from_runtime(choice))
+}
+
+///|
+fn ask_question_dialog(
+  window : @desktop.Window,
+) -> @shared.DialogEvent raise @desktop.DesktopError {
+  let choice = window.show_message_dialog(
+    "Do you want to keep using typed IPC for native dialogs?",
+    title="Question",
+    kind=Question,
+    buttons=YesNoCancel,
+  )
   DialogClosed(dialog_choice_from_runtime(choice))
 }
 
@@ -94,13 +102,14 @@ fn main {
         load=Html(html),
       ),
     )
-    let policy = @ipc.IpcPolicy::allow(classify=@shared.command_id, allowed=[
-      @ipc.CommandId("dialog.show_info"),
-      @ipc.CommandId("dialog.show_warning"),
-      @ipc.CommandId("dialog.ask_question"),
-    ])
-    window.handle_ipc_default(policy~, handler=command => {
-      handle_command(window, command)
+    window.handle_ipc_endpoint(@shared.show_info_endpoint, handler=_request => {
+      show_info_dialog(window)
+    })
+    window.handle_ipc_endpoint(@shared.show_warning_endpoint, handler=_request => {
+      show_warning_dialog(window)
+    })
+    window.handle_ipc_endpoint(@shared.ask_question_endpoint, handler=_request => {
+      ask_question_dialog(window)
     })
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")

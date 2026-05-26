@@ -1,9 +1,8 @@
 ///|
-test "dialog command can be encoded as json" {
-  let command = DialogCommand::AskQuestion
-  let json = command.to_json()
-  let decoded : DialogCommand = @json.from_json(json)
-  assert_true(decoded == command)
+test "dialog endpoint carries command id" {
+  assert_true(
+    ask_question_endpoint.command_id() == @ipc.CommandId("dialog.ask_question"),
+  )
 }
 
 ///|

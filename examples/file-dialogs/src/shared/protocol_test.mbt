@@ -1,9 +1,8 @@
 ///|
-test "file dialog command can be encoded as json" {
-  let command = FileDialogCommand::OpenFiles
-  let json = command.to_json()
-  let decoded : FileDialogCommand = @json.from_json(json)
-  assert_true(decoded == command)
+test "file dialog endpoint carries command id" {
+  assert_true(
+    open_files_endpoint.command_id() == @ipc.CommandId("file_dialog.open_files"),
+  )
 }
 
 ///|

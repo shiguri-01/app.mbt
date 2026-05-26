@@ -41,6 +41,18 @@ fn[T : FromJson] decode_command(
 }
 
 ///|
+fn[T : FromJson] decode_endpoint_command(
+  raw : String,
+  max_payload_bytes : Int,
+) -> T raise @ipc.IpcError {
+  if payload_too_large(raw, max_payload_bytes) {
+    raise PayloadTooLarge(size=raw.length(), limit=max_payload_bytes)
+  }
+  let frame = @ipc.parse_request_frame(raw)
+  frame.decode()
+}
+
+///|
 fn[T : FromJson, R : ToJson] binding_ipc_response(
   req : String,
   policy : @ipc.IpcPolicy[T],
@@ -48,6 +60,25 @@ fn[T : FromJson, R : ToJson] binding_ipc_response(
 ) -> String {
   let raw = binding_payload(req) catch { err => return err_response(err) }
   let command = decode_command(raw, policy) catch {
+    err => return err_response(err)
+  }
+  let response = @async_driver.run_response(() => {
+    let value = handler(command) catch {
+      err => return Err(HandlerError(error_to_string(err)))
+    }
+    Ok(value)
+  })
+  @ipc.ResponseFrame(response).stringify()
+}
+
+///|
+fn[T : FromJson, R : ToJson] binding_endpoint_response(
+  req : String,
+  max_payload_bytes : Int,
+  handler : async (T) -> R,
+) -> String {
+  let raw = binding_payload(req) catch { err => return err_response(err) }
+  let command : T = decode_endpoint_command(raw, max_payload_bytes) catch {
     err => return err_response(err)
   }
   let response = @async_driver.run_response(() => {
@@ -109,6 +140,23 @@ pub fn[T : FromJson, R : ToJson] Window::handle_ipc(
 }
 
 ///|
+pub fn[T : FromJson, R : ToJson] Window::handle_ipc_endpoint(
+  self : Window,
+  endpoint : @ipc.IpcEndpoint[T, R],
+  max_payload_bytes? : Int = 65536,
+  handler~ : async (T) -> R,
+) -> Unit raise DesktopError {
+  self.view.bind(endpoint.name(), (id, req) => {
+    let result = binding_endpoint_response(req, max_payload_bytes, handler)
+    self.view.return_(id, 0, result) catch {
+      _ => ()
+    }
+  }) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
 /// Bind a typed IPC handler that may respond after the binding callback returns.
 ///
 /// This is a low-level escape hatch. Prefer `Window::handle_ipc` for ordinary
@@ -143,4 +191,13 @@ pub fn[T : ToJson] Window::emit_event(
     payload +
     "); })()",
   )
+}
+
+///|
+pub fn[T : ToJson] Window::emit_event_endpoint(
+  self : Window,
+  endpoint : @ipc.IpcEvent[T],
+  event : T,
+) -> Unit raise DesktopError {
+  self.emit_event(endpoint.name(), event)
 }

@@ -6,7 +6,9 @@ JS-target helpers for calling a desktop runtime bridge from frontend code.
 bridge function such as `globalThis.moonbitDesktop`. It is UI-library agnostic;
 DOM, Rabbita, Luna, or another layer can decide when to call it.
 
-Use `request_async_default` for async frontend code. `request_with_callback`
+Use `request_endpoint_async` for async frontend code. The endpoint value should
+come from the application shared package, so the command and reply types are
+chosen by the protocol rather than by each call site. `request_endpoint_with_callback`
 exists for callback-driven UI code.
 
 ```mbt nocheck
@@ -14,10 +16,10 @@ exists for callback-driven UI code.
 let client = @frontend.Client()
 
 ///|
-let response : @ipc.IpcResponse[AppReply] = client.request_async_default(
-  command,
-)
+let response = client.request_endpoint_async(@shared.increment_endpoint, @shared.IncrementRequest::{
+  amount: 1,
+})
 ```
 
-Host-to-frontend events use `listen_default`, which installs a typed listener
-on `globalThis.moonbitDesktopEvent`.
+Host-to-frontend events use `listen_event`, which installs a typed listener
+from an `IpcEvent[E]` descriptor.

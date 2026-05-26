@@ -6,9 +6,9 @@ This package owns the application event loop, host windows, content loading,
 typed async IPC handler registration, native dialogs, and window lifecycle
 callbacks.
 
-Applications normally create windows from `App::create_window` and use
-`Window::handle_ipc_default` to register an async command handler with an
-`IpcPolicy`.
+Applications normally create windows from `App::create_window` and use a shared
+`IpcEndpoint[T, R]` with `Window::handle_ipc_endpoint` to register an async
+command handler.
 
 ```mbt nocheck
 @desktop.run(on_startup=app => {
@@ -21,25 +21,20 @@ Applications normally create windows from `App::create_window` and use
       load=Html(html),
     ),
   )
-  let policy = @ipc.IpcPolicy::allow(
-    classify=@shared.command_id,
-    allowed=[@ipc.CommandId("counter.increment")],
-  )
-  window.handle_ipc_default(policy~, handler=command => {
+  window.handle_ipc_endpoint(@shared.increment_endpoint, handler=request => {
     @async.sleep(1)
-    handle_command(command)
+    handle_increment(request)
   })
 })
 ```
 
 The runtime decodes `RequestFrame.payload` as the application command type,
-checks the policy allowlist, runs the async handler, and returns a
-`ResponseFrame[R]` to the webview binding promise. Handler errors are mapped to
-`IpcError::HandlerError`; decode and policy failures are returned as
-`IpcResponse::Err`.
+runs the async handler, and returns a `ResponseFrame[R]` to the webview binding
+promise. Handler errors are mapped to `IpcError::HandlerError`; decode failures
+are returned as `IpcResponse::Err`.
 
-`Window::emit_event_default` sends a typed host-to-frontend event to the default
-frontend listener. `Window::handle_deferred` and `ResponseSender` remain
+`Window::emit_event_endpoint` sends a typed host-to-frontend event through a
+shared `IpcEvent[E]`. `Window::handle_deferred` and `ResponseSender` remain
 available for work that must complete after the webview binding callback has
 returned.
 
