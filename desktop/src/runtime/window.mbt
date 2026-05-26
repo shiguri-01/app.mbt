@@ -26,18 +26,6 @@ pub fn WindowOptions::WindowOptions(
 }
 
 ///|
-#deprecated("use `WindowOptions(...)` instead")
-pub fn WindowOptions::new(
-  title~ : String,
-  width? : Int = 800,
-  height? : Int = 600,
-  debug? : Bool = false,
-  load? : Load,
-) -> WindowOptions {
-  WindowOptions(title~, width~, height~, debug~, load?)
-}
-
-///|
 pub fn Window::set_title(
   self : Window,
   title : String,

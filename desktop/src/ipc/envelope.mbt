@@ -15,12 +15,6 @@ pub fn[T : ToJson] Envelope::Envelope(body : T, id? : String) -> Envelope {
 }
 
 ///|
-#deprecated("use `Envelope(...)` instead")
-pub fn[T : ToJson] Envelope::new(body : T, id? : String) -> Envelope {
-  Envelope(body, id?)
-}
-
-///|
 /// Decode the envelope payload as an application-defined command or event.
 pub fn[T : FromJson] Envelope::decode(self : Envelope) -> T raise IpcError {
   @json.from_json(self.payload) catch {

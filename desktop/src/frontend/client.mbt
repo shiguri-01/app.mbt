@@ -55,12 +55,6 @@ pub fn Client::Client() -> Client {
 }
 
 ///|
-#deprecated("use `Client()` instead")
-pub fn Client::new() -> Client {
-  Client()
-}
-
-///|
 pub fn[T : ToJson] Client::event(self : Client, body : T) -> String {
   ignore(self)
   @ipc.Envelope(body).stringify()
