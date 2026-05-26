@@ -3,7 +3,7 @@
 ///
 /// The framework owns `id`; applications own the typed payload encoded inside
 /// `payload`.
-pub(all) struct Envelope {
+pub struct Envelope {
   id : String?
   payload : Json
 } derive(Debug, Eq, ToJson, FromJson)

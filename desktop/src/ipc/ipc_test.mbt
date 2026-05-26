@@ -25,3 +25,23 @@ test "parse envelope json" {
   let decoded : TestCommand = parsed.decode()
   assert_true(decoded == command)
 }
+
+///|
+test "event constructor creates envelope" {
+  let command = TestCommand::Parent(Increment(amount=5))
+  let event = @ipc.Event(command)
+  let envelope = event.to_envelope()
+  let decoded : TestCommand = envelope.decode()
+  assert_true(decoded == command)
+  assert_true(envelope.id is None)
+}
+
+///|
+test "request constructor preserves id in envelope" {
+  let command = TestCommand::Parent(Increment(amount=6))
+  let request = @ipc.Request(command, id="req-3")
+  let envelope = request.to_envelope()
+  let decoded : TestCommand = envelope.decode()
+  assert_true(decoded == command)
+  assert_true(envelope.id == Some("req-3"))
+}

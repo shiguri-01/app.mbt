@@ -6,7 +6,7 @@ pub struct Window {
 
 ///|
 /// Options used by `run`.
-pub(all) struct WindowOptions {
+pub struct WindowOptions {
   title : String
   width : Int
   height : Int

@@ -1,9 +1,14 @@
 ///|
 /// A typed request that expects a reply.
-pub(all) struct Request[T] {
+pub struct Request[T] {
   id : String
   body : T
 } derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub fn[T] Request::Request(body : T, id~ : String) -> Request[T] {
+  { id, body }
+}
 
 ///|
 pub fn[T : ToJson] Request::to_envelope(self : Request[T]) -> Envelope {

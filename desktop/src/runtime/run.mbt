@@ -11,7 +11,7 @@ pub fn run(
   load? : Load,
   on_ready~ : async (Window) -> Unit,
 ) -> Unit raise DesktopError {
-  let options = { title, width, height, debug, load }
+  let options = WindowOptions(title~, width~, height~, debug~, load?)
   run_with_options(options, on_ready~)
 }
 

@@ -21,7 +21,7 @@ pub(all) suberror IpcError {
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Types and methods
-pub(all) struct Envelope {
+pub struct Envelope {
   id : String?
   payload : Json
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
@@ -29,15 +29,17 @@ pub fn[T : ToJson] Envelope::Envelope(T, id? : String) -> Self
 pub fn[T : @json.FromJson] Envelope::decode(Self) -> T raise IpcError
 pub fn Envelope::stringify(Self) -> String
 
-pub(all) struct Event[T] {
+pub struct Event[T] {
   body : T
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T] Event::Event(T) -> Self[T]
 pub fn[T : ToJson] Event::to_envelope(Self[T]) -> Envelope
 
-pub(all) struct Request[T] {
+pub struct Request[T] {
   id : String
   body : T
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T] Request::Request(T, id~ : String) -> Self[T]
 pub fn[T : ToJson] Request::to_envelope(Self[T]) -> Envelope
 
 pub(all) enum Response[T] {
