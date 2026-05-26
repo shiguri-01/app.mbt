@@ -3,6 +3,7 @@
 #include <moonbit.h>
 
 #include <cstring>
+#include <new>
 #include <string>
 #include <vector>
 
@@ -115,7 +116,9 @@ static webview_error_t destroy_handle(MoonBitWebView *view) {
 }
 
 static void finalize_webview(void *ptr) {
-  (void)destroy_handle(static_cast<MoonBitWebView *>(ptr));
+  auto *view = static_cast<MoonBitWebView *>(ptr);
+  (void)destroy_handle(view);
+  view->bindings.~vector<MoonBitWebViewBinding *>();
 }
 
 static const char *as_c_string(moonbit_bytes_t bytes) {
@@ -170,6 +173,7 @@ MOONBIT_FFI_EXPORT
 MoonBitWebView *moonbit_webview_create(int32_t debug) {
   auto *view = static_cast<MoonBitWebView *>(
       moonbit_make_external_object(finalize_webview, sizeof(MoonBitWebView)));
+  new (&view->bindings) std::vector<MoonBitWebViewBinding *>();
   view->handle = webview_create(debug, nullptr);
   view->destroyed = view->handle == nullptr ? 1 : 0;
   view->window_closed = view->destroyed;
