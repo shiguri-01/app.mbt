@@ -17,3 +17,7 @@ window.show_message_dialog(
 
 The public API uses small enums for dialog kinds, button sets, and results so
 applications can stay portable across Windows, macOS, and Linux backends.
+
+On Windows, message dialogs use `TaskDialogIndirect` when available. If the
+common-controls task dialog entry point cannot be loaded, the backend falls back
+to `MessageBoxW` rather than failing an otherwise valid dialog request.
