@@ -34,7 +34,12 @@ pub fn run_with_options(
   view.set_size(options.width, options.height) catch {
     err => raise_webview(err)
   }
-  run_async_setup(on_ready, window)
+  match @async_driver.run_unit(() => on_ready(window)) {
+    Some(Ok(_)) => ()
+    Some(Err(err)) => raise_error_as_desktop(err)
+    None =>
+      raise InvalidState("async setup finished without producing a result")
+  }
   match options.load {
     Some(load) => load.apply(window)
     None => ()

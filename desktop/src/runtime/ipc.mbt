@@ -57,7 +57,7 @@ fn[T : FromJson, R : ToJson] binding_async_response(
     err => return err_response(err)
   }
   let command : T = envelope.decode() catch { err => return err_response(err) }
-  let response = run_async_response(() => {
+  let response = @async_driver.run_response(() => {
     let value = handler(command) catch {
       err => return Err(HandlerError(error_to_string(err)))
     }
@@ -101,8 +101,8 @@ fn[T : FromJson] binding_deferred_request(
 /// Bind a typed async IPC handler to this window.
 ///
 /// The async handler runs to completion inside a runtime-owned async driver.
-/// This keeps async internals behind the desktop runtime while still exposing
-/// async application handlers.
+/// The driver details live in `runtime/async_driver`; applications only see
+/// typed async handlers.
 pub fn[T : FromJson, R : ToJson] Window::handle(
   self : Window,
   name : String,

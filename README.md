@@ -46,4 +46,3 @@ tasks call `tools/msvc-native.cmd` for commands that need MSVC.
 - `desktop/src/runtime/README.mbt.md`: runtime window and host handlers.
 - `desktop/src/frontend/README.mbt.md`: JS frontend client helpers.
 - `webview/README.mbt.md`: low-level webview bindings.
-- `docs/async-integration.md`: async integration notes and constraints.

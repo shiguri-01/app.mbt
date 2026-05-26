@@ -1,5 +1,6 @@
 ///|
-fn[R] run_async_response(
+/// Run an async IPC handler to completion and return its typed response.
+pub fn[R] run_response(
   handler : async () -> @ipc.Response[R],
 ) -> @ipc.Response[R] {
   let response : Ref[@ipc.Response[R]?] = Ref(None)
@@ -12,13 +13,11 @@ fn[R] run_async_response(
 }
 
 ///|
-fn run_async_setup(
-  on_ready : async (Window) -> Unit,
-  window : Window,
-) -> Unit raise DesktopError {
+/// Run async setup and capture either completion, a raised error, or no result.
+pub fn run_unit(handler : async () -> Unit) -> Result[Unit, Error]? {
   let result : Ref[Result[Unit, Error]?] = Ref(None)
   @async.run_async_main(() => {
-    on_ready(window) catch {
+    handler() catch {
       err => {
         result.val = Some(Err(err))
         return
@@ -26,10 +25,5 @@ fn run_async_setup(
     }
     result.val = Some(Ok(()))
   })
-  match result.val {
-    Some(Ok(_)) => ()
-    Some(Err(err)) => raise_error_as_desktop(err)
-    None =>
-      raise InvalidState("async setup finished without producing a result")
-  }
+  result.val
 }

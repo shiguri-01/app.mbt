@@ -67,9 +67,9 @@ from the webview callback. This means MoonBit async APIs such as timers and
 async file operations are usable from handlers, but long handlers still occupy
 the UI callback path.
 
-That compromise is intentionally isolated inside this package. When
-`moonbitlang/async` exposes an official external-event-loop integration hook,
-the driver can be replaced without changing application handlers.
+That compromise is isolated behind `runtime/async_driver`. Application code
+should choose `Window::handle` for short async handlers and
+`Window::handle_deferred` for work that should complete later.
 
 ## Content loading
 
