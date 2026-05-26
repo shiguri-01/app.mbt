@@ -38,6 +38,7 @@ complete later without blocking that callback.
 just check
 just test
 just run-counter-example
+just package-counter-example
 just run-dialogs-example
 just run-file-dialogs-example
 ```

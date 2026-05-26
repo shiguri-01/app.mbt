@@ -8,7 +8,13 @@ import {
 }
 
 // Values
+pub fn app_dir() -> String
+
 pub fn default_bridge_name() -> String
+
+pub fn resource_dir() -> String
+
+pub fn resource_path(String) -> String
 
 pub fn run(options? : AppOptions, lifecycle? : AppLifecycle, on_startup~ : async (App) -> Unit) -> Unit raise DesktopError
 

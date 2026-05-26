@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+supported_targets = "+native"
+
+options(
+  "is-main": true,
+  "native-stub": [ "packager_win32.cc" ],
+  link: {
+    "native": { "stub-cc": "cl", "stub-cc-flags": "/std:c++17 /EHsc /utf-8" },
+  },
+)
