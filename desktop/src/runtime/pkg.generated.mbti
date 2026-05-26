@@ -12,9 +12,13 @@ pub fn app_dir() -> String
 
 pub fn default_bridge_name() -> String
 
+pub fn resource_bytes(String) -> Bytes? raise DesktopError
+
 pub fn resource_dir() -> String
 
 pub fn resource_path(String) -> String
+
+pub fn resource_text(String) -> String? raise DesktopError
 
 pub fn run(options? : AppOptions, lifecycle? : AppLifecycle, on_startup~ : async (App) -> Unit) -> Unit raise DesktopError
 

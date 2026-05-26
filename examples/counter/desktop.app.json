@@ -7,5 +7,7 @@
   "frontend": "examples/counter/src/frontend",
   "static_dir": "examples/counter/static",
   "dist": "dist/counter",
-  "executable": "MoonBitCounter.exe"
+  "executable": "MoonBitCounter.exe",
+  "bundle": "single-exe",
+  "windows_subsystem": "windows"
 }

@@ -9,7 +9,25 @@ struct AppManifest {
   static_dir : String
   dist : String
   executable : String
+  bundle : String?
+  windows_subsystem : String?
 } derive(FromJson, ToJson, Debug, Eq)
+
+///|
+fn AppManifest::bundle_kind(self : AppManifest) -> String {
+  match self.bundle {
+    Some(kind) => kind
+    None => "dir"
+  }
+}
+
+///|
+fn AppManifest::windows_subsystem_kind(self : AppManifest) -> String {
+  match self.windows_subsystem {
+    Some(kind) => kind
+    None => "windows"
+  }
+}
 
 ///|
 fn read_text(path : String) -> String raise PackError {

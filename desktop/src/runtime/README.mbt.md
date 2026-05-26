@@ -139,6 +139,15 @@ should choose `Window::handle` for short async handlers and
 to a URL. The runtime does not depend on any frontend bundler; applications can
 load frontend output from a dev server, generated HTML, or bundled assets.
 
+Packaged applications can read assets through `resource_text` or
+`resource_bytes`. Embedded single-exe resources are checked first, then the
+runtime falls back to `resources` next to the executable:
+
+```mbt nocheck
+///|
+let html = @desktop.resource_text("index.html")
+```
+
 ## Native dialogs
 
 `Window::show_message_dialog` shows a native modal message dialog owned by the
