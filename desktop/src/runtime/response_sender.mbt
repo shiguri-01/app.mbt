@@ -3,15 +3,17 @@
 ///
 /// `ResponseSender` schedules the final `webview_return` on the GUI event-loop
 /// thread, so callers do not need to call webview APIs directly from completion
-/// paths.
+/// paths. A sender is one-shot: the first response wins, and later attempts
+/// raise `DesktopError::InvalidState`.
 pub struct ResponseSender {
   priv view : @webview.WebView
   priv id : String
+  priv mut completed : Bool
 }
 
 ///|
 fn ResponseSender::new(view : @webview.WebView, id : String) -> ResponseSender {
-  { view, id }
+  { view, id, completed: false }
 }
 
 ///|
@@ -19,6 +21,10 @@ fn ResponseSender::return_raw(
   self : ResponseSender,
   raw : String,
 ) -> Unit raise DesktopError {
+  if self.completed {
+    raise InvalidState("response for request \{self.id} has already been sent")
+  }
+  self.completed = true
   self.view.dispatch(() => self.view.return_(self.id, 0, raw) catch { _ => () }) catch {
     err => raise_webview(err)
   }

@@ -57,7 +57,8 @@ window.handle_deferred("moonbitDesktop", (command, sender) => {
 
 The sender schedules the final `webview_return` through `WebView::dispatch`,
 so completion paths can return to the GUI event-loop thread before touching the
-native webview API.
+native webview API. A sender is one-shot; a second `resolve` or `reject` raises
+`DesktopError::InvalidState`.
 
 ## Async driver boundary
 
