@@ -15,7 +15,7 @@ pub(all) suberror IpcError {
   EncodeError(String)
   MissingRequestId
   HandlerError(String)
-  TransportClosed
+  TransportClosed(String)
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Types and methods

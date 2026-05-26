@@ -55,6 +55,46 @@ fn[T : FromJson, R : ToJson] binding_response(
 }
 
 ///|
+fn[T : FromJson, R : ToJson] binding_async_response(
+  req : String,
+  handler : async (T) -> R,
+) -> String {
+  let raw = binding_payload(req) catch { err => return err_response(err) }
+  let envelope = @ipc.parse_envelope(raw) catch {
+    err => return err_response(err)
+  }
+  let command : T = envelope.decode() catch { err => return err_response(err) }
+  let response = run_async_response(() => {
+    let value = handler(command) catch {
+      err => return Err(@ipc.IpcError::HandlerError(error_to_string(err)))
+    }
+    Ok(value)
+  })
+  response.to_json().stringify()
+}
+
+///|
+/// Bind a typed async IPC handler to this window.
+///
+/// The async handler runs to completion inside a runtime-owned async driver.
+/// This keeps async internals behind the desktop runtime while still exposing
+/// async application handlers.
+pub fn[T : FromJson, R : ToJson] Window::handle(
+  self : Window,
+  name : String,
+  handler : async (T) -> R,
+) -> Unit raise DesktopError {
+  self.view.bind(name, (id, req) => {
+    let result = binding_async_response(req, handler)
+    self.view.return_(id, 0, result) catch {
+      _ => ()
+    }
+  }) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
 /// Bind a typed synchronous IPC handler to this window.
 ///
 /// JavaScript calls the binding with one argument: an `Envelope` JSON string.

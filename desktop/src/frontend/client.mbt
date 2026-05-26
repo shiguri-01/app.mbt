@@ -97,10 +97,7 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
       }
       callback(result)
     },
-    message => {
-      ignore(message)
-      callback(Err(@ipc.IpcError::TransportClosed))
-    },
+    message => callback(Err(@ipc.IpcError::TransportClosed(message))),
   )
   next
 }

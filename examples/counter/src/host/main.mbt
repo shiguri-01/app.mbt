@@ -12,6 +12,24 @@ async fn counter_html() -> String {
 }
 
 ///|
+fn load_counter_html() -> Result[String, String] {
+  let result : Ref[Result[String, String]?] = Ref(None)
+  @async.run_async_main(() => {
+    let html = counter_html() catch {
+      err => {
+        result.val = Some(Err("\{to_repr(err)}"))
+        return
+      }
+    }
+    result.val = Some(Ok(html))
+  })
+  match result.val {
+    Some(result) => result
+    None => Err("counter frontend loader finished without a result")
+  }
+}
+
+///|
 fn handle_command(
   count : Int,
   command : @shared.CounterAppCommand,
@@ -28,12 +46,14 @@ fn handle_command(
 }
 
 ///|
-async fn main {
-  let html = counter_html() catch {
-    _ => {
+fn main {
+  let html = match load_counter_html() {
+    Ok(html) => html
+    Err(message) => {
       println(
         "failed to load counter frontend; run `just build-counter-example-frontend` first",
       )
+      println(message)
       return
     }
   }
@@ -45,13 +65,14 @@ async fn main {
     on_ready=window => {
       window.set_title("MoonBit Counter")
       let count = Ref(0)
-      window.handle_sync("moonbitDesktop", command => {
+      window.handle("moonbitDesktop", command => {
+        @async.sleep(1)
         let (next, event) = handle_command(count.val, command)
         count.val = next
         event
       })
     },
   ) catch {
-    _ => println("desktop runtime failed")
+    err => println("desktop runtime failed: \{to_repr(err)}")
   }
 }

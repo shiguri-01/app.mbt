@@ -5,5 +5,5 @@ pub(all) suberror IpcError {
   EncodeError(String)
   MissingRequestId
   HandlerError(String)
-  TransportClosed
+  TransportClosed(String)
 } derive(Debug, Eq, ToJson, FromJson)

@@ -39,3 +39,24 @@ fn desktop_error_to_string(err : DesktopError) -> String {
     InvalidState(message) => "invalid state: \{message}"
   }
 }
+
+///|
+fn error_to_string(err : Error) -> String {
+  match err {
+    WebView(message) => desktop_error_to_string(DesktopError::WebView(message))
+    Ipc(message) => desktop_error_to_string(DesktopError::Ipc(message))
+    InvalidState(message) =>
+      desktop_error_to_string(DesktopError::InvalidState(message))
+    _ => err.to_string()
+  }
+}
+
+///|
+fn raise_error_as_desktop(err : Error) -> Unit raise DesktopError {
+  match err {
+    WebView(message) => raise DesktopError::WebView(message)
+    Ipc(message) => raise DesktopError::Ipc(message)
+    InvalidState(message) => raise DesktopError::InvalidState(message)
+    _ => raise DesktopError::InvalidState(error_to_string(err))
+  }
+}

@@ -9,11 +9,11 @@ import {
 }
 
 // Values
-pub async fn[T : @json.FromJson, R] dispatch(@ipc.Envelope, async (T) -> R raise DesktopError) -> @ipc.Response[R]
+pub async fn[T : @json.FromJson, R] dispatch(@ipc.Envelope, async (T) -> R) -> @ipc.Response[R]
 
-pub async fn run(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load, on_ready~ : async (Window) -> Unit raise DesktopError) -> Unit raise DesktopError
+pub fn run(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load, on_ready~ : async (Window) -> Unit) -> Unit raise DesktopError
 
-pub async fn run_with_options(WindowOptions, on_ready~ : async (Window) -> Unit raise DesktopError) -> Unit raise DesktopError
+pub fn run_with_options(WindowOptions, on_ready~ : async (Window) -> Unit) -> Unit raise DesktopError
 
 // Errors
 pub(all) suberror DesktopError {
@@ -32,6 +32,7 @@ pub struct Window {
   view : @webview.WebView
 }
 pub fn Window::eval(Self, String) -> Unit raise DesktopError
+pub fn[T : @json.FromJson, R : ToJson] Window::handle(Self, String, async (T) -> R) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync(Self, String, (T) -> R raise DesktopError) -> Unit raise DesktopError
 pub fn Window::navigate(Self, String) -> Unit raise DesktopError
 pub fn Window::set_html(Self, String) -> Unit raise DesktopError
