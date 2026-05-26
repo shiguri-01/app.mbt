@@ -16,28 +16,26 @@ fn[T : ToJson] bridge_request(body : T) -> String {
 
 ///|
 test "binding payload extracts first bridge argument" {
-  let raw = @ipc.Envelope::new(TestCommand::Increment(amount=3)).stringify()
+  let raw = @ipc.Envelope::new(Increment(amount=3)).stringify()
   let req = Json::array([Json::string(raw)]).stringify()
   assert_eq(binding_payload(req), raw)
 }
 
 ///|
 test "binding response returns typed ok response" {
-  let req = bridge_request(TestCommand::Increment(amount=4))
+  let req = bridge_request(Increment(amount=4))
   let raw = binding_response(req, command => {
     match command {
-      Increment(amount~) => TestEvent::CountChanged(amount + 1)
+      Increment(amount~) => CountChanged(amount + 1)
     }
   })
   let response : @ipc.Response[TestEvent] = @json.from_json(@json.parse(raw))
-  assert_true(response == Ok(TestEvent::CountChanged(5)))
+  assert_true(response == Ok(CountChanged(5)))
 }
 
 ///|
 test "binding response reports decode error" {
-  let raw = binding_response("[1]", (_ : TestCommand) => {
-    TestEvent::CountChanged(0)
-  })
+  let raw = binding_response("[1]", (_ : TestCommand) => CountChanged(0))
   let response : @ipc.Response[TestEvent] = @json.from_json(@json.parse(raw))
   assert_true(response is Err(DecodeError(_)))
 }

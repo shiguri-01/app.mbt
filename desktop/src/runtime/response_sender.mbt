@@ -5,8 +5,8 @@
 /// thread, so callers do not need to call webview APIs directly from completion
 /// paths.
 pub struct ResponseSender {
-  view : @webview.WebView
-  id : String
+  priv view : @webview.WebView
+  priv id : String
 }
 
 ///|

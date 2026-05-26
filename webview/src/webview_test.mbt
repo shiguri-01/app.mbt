@@ -6,11 +6,6 @@ test "version number is available" {
 
 ///|
 test "size hint constructors are public" {
-  let hints : Array[@webview.SizeHint] = [
-    @webview.SizeHint::None,
-    @webview.SizeHint::Min,
-    @webview.SizeHint::Max,
-    @webview.SizeHint::Fixed,
-  ]
+  let hints : Array[@webview.SizeHint] = [None, Min, Max, Fixed]
   assert_eq(hints.length(), 4)
 }

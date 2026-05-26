@@ -16,13 +16,13 @@ pub(all) suberror WebViewError {
 fn check_status(status : Int) -> Unit raise WebViewError {
   match status {
     0 => ()
-    -5 => raise WebViewError::MissingDependency
-    -4 => raise WebViewError::Canceled
-    -3 => raise WebViewError::InvalidState
-    -2 => raise WebViewError::InvalidArgument
-    -1 => raise WebViewError::Unspecified
-    1 => raise WebViewError::Duplicate
-    2 => raise WebViewError::NotFound
-    code => raise WebViewError::Unknown(code)
+    -5 => raise MissingDependency
+    -4 => raise Canceled
+    -3 => raise InvalidState
+    -2 => raise InvalidArgument
+    -1 => raise Unspecified
+    1 => raise Duplicate
+    2 => raise NotFound
+    code => raise Unknown(code)
   }
 }

@@ -5,7 +5,7 @@ pub fn WebView::new(debug? : Bool = false) -> WebView raise WebViewError {
   if view.is_valid() {
     view
   } else {
-    raise WebViewError::CreationFailed
+    raise CreationFailed
   }
 }
 

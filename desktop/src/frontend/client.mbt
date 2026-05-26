@@ -4,7 +4,7 @@
 /// This package only prepares typed JSON messages. A Rabbita, Luna, or plain DOM
 /// layer can decide how to deliver them to the host bridge.
 pub struct Client {
-  next_id : Int
+  priv next_id : Int
 }
 
 ///|
@@ -98,11 +98,11 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
     raw,
     response => {
       let result : @ipc.Response[R] = @json.from_json(@json.parse(response)) catch {
-        err => Err(@ipc.IpcError::DecodeError(err.to_string()))
+        err => Err(DecodeError(err.to_string()))
       }
       callback(result)
     },
-    message => callback(Err(@ipc.IpcError::TransportClosed(message))),
+    message => callback(Err(TransportClosed(message))),
   )
   next
 }
@@ -125,7 +125,7 @@ pub async fn[T : ToJson, R : FromJson] Client::request_async(
   let (next, raw) = self.request_envelope(body)
   let response = call_bridge_promise(name, raw).wait()
   let result : @ipc.Response[R] = @json.from_json(@json.parse(response)) catch {
-    err => Err(@ipc.IpcError::DecodeError(err.to_string()))
+    err => Err(DecodeError(err.to_string()))
   }
   (next, result)
 }

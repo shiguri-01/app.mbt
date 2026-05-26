@@ -7,11 +7,7 @@ fn[R] run_async_response(
   match response.val {
     Some(response) => response
     None =>
-      Err(
-        @ipc.IpcError::HandlerError(
-          "async handler finished without producing a response",
-        ),
-      )
+      Err(HandlerError("async handler finished without producing a response"))
   }
 }
 
@@ -34,8 +30,6 @@ fn run_async_setup(
     Some(Ok(_)) => ()
     Some(Err(err)) => raise_error_as_desktop(err)
     None =>
-      raise DesktopError::InvalidState(
-        "async setup finished without producing a result",
-      )
+      raise InvalidState("async setup finished without producing a result")
   }
 }

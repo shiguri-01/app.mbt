@@ -18,7 +18,7 @@ pub fn[T : ToJson] Envelope::new(body : T, id? : String) -> Envelope {
 /// Decode the envelope payload as an application-defined command or event.
 pub fn[T : FromJson] Envelope::decode(self : Envelope) -> T raise IpcError {
   @json.from_json(self.payload) catch {
-    err => raise IpcError::DecodeError(err.to_string())
+    err => raise DecodeError(err.to_string())
   }
 }
 
@@ -32,9 +32,9 @@ pub fn Envelope::stringify(self : Envelope) -> String {
 /// Parse a transport JSON string into an envelope.
 pub fn parse_envelope(raw : String) -> Envelope raise IpcError {
   let json = @json.parse(raw) catch {
-    err => raise IpcError::DecodeError(err.to_string())
+    err => raise DecodeError(err.to_string())
   }
   @json.from_json(json) catch {
-    err => raise IpcError::DecodeError(err.to_string())
+    err => raise DecodeError(err.to_string())
   }
 }

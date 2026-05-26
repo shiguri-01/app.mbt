@@ -1,7 +1,7 @@
 ///|
 /// Native desktop window managed by the runtime.
 pub struct Window {
-  view : @webview.WebView
+  priv view : @webview.WebView
 }
 
 ///|

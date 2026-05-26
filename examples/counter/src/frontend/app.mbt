@@ -33,17 +33,13 @@ fn CounterModel::render(self : CounterModel) -> Unit {
 
 ///|
 fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
-  let command = @shared.CounterAppCommand::Counter(
-    @shared.CounterCommand::Increment(amount~),
-  )
+  let command = @shared.CounterAppCommand::Counter(Increment(amount~))
   self.send_command(command)
 }
 
 ///|
 fn CounterModel::reset(self : CounterModel) -> Unit {
-  let command = @shared.CounterAppCommand::Counter(
-    @shared.CounterCommand::Reset,
-  )
+  let command = @shared.CounterAppCommand::Counter(Reset)
   self.send_command(command)
 }
 

@@ -42,29 +42,3 @@ pub fn run_with_options(
     err => raise_webview(err)
   }
 }
-
-///|
-/// Decode a typed payload and run an async typed handler.
-pub async fn[T : FromJson, R] dispatch(
-  envelope : @ipc.Envelope,
-  handler : async (T) -> R,
-) -> @ipc.Response[R] {
-  @async.pause() catch {
-    _ => ()
-  }
-  let command : T = envelope.decode() catch {
-    err => {
-      raise_ipc(err) catch {
-        desktop_err =>
-          return Err(
-            @ipc.IpcError::HandlerError(desktop_error_to_string(desktop_err)),
-          )
-      }
-      abort("unreachable")
-    }
-  }
-  let response = handler(command) catch {
-    err => return Err(@ipc.IpcError::HandlerError(error_to_string(err)))
-  }
-  Ok(response)
-}

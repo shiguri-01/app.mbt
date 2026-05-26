@@ -1,25 +1,18 @@
 ///|
 fn binding_payload(req : String) -> String raise @ipc.IpcError {
   let json = @json.parse(req) catch {
-    err => raise @ipc.IpcError::DecodeError(err.to_string())
+    err => raise DecodeError(err.to_string())
   }
   match json {
     Array(args) =>
       match args.get(0) {
         Some(String(raw)) => raw
         Some(_) =>
-          raise @ipc.IpcError::DecodeError(
-            "desktop bridge first argument must be a string",
-          )
+          raise DecodeError("desktop bridge first argument must be a string")
         None =>
-          raise @ipc.IpcError::DecodeError(
-            "desktop bridge call must include one argument",
-          )
+          raise DecodeError("desktop bridge call must include one argument")
       }
-    _ =>
-      raise @ipc.IpcError::DecodeError(
-        "desktop bridge request must be a JSON array",
-      )
+    _ => raise DecodeError("desktop bridge request must be a JSON array")
   }
 }
 
@@ -37,7 +30,7 @@ fn err_response(err : @ipc.IpcError) -> String {
 
 ///|
 fn desktop_err_response(err : DesktopError) -> String {
-  err_response(@ipc.IpcError::HandlerError(desktop_error_to_string(err)))
+  err_response(HandlerError(desktop_error_to_string(err)))
 }
 
 ///|
@@ -66,7 +59,7 @@ fn[T : FromJson, R : ToJson] binding_async_response(
   let command : T = envelope.decode() catch { err => return err_response(err) }
   let response = run_async_response(() => {
     let value = handler(command) catch {
-      err => return Err(@ipc.IpcError::HandlerError(error_to_string(err)))
+      err => return Err(HandlerError(error_to_string(err)))
     }
     Ok(value)
   })
