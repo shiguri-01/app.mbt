@@ -7,7 +7,7 @@ pub(all) struct Request[T] {
 
 ///|
 pub fn[T : ToJson] Request::to_envelope(self : Request[T]) -> Envelope {
-  Envelope::new(self.body, id=self.id)
+  Envelope(self.body, id=self.id)
 }
 
 ///|
@@ -22,5 +22,5 @@ pub fn[T : ToJson] Response::to_envelope(
   self : Response[T],
   id : String,
 ) -> Envelope {
-  Envelope::new(self, id~)
+  Envelope(self, id~)
 }

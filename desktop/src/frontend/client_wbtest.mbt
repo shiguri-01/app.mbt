@@ -5,7 +5,7 @@ enum TestCommand {
 
 ///|
 test "client event serializes envelope without request id" {
-  let raw = Client::new().event(Increment(amount=2))
+  let raw = Client().event(Increment(amount=2))
   let envelope = @ipc.parse_envelope(raw)
   let decoded : TestCommand = envelope.decode()
   assert_true(decoded == Increment(amount=2))
@@ -14,7 +14,7 @@ test "client event serializes envelope without request id" {
 
 ///|
 test "client request envelope increments ids" {
-  let client = Client::new()
+  let client = Client()
   let (client, first) = client.request(Increment(amount=1))
   let (_, second) = client.request(Increment(amount=2))
   let first_envelope = @ipc.parse_envelope(first)

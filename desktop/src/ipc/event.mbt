@@ -6,5 +6,5 @@ pub(all) struct Event[T] {
 
 ///|
 pub fn[T : ToJson] Event::to_envelope(self : Event[T]) -> Envelope {
-  Envelope::new(self.body)
+  Envelope(self.body)
 }

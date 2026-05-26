@@ -10,8 +10,14 @@ pub(all) struct Envelope {
 
 ///|
 /// Build an IPC envelope from any value that can be serialized as JSON.
-pub fn[T : ToJson] Envelope::new(body : T, id? : String) -> Envelope {
+pub fn[T : ToJson] Envelope::Envelope(body : T, id? : String) -> Envelope {
   { id, payload: body.to_json() }
+}
+
+///|
+#deprecated("use `Envelope(...)` instead")
+pub fn[T : ToJson] Envelope::new(body : T, id? : String) -> Envelope {
+  Envelope(body, id?)
 }
 
 ///|

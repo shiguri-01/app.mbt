@@ -11,7 +11,7 @@ enum TestChildCommand {
 ///|
 test "nested enum command round trip through envelope" {
   let command = TestCommand::Parent(Increment(amount=3))
-  let envelope = Envelope::new(command, id="req-1")
+  let envelope = @ipc.Envelope(command, id="req-1")
   let decoded : TestCommand = envelope.decode()
   assert_true(decoded == command)
   assert_true(envelope.id == Some("req-1"))
@@ -20,7 +20,7 @@ test "nested enum command round trip through envelope" {
 ///|
 test "parse envelope json" {
   let command = TestCommand::Parent(Increment(amount=4))
-  let envelope = Envelope::new(command, id="req-2")
+  let envelope = @ipc.Envelope(command, id="req-2")
   let parsed = parse_envelope(envelope.stringify())
   let decoded : TestCommand = parsed.decode()
   assert_true(decoded == command)

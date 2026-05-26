@@ -50,14 +50,20 @@ extern "js" fn call_bridge_promise(
   #| }
 
 ///|
-pub fn Client::new() -> Client {
+pub fn Client::Client() -> Client {
   { next_id: 0 }
+}
+
+///|
+#deprecated("use `Client()` instead")
+pub fn Client::new() -> Client {
+  Client()
 }
 
 ///|
 pub fn[T : ToJson] Client::event(self : Client, body : T) -> String {
   ignore(self)
-  @ipc.Envelope::new(body).stringify()
+  @ipc.Envelope(body).stringify()
 }
 
 ///|
@@ -77,7 +83,7 @@ pub fn[T : ToJson] Client::request_envelope(
 ) -> (Client, String) {
   let id = "req-\{self.next_id}"
   let next = { next_id: self.next_id + 1 }
-  (next, @ipc.Envelope::new(body, id~).stringify())
+  (next, @ipc.Envelope(body, id~).stringify())
 }
 
 ///|

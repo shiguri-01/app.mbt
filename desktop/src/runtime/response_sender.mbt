@@ -12,7 +12,10 @@ pub struct ResponseSender {
 }
 
 ///|
-fn ResponseSender::new(view : @webview.WebView, id : String) -> ResponseSender {
+fn ResponseSender::ResponseSender(
+  view : @webview.WebView,
+  id : String,
+) -> ResponseSender {
   { view, id, completed: false }
 }
 

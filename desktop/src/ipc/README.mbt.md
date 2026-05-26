@@ -36,7 +36,7 @@ application command or event:
 let command = AppCommand::Counter(CounterCommand::Increment(amount=1))
 
 ///|
-let envelope = Envelope::new(command, id="req-1")
+let envelope = @ipc.Envelope(command, id="req-1")
 
 ///|
 let decoded : AppCommand = envelope.decode()

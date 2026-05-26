@@ -10,13 +10,13 @@ enum TestEvent {
 
 ///|
 fn[T : ToJson] bridge_request(body : T) -> String {
-  let raw = @ipc.Envelope::new(body, id="req-1").stringify()
+  let raw = @ipc.Envelope(body, id="req-1").stringify()
   Json::array([Json::string(raw)]).stringify()
 }
 
 ///|
 test "binding payload extracts first bridge argument" {
-  let raw = @ipc.Envelope::new(Increment(amount=3)).stringify()
+  let raw = @ipc.Envelope(Increment(amount=3)).stringify()
   let req = Json::array([Json::string(raw)]).stringify()
   assert_eq(binding_payload(req), raw)
 }

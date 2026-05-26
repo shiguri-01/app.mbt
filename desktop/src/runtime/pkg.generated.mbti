@@ -56,6 +56,8 @@ pub(all) struct WindowOptions {
   debug : Bool
   load : Load?
 } derive(Eq, @debug.Debug)
+pub fn WindowOptions::WindowOptions(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load) -> Self
+#deprecated
 pub fn WindowOptions::new(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load) -> Self
 
 // Type aliases

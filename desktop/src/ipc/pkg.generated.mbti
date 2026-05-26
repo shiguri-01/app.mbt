@@ -25,7 +25,9 @@ pub(all) struct Envelope {
   id : String?
   payload : Json
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn[T : ToJson] Envelope::Envelope(T, id? : String) -> Self
 pub fn[T : @json.FromJson] Envelope::decode(Self) -> T raise IpcError
+#deprecated
 pub fn[T : ToJson] Envelope::new(T, id? : String) -> Self
 pub fn Envelope::stringify(Self) -> String
 

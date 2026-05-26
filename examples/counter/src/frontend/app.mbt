@@ -45,11 +45,7 @@ fn CounterModel::reset(self : CounterModel) -> Unit {
 
 ///|
 fn main {
-  let model = {
-    count: 0,
-    view: element_by_id("count"),
-    client: @desktop.Client::new(),
-  }
+  let model = { count: 0, view: element_by_id("count"), client: Client() }
   element_by_id("inc").on_click(() => model.increment(1))
   element_by_id("dec").on_click(() => model.increment(-1))
   element_by_id("reset").on_click(() => model.reset())

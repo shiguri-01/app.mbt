@@ -15,7 +15,7 @@ pub(all) struct WindowOptions {
 } derive(Debug, Eq)
 
 ///|
-pub fn WindowOptions::new(
+pub fn WindowOptions::WindowOptions(
   title~ : String,
   width? : Int = 800,
   height? : Int = 600,
@@ -23,6 +23,18 @@ pub fn WindowOptions::new(
   load? : Load,
 ) -> WindowOptions {
   { title, width, height, debug, load }
+}
+
+///|
+#deprecated("use `WindowOptions(...)` instead")
+pub fn WindowOptions::new(
+  title~ : String,
+  width? : Int = 800,
+  height? : Int = 600,
+  debug? : Bool = false,
+  load? : Load,
+) -> WindowOptions {
+  WindowOptions(title~, width~, height~, debug~, load?)
 }
 
 ///|
