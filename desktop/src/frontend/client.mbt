@@ -50,27 +50,32 @@ extern "js" fn call_bridge_promise(
   #| }
 
 ///|
+/// Create a frontend IPC client with request ids starting at `req-0`.
 pub fn Client::Client() -> Client {
   { next_id: 0 }
 }
 
 ///|
+/// Serialize a one-way event envelope without calling the JavaScript bridge.
 pub fn[T : ToJson] Client::event(self : Client, body : T) -> String {
   ignore(self)
   @ipc.Envelope(body).stringify()
 }
 
 ///|
+/// Send a one-way event through the named JavaScript bridge.
 pub fn[T : ToJson] Client::emit(self : Client, name : String, body : T) -> Unit {
   call_bridge(name, self.event(body))
 }
 
 ///|
+/// Send a one-way event through the default bridge, `moonbitDesktop`.
 pub fn[T : ToJson] Client::emit_default(self : Client, body : T) -> Unit {
   self.emit(@ipc.default_bridge_name(), body)
 }
 
 ///|
+/// Build a request envelope and return the next client state.
 pub fn[T : ToJson] Client::request_envelope(
   self : Client,
   body : T,
@@ -81,11 +86,13 @@ pub fn[T : ToJson] Client::request_envelope(
 }
 
 ///|
+/// Alias of `request_envelope` for callers that do their own bridge call.
 pub fn[T : ToJson] Client::request(self : Client, body : T) -> (Client, String) {
   self.request_envelope(body)
 }
 
 ///|
+/// Send a request and deliver the decoded response to a callback.
 pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
   self : Client,
   name : String,
@@ -108,6 +115,7 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
 }
 
 ///|
+/// Send a callback-style request through the default bridge.
 pub fn[T : ToJson, R : FromJson] Client::request_with_callback_default(
   self : Client,
   body : T,
@@ -117,6 +125,7 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback_default(
 }
 
 ///|
+/// Send a request and wait for the JavaScript bridge promise.
 pub async fn[T : ToJson, R : FromJson] Client::request_async(
   self : Client,
   name : String,
@@ -131,6 +140,7 @@ pub async fn[T : ToJson, R : FromJson] Client::request_async(
 }
 
 ///|
+/// Send an async request through the default bridge.
 pub async fn[T : ToJson, R : FromJson] Client::request_async_default(
   self : Client,
   body : T,
@@ -139,6 +149,7 @@ pub async fn[T : ToJson, R : FromJson] Client::request_async_default(
 }
 
 ///|
+/// Decode a raw event envelope received by frontend-side code.
 pub fn[T : FromJson] decode_event(raw : String) -> T raise @ipc.IpcError {
   @ipc.parse_envelope(raw).decode()
 }

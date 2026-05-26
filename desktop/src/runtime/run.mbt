@@ -16,6 +16,7 @@ pub fn run(
 }
 
 ///|
+/// Run a single-window application from an options value.
 pub fn run_with_options(
   options : WindowOptions,
   on_ready~ : async (Window) -> Unit,

@@ -27,6 +27,7 @@ Package-level README files contain the API-oriented details:
 
 - `src/ipc/README.mbt.md`: typed envelopes, requests, responses, and errors.
 - `src/runtime/README.mbt.md`: native window runtime and async host handlers.
+- `src/frontend/README.mbt.md`: JS-target client helpers for frontend code.
 
 ## Async IPC direction
 
