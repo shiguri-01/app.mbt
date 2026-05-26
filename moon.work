@@ -1,5 +1,6 @@
 members = [
   "./desktop",
   "./examples/counter",
+  "./examples/dialogs",
   "./webview",
 ]

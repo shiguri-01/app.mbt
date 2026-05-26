@@ -5,11 +5,12 @@ host and typed IPC between host and frontend code.
 
 ## Workspace
 
-This repository is a `moon.work` workspace with three members:
+This repository is a `moon.work` workspace with four members:
 
 - `desktop`: higher-level desktop app framework.
 - `webview`: native FFI bindings to `webview/webview`.
 - `examples/counter`: sample app that uses `desktop` as an external package.
+- `examples/dialogs`: native message dialog sample app.
 
 `desktop` is split into focused packages:
 
@@ -34,6 +35,7 @@ callback.
 just check
 just test
 just run-counter-example
+just run-dialogs-example
 ```
 
 On Windows, native commands require a Visual Studio C++ environment. The `just`

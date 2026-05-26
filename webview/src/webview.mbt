@@ -16,6 +16,22 @@ pub fn WebView::is_valid(self : WebView) -> Bool {
 }
 
 ///|
+/// Return the borrowed native top-level window handle for this webview.
+///
+/// The returned handle is opaque and only valid while this `WebView` remains
+/// alive. It is intended for higher-level native shell integrations such as
+/// dialogs and menus.
+pub fn WebView::native_window(
+  self : WebView,
+) -> NativeWindow raise WebViewError {
+  if ffi_has_native_window(self) {
+    ffi_get_native_window(self)
+  } else {
+    raise InvalidState
+  }
+}
+
+///|
 /// Destroy the native webview if it has not already been destroyed.
 pub fn WebView::destroy(self : WebView) -> Unit raise WebViewError {
   check_status(ffi_destroy(self))

@@ -7,6 +7,14 @@ extern "C" fn ffi_is_valid(view : WebView) -> Bool = "moonbit_webview_is_valid"
 
 ///|
 #borrow(view)
+extern "C" fn ffi_has_native_window(view : WebView) -> Bool = "moonbit_webview_has_native_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_get_native_window(view : WebView) -> NativeWindow = "moonbit_webview_get_native_window"
+
+///|
+#borrow(view)
 extern "C" fn ffi_destroy(view : WebView) -> Int = "moonbit_webview_destroy"
 
 ///|

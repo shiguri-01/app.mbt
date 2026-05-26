@@ -1,0 +1,45 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop/shell"
+
+import {
+  "moonbitlang/core/debug",
+  "shiguri-01/webview",
+}
+
+// Values
+pub fn show_message_dialog(@webview.NativeWindow, String, title? : String, kind? : MessageDialogKind, buttons? : MessageDialogButtons) -> MessageDialogResult raise ShellError
+
+// Errors
+pub(all) suberror ShellError {
+  UnsupportedPlatform
+  InvalidWindow
+  DialogFailed(String)
+  UnknownDialogResult(Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) enum MessageDialogButtons {
+  Ok
+  OkCancel
+  YesNo
+  YesNoCancel
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MessageDialogKind {
+  Info
+  Warning
+  Error
+  Question
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MessageDialogResult {
+  Ok
+  Cancel
+  Yes
+  No
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

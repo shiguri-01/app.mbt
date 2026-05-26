@@ -1,0 +1,17 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "shiguri-01/webview",
+}
+
+supported_targets = "+native"
+
+options(
+  "native-stub": [ "shell_win32.cc" ],
+  link: {
+    "native": {
+      "stub-cc": "cl",
+      "stub-cc-flags": "/std:c++14 /EHsc /utf-8",
+      "cc-link-flags": "user32.lib",
+    },
+  },
+)

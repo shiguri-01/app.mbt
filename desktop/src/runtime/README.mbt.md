@@ -76,3 +76,21 @@ should choose `Window::handle` for short async handlers and
 `Load::Html` embeds an HTML string directly. `Load::Url` navigates the webview
 to a URL. The runtime does not depend on any frontend bundler; applications can
 load frontend output from a dev server, generated HTML, or bundled assets.
+
+## Native dialogs
+
+`Window::show_message_dialog` shows a native modal message dialog owned by the
+current window:
+
+```mbt nocheck
+window.show_message_dialog(
+  "The export has finished.",
+  title="Export",
+  kind=Info,
+  buttons=Ok,
+)
+```
+
+The dialog API exposes portable enum values for kind, button set, and result.
+Platform handles, Win32 flags, and OS-specific result codes stay inside
+`desktop/shell`.

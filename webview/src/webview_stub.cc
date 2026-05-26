@@ -121,6 +121,20 @@ int32_t moonbit_webview_is_valid(MoonBitWebView *view) {
 }
 
 MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_has_native_window(MoonBitWebView *view) {
+  return require_handle(view) == WEBVIEW_ERROR_OK &&
+         webview_get_window(view->handle) != nullptr;
+}
+
+MOONBIT_FFI_EXPORT
+void *moonbit_webview_get_native_window(MoonBitWebView *view) {
+  if (require_handle(view) != WEBVIEW_ERROR_OK) {
+    return nullptr;
+  }
+  return webview_get_window(view->handle);
+}
+
+MOONBIT_FFI_EXPORT
 int32_t moonbit_webview_destroy(MoonBitWebView *view) {
   return destroy_handle(view);
 }

@@ -3,6 +3,7 @@
 pub(all) suberror DesktopError {
   WebView(String)
   Ipc(String)
+  Shell(String)
   InvalidState(String)
 } derive(Debug, Eq)
 
@@ -22,6 +23,17 @@ fn webview_error_to_string(err : @webview.WebViewError) -> String {
 }
 
 ///|
+fn shell_error_to_string(err : @shell.ShellError) -> String {
+  match err {
+    UnsupportedPlatform =>
+      "native shell operation is not supported on this platform"
+    InvalidWindow => "native window handle is invalid"
+    DialogFailed(message) => "native dialog failed: \{message}"
+    UnknownDialogResult(code) => "native dialog returned unknown result \{code}"
+  }
+}
+
+///|
 fn raise_webview(err : @webview.WebViewError) -> Unit raise DesktopError {
   raise WebView(webview_error_to_string(err))
 }
@@ -31,6 +43,7 @@ fn desktop_error_to_string(err : DesktopError) -> String {
   match err {
     WebView(message) => "webview: \{message}"
     Ipc(message) => "ipc: \{message}"
+    Shell(message) => "shell: \{message}"
     InvalidState(message) => "invalid state: \{message}"
   }
 }
@@ -50,7 +63,13 @@ fn raise_error_as_desktop(err : Error) -> Unit raise DesktopError {
   match err {
     WebView(message) => raise WebView(message)
     Ipc(message) => raise Ipc(message)
+    Shell(message) => raise Shell(message)
     InvalidState(message) => raise InvalidState(message)
     _ => raise InvalidState(error_to_string(err))
   }
+}
+
+///|
+fn raise_shell(err : @shell.ShellError) -> Unit raise DesktopError {
+  raise Shell(shell_error_to_string(err))
 }

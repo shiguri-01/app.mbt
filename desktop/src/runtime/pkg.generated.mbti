@@ -18,6 +18,7 @@ pub fn run_with_options(WindowOptions, on_ready~ : async (Window) -> Unit) -> Un
 pub(all) suberror DesktopError {
   WebView(String)
   Ipc(String)
+  Shell(String)
   InvalidState(String)
 } derive(Eq, @debug.Debug)
 
@@ -25,6 +26,27 @@ pub(all) suberror DesktopError {
 pub(all) enum Load {
   Url(String)
   Html(String)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MessageDialogButtons {
+  Ok
+  OkCancel
+  YesNo
+  YesNoCancel
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MessageDialogKind {
+  Info
+  Warning
+  Error
+  Question
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MessageDialogResult {
+  Ok
+  Cancel
+  Yes
+  No
 } derive(Eq, @debug.Debug)
 
 pub struct ResponseSender {
@@ -46,6 +68,7 @@ pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync_default(Self, (T) -> 
 pub fn Window::navigate(Self, String) -> Unit raise DesktopError
 pub fn Window::set_html(Self, String) -> Unit raise DesktopError
 pub fn Window::set_title(Self, String) -> Unit raise DesktopError
+pub fn Window::show_message_dialog(Self, String, title? : String, kind? : MessageDialogKind, buttons? : MessageDialogButtons) -> MessageDialogResult raise DesktopError
 pub fn Window::terminate(Self) -> Unit raise DesktopError
 pub fn Window::unbind(Self, String) -> Unit raise DesktopError
 
