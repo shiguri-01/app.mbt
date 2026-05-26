@@ -28,6 +28,7 @@ fn shell_error_to_string(err : @shell.ShellError) -> String {
     UnsupportedPlatform =>
       "native shell operation is not supported on this platform"
     InvalidWindow => "native window handle is invalid"
+    InvalidFileFilter(message) => "native file filter is invalid: \{message}"
     DialogFailed(message) => "native dialog failed: \{message}"
     UnknownDialogResult(code) => "native dialog returned unknown result \{code}"
   }

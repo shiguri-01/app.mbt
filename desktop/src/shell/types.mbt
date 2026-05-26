@@ -44,3 +44,13 @@ pub(all) enum MessageDialogResult {
   Yes
   No
 } derive(Debug, Eq)
+
+///|
+/// A file filter shown in native file open/save dialogs.
+///
+/// `extensions` must contain extension names without leading dots, such as
+/// `["png", "jpg", "jpeg"]`.
+pub(all) struct FileFilter {
+  name : String
+  extensions : Array[String]
+} derive(Debug, Eq)

@@ -25,3 +25,20 @@ test "dialog result status errors" {
     content="Err(UnknownDialogResult(99))",
   )
 }
+
+///|
+test "file filter validation accepts extension groups" {
+  let filter = FileFilter::{ name: "Images", extensions: ["png", "jpg"] }
+  debug_inspect(try? validate_file_filter(filter), content="Ok(())")
+}
+
+///|
+test "file filter validation rejects dotted extensions" {
+  let filter = FileFilter::{ name: "Images", extensions: [".png"] }
+  debug_inspect(
+    try? validate_file_filter(filter),
+    content=(
+      #|Err(InvalidFileFilter("filter extension must not contain separators, wildcards, or dots"))
+    ),
+  )
+}

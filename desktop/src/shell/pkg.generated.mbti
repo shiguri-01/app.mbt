@@ -7,17 +7,31 @@ import {
 }
 
 // Values
+pub fn open_file_dialog(@webview.NativeWindow, filters? : Array[FileFilter], default_path? : String) -> String? raise ShellError
+
+pub fn open_files_dialog(@webview.NativeWindow, filters? : Array[FileFilter], default_path? : String) -> Array[String]? raise ShellError
+
+pub fn open_folder_dialog(@webview.NativeWindow, default_path? : String) -> String? raise ShellError
+
+pub fn save_file_dialog(@webview.NativeWindow, filters? : Array[FileFilter], default_path? : String, default_name? : String) -> String? raise ShellError
+
 pub fn show_message_dialog(@webview.NativeWindow, String, title? : String, kind? : MessageDialogKind, buttons? : MessageDialogButtons) -> MessageDialogResult raise ShellError
 
 // Errors
 pub(all) suberror ShellError {
   UnsupportedPlatform
   InvalidWindow
+  InvalidFileFilter(String)
   DialogFailed(String)
   UnknownDialogResult(Int)
 } derive(Eq, @debug.Debug)
 
 // Types and methods
+pub(all) struct FileFilter {
+  name : String
+  extensions : Array[String]
+} derive(Eq, @debug.Debug)
+
 pub(all) enum MessageDialogButtons {
   Ok
   OkCancel

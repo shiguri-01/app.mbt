@@ -6,12 +6,12 @@ import {
 supported_targets = "+native"
 
 options(
-  "native-stub": [ "shell_win32.cc" ],
+  "native-stub": [ "shell_win32.cc", "shell_nfd_win.cc" ],
   link: {
     "native": {
       "stub-cc": "cl",
       "stub-cc-flags": "/std:c++14 /EHsc /utf-8",
-      "cc-link-flags": "user32.lib",
+      "cc-link-flags": "user32.lib ole32.lib uuid.lib shell32.lib",
     },
   },
 )

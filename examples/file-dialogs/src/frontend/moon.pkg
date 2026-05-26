@@ -1,0 +1,11 @@
+import {
+  "shiguri-01/desktop-file-dialog-example/shared",
+  "shiguri-01/desktop/frontend" @desktop,
+  "shiguri-01/desktop/ipc",
+}
+
+supported_targets = "+js"
+
+options(
+  "is-main": true,
+)

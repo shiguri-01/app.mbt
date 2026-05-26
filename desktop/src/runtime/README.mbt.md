@@ -94,3 +94,17 @@ window.show_message_dialog(
 The dialog API exposes portable enum values for kind, button set, and result.
 Platform handles, Win32 flags, and OS-specific result codes stay inside
 `desktop/shell`.
+
+`Window::open_file_dialog`, `Window::open_files_dialog`,
+`Window::save_file_dialog`, and `Window::open_folder_dialog` show native file
+dialogs owned by the current window. They return `None` when the user cancels:
+
+```mbt nocheck
+///|
+let path = window.open_file_dialog(filters=[
+  { name: "Images", extensions: ["png", "jpg", "jpeg"] },
+])
+
+///|
+let folder = window.open_folder_dialog()
+```

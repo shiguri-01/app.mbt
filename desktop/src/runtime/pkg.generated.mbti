@@ -23,6 +23,11 @@ pub(all) suberror DesktopError {
 } derive(Eq, @debug.Debug)
 
 // Types and methods
+pub(all) struct FileFilter {
+  name : String
+  extensions : Array[String]
+} derive(Eq, @debug.Debug)
+
 pub(all) enum Load {
   Url(String)
   Html(String)
@@ -66,6 +71,10 @@ pub fn[T : @json.FromJson] Window::handle_deferred_default(Self, (T, ResponseSen
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync(Self, String, (T) -> R raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync_default(Self, (T) -> R raise DesktopError) -> Unit raise DesktopError
 pub fn Window::navigate(Self, String) -> Unit raise DesktopError
+pub fn Window::open_file_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> String? raise DesktopError
+pub fn Window::open_files_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> Array[String]? raise DesktopError
+pub fn Window::open_folder_dialog(Self, default_path? : String) -> String? raise DesktopError
+pub fn Window::save_file_dialog(Self, filters? : Array[FileFilter], default_path? : String, default_name? : String) -> String? raise DesktopError
 pub fn Window::set_html(Self, String) -> Unit raise DesktopError
 pub fn Window::set_title(Self, String) -> Unit raise DesktopError
 pub fn Window::show_message_dialog(Self, String, title? : String, kind? : MessageDialogKind, buttons? : MessageDialogButtons) -> MessageDialogResult raise DesktopError

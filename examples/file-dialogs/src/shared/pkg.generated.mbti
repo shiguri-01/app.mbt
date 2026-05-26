@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-file-dialog-example/shared"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum FileDialogCommand {
+  OpenFile
+  OpenFiles
+  SaveFile
+  OpenFolder
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum FileDialogEvent {
+  Selected(Array[String])
+  Canceled
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

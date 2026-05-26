@@ -21,3 +21,14 @@ applications can stay portable across Windows, macOS, and Linux backends.
 On Windows, message dialogs use `TaskDialogIndirect` when available. If the
 common-controls task dialog entry point cannot be loaded, the backend falls back
 to `MessageBoxW` rather than failing an otherwise valid dialog request.
+
+File, save, and folder dialogs are exposed as portable functions returning
+`None` when the user cancels. On Windows, these dialogs are backed by Native
+File Dialog Extended (NFDe), which uses the modern `IFileDialog` API.
+
+```mbt nocheck
+///|
+let image = window.open_file_dialog(filters=[
+  { name: "Images", extensions: ["png", "jpg", "jpeg"] },
+])
+```

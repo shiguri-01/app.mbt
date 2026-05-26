@@ -31,6 +31,14 @@ build-dialogs-example-frontend:
 run-dialogs-example: build-dialogs-example-frontend
     cmd.exe /C tools\msvc-native.cmd moon run examples/dialogs/src/host --target native
 
+# Build the MoonBit JS frontend for the file dialogs desktop example.
+build-file-dialogs-example-frontend:
+    moon build examples/file-dialogs/src/frontend --target js
+
+# Run the native file dialog example.
+run-file-dialogs-example: build-file-dialogs-example-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/file-dialogs/src/host --target native
+
 # Refresh generated package interfaces.
 info:
     moon info --target all
