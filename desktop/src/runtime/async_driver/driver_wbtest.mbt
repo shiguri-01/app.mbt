@@ -1,6 +1,6 @@
 ///|
 test "async driver completes timer-backed response" {
-  let response : @ipc.Response[Int] = run_response(() => {
+  let response : @ipc.IpcResponse[Int] = run_response(() => {
     @async.sleep(1)
     Ok(42)
   })

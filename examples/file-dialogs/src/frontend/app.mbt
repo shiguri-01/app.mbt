@@ -1,7 +1,7 @@
 ///|
 struct FileDialogModel {
   status : Element
-  mut client : @desktop.Client
+  client : @desktop.Client
 }
 
 ///|
@@ -19,8 +19,8 @@ fn FileDialogModel::send_command(
   command : @shared.FileDialogCommand,
 ) -> Unit {
   self.status.set_text("Waiting for native file dialog...")
-  self.client = self.client.request_with_callback_default(command, (
-    response : @ipc.Response[@shared.FileDialogEvent],
+  self.client.request_with_callback_default(command, (
+    response : @ipc.IpcResponse[@shared.FileDialogEvent],
   ) => {
     match response {
       Ok(Selected(paths)) => self.status.set_text(describe_paths(paths))

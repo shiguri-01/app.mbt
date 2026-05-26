@@ -39,7 +39,7 @@ pub fn[T : ToJson] ResponseSender::resolve(
   self : ResponseSender,
   value : T,
 ) -> Unit raise DesktopError {
-  self.return_raw(ok_response(value))
+  self.return_raw(@ipc.response_ok(value))
 }
 
 ///|
@@ -48,7 +48,7 @@ pub fn ResponseSender::reject(
   self : ResponseSender,
   err : @ipc.IpcError,
 ) -> Unit raise DesktopError {
-  self.return_raw(err_response(err))
+  self.return_raw(@ipc.response_err(err))
 }
 
 ///|
@@ -56,5 +56,5 @@ fn ResponseSender::reject_desktop(
   self : ResponseSender,
   err : DesktopError,
 ) -> Unit raise DesktopError {
-  self.return_raw(desktop_err_response(err))
+  self.return_raw(@ipc.response_err(HandlerError(desktop_error_to_string(err))))
 }

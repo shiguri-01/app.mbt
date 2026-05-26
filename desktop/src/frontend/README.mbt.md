@@ -2,22 +2,22 @@
 
 JS-target helpers for calling a desktop runtime bridge from frontend code.
 
-`Client` builds typed IPC envelopes and sends them through a JavaScript bridge
-function such as `globalThis.moonbitDesktop`. It is UI-library agnostic; DOM,
-Rabbita, Luna, or another layer can decide when to call it.
+`Client` builds typed `RequestFrame` values and sends them through a JavaScript
+bridge function such as `globalThis.moonbitDesktop`. It is UI-library agnostic;
+DOM, Rabbita, Luna, or another layer can decide when to call it.
 
-Use `emit_default` for one-way events and `request_with_callback_default` or
-`request_async_default` when the host returns a typed `Response[T]`.
+Use `request_async_default` for async frontend code. `request_with_callback`
+exists for callback-driven UI code.
 
 ```mbt nocheck
 ///|
 let client = @frontend.Client()
 
 ///|
-let client = client.request_with_callback_default(command, response => {
-  match response {
-    Ok(event) => handle_event(event)
-    Err(err) => handle_error(err)
-  }
-})
+let response : @ipc.IpcResponse[AppReply] = client.request_async_default(
+  command,
+)
 ```
+
+Host-to-frontend events use `listen_default`, which installs a typed listener
+on `globalThis.moonbitDesktopEvent`.

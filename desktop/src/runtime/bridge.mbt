@@ -6,12 +6,18 @@ pub fn default_bridge_name() -> String {
 }
 
 ///|
+pub fn default_event_name() -> String {
+  @ipc.default_event_name()
+}
+
+///|
 /// Bind an async IPC handler on the default bridge.
-pub fn[T : FromJson, R : ToJson] Window::handle_default(
+pub fn[T : FromJson, R : ToJson] Window::handle_ipc_default(
   self : Window,
-  handler : async (T) -> R,
+  policy~ : @ipc.IpcPolicy[T],
+  handler~ : async (T) -> R,
 ) -> Unit raise DesktopError {
-  self.handle(default_bridge_name(), handler)
+  self.handle_ipc(default_bridge_name(), policy~, handler~)
 }
 
 ///|
@@ -24,10 +30,9 @@ pub fn[T : FromJson] Window::handle_deferred_default(
 }
 
 ///|
-/// Bind a synchronous IPC handler on the default bridge.
-pub fn[T : FromJson, R : ToJson] Window::handle_sync_default(
+pub fn[T : ToJson] Window::emit_event_default(
   self : Window,
-  handler : (T) -> R raise DesktopError,
+  event : T,
 ) -> Unit raise DesktopError {
-  self.handle_sync(default_bridge_name(), handler)
+  self.emit_event(default_event_name(), event)
 }

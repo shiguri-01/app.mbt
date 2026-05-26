@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn[R] run_response(async () -> @ipc.Response[R]) -> @ipc.Response[R]
+pub fn[R] run_response(async () -> @ipc.IpcResponse[R]) -> @ipc.IpcResponse[R]
 
 pub fn run_unit(async () -> Unit) -> Result[Unit, Error]?
 

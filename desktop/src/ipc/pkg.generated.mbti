@@ -4,49 +4,75 @@ package "shiguri-01/desktop/ipc"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "moonbitlang/core/set",
 }
 
 // Values
 pub fn default_bridge_name() -> String
 
-pub fn parse_envelope(String) -> Envelope raise IpcError
+pub fn default_event_name() -> String
+
+pub fn parse_request_frame(String) -> RequestFrame raise IpcError
+
+pub fn[T : @json.FromJson] parse_response_frame(String) -> ResponseFrame[T] raise IpcError
+
+pub fn response_err(IpcError) -> String
+
+pub fn[T : ToJson] response_ok(T) -> String
 
 // Errors
 pub(all) suberror IpcError {
   DecodeError(String)
   EncodeError(String)
-  MissingRequestId
   HandlerError(String)
   TransportClosed(String)
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  UnsupportedVersion(Int)
+  PayloadTooLarge(size~ : Int, limit~ : Int)
+  UnauthorizedCommand(CommandId)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for IpcError
+pub impl @json.FromJson for IpcError
 
 // Types and methods
-pub struct Envelope {
-  id : String?
-  payload : Json
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn[T : ToJson] Envelope::Envelope(T, id? : String) -> Self
-pub fn[T : @json.FromJson] Envelope::decode(Self) -> T raise IpcError
-pub fn Envelope::stringify(Self) -> String
+pub(all) struct CommandId(String) derive(Eq, Hash, @debug.Debug)
+pub fn CommandId::to_string(Self) -> String
+pub impl ToJson for CommandId
+pub impl @json.FromJson for CommandId
 
-pub struct Event[T] {
-  body : T
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn[T] Event::Event(T) -> Self[T]
-pub fn[T : ToJson] Event::to_envelope(Self[T]) -> Envelope
+pub struct IpcPolicy[T] {
+  classify : (T) -> CommandId
+  allowed : @set.Set[CommandId]?
+  max_payload_bytes : Int
+}
+pub fn[T] IpcPolicy::allow(classify~ : (T) -> CommandId, allowed~ : Array[CommandId], max_payload_bytes? : Int) -> Self[T]
+pub fn[T] IpcPolicy::allow_all(classify~ : (T) -> CommandId, max_payload_bytes? : Int) -> Self[T]
+pub fn[T] IpcPolicy::check(Self[T], T) -> Unit raise IpcError
 
-pub struct Request[T] {
-  id : String
-  body : T
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn[T] Request::Request(T, id~ : String) -> Self[T]
-pub fn[T : ToJson] Request::to_envelope(Self[T]) -> Envelope
-
-pub(all) enum Response[T] {
+pub(all) enum IpcResponse[T] {
   Ok(T)
   Err(IpcError)
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn[T : ToJson] Response::to_envelope(Self[T], String) -> Envelope
+} derive(Eq, @debug.Debug)
+pub impl[T : ToJson] ToJson for IpcResponse[T]
+pub impl[T : @json.FromJson] @json.FromJson for IpcResponse[T]
+
+pub(all) struct RequestFrame {
+  version : Int
+  payload : Json
+} derive(Eq, @debug.Debug)
+pub fn[T : ToJson] RequestFrame::RequestFrame(T) -> Self
+pub fn[T : @json.FromJson] RequestFrame::decode(Self) -> T raise IpcError
+pub fn RequestFrame::stringify(Self) -> String
+pub impl ToJson for RequestFrame
+pub impl @json.FromJson for RequestFrame
+
+pub(all) struct ResponseFrame[T] {
+  version : Int
+  response : IpcResponse[T]
+} derive(Eq, @debug.Debug)
+pub fn[T] ResponseFrame::ResponseFrame(IpcResponse[T]) -> Self[T]
+pub fn[T : ToJson] ResponseFrame::stringify(Self[T]) -> String
+pub impl[T : ToJson] ToJson for ResponseFrame[T]
+pub impl[T : @json.FromJson] @json.FromJson for ResponseFrame[T]
 
 // Type aliases
 

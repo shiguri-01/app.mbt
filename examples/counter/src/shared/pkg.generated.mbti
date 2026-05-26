@@ -4,9 +4,11 @@ package "shiguri-01/desktop-counter-example/shared"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "shiguri-01/desktop/ipc",
 }
 
 // Values
+pub fn command_id(CounterAppCommand) -> @ipc.CommandId
 
 // Errors
 

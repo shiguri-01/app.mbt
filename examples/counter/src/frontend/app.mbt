@@ -2,7 +2,7 @@
 struct CounterModel {
   mut count : Int
   view : Element
-  mut client : @desktop.Client
+  client : @desktop.Client
 }
 
 ///|
@@ -10,8 +10,8 @@ fn CounterModel::send_command(
   self : CounterModel,
   command : @shared.CounterAppCommand,
 ) -> Unit {
-  self.client = self.client.request_with_callback_default(command, (
-    response : @ipc.Response[@shared.CounterEvent],
+  self.client.request_with_callback_default(command, (
+    response : @ipc.IpcResponse[@shared.CounterEvent],
   ) => {
     match response {
       Ok(CountChanged(count)) => {

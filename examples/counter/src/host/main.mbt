@@ -69,7 +69,13 @@ fn main {
     )
     window.set_title("MoonBit Counter")
     let count = Ref(0)
-    window.handle_default(command => {
+    let policy = @ipc.IpcPolicy::allow(classify=@shared.command_id, allowed=[
+      @ipc.CommandId("counter.increment"),
+      @ipc.CommandId("counter.reset"),
+      @ipc.CommandId("window.set_title"),
+      @ipc.CommandId("window.close"),
+    ])
+    window.handle_ipc_default(policy~, handler=command => {
       @async.sleep(1)
       let (next, event) = handle_command(count.val, command)
       count.val = next

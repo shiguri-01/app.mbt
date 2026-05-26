@@ -1,9 +1,11 @@
 # desktop/ipc
 
-Target-agnostic typed IPC protocol helpers.
+Target-agnostic IPC transport helpers.
 
-Applications define their own command and event enums, derive JSON traits, and
-send them through `Envelope`.
+Applications define shared command and reply enums in their own shared package
+and derive or implement `ToJson` / `FromJson` for those protocol types. The
+framework owns the outer wire format through `RequestFrame`,
+`ResponseFrame[T]`, and `IpcResponse[T]`.
 
 ```mbt nocheck
 ///|
@@ -13,41 +15,26 @@ pub(all) enum AppCommand {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) enum CounterCommand {
-  Increment(amount~ : Int)
-  Reset
+pub(all) enum AppReply {
+  CountChanged(Int)
+  WindowTitleChanged(String)
 } derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub fn command_id(command : AppCommand) -> @ipc.CommandId {
+  match command {
+    Counter(Increment(_)) => @ipc.CommandId("counter.increment")
+    Counter(Reset) => @ipc.CommandId("counter.reset")
+    Window(SetTitle(_)) => @ipc.CommandId("window.set_title")
+    Window(Close) => @ipc.CommandId("window.close")
+  }
+}
 ```
 
-Nested enums are the preferred way to group commands. They keep routing typed
-without falling back to stringly-typed command names.
+`IpcPolicy[T]` stores a plain `classify : (T) -> CommandId` function and an
+optional allowlist. Runtime code applies the policy after decoding the command
+and before running the async handler.
 
-`default_bridge_name()` returns the framework's conventional JavaScript bridge
-name, `moonbitDesktop`. Runtime and frontend packages use it for their
-`*_default` helpers.
-
-## Transport shape
-
-`Envelope` is the transport-level JSON value. Its `payload` contains the
-application command or event:
-
-```mbt nocheck
-///|
-let command = AppCommand::Counter(CounterCommand::Increment(amount=1))
-
-///|
-let envelope = @ipc.Envelope(command, id="req-1")
-
-///|
-let decoded : AppCommand = envelope.decode()
-```
-
-`Response[T]` is used for request replies:
-
-```mbt nocheck
-///|
-let response : Response[CounterEvent] = Ok(CounterEvent::CountChanged(1))
-```
-
-Errors that cross the IPC boundary are represented as `IpcError`. Transport
-failures stay distinct from application handler failures.
+`default_bridge_name()` returns `moonbitDesktop` for frontend-to-host requests.
+`default_event_name()` returns `moonbitDesktopEvent` for host-to-frontend
+events.

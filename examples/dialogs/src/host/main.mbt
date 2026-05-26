@@ -94,7 +94,14 @@ fn main {
         load=Html(html),
       ),
     )
-    window.handle_sync_default(command => handle_command(window, command))
+    let policy = @ipc.IpcPolicy::allow(classify=@shared.command_id, allowed=[
+      @ipc.CommandId("dialog.show_info"),
+      @ipc.CommandId("dialog.show_warning"),
+      @ipc.CommandId("dialog.ask_question"),
+    ])
+    window.handle_ipc_default(policy~, handler=command => {
+      handle_command(window, command)
+    })
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }

@@ -1,9 +1,9 @@
 ///|
 /// Run an async IPC handler to completion and return its typed response.
 pub fn[R] run_response(
-  handler : async () -> @ipc.Response[R],
-) -> @ipc.Response[R] {
-  let response : Ref[@ipc.Response[R]?] = Ref(None)
+  handler : async () -> @ipc.IpcResponse[R],
+) -> @ipc.IpcResponse[R] {
+  let response : Ref[@ipc.IpcResponse[R]?] = Ref(None)
   @async.run_async_main(() => response.val = Some(handler()))
   match response.val {
     Some(response) => response

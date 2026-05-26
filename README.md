@@ -15,7 +15,7 @@ This repository is a `moon.work` workspace with five members:
 
 `desktop` is split into focused packages:
 
-- `desktop/src/ipc`: target-agnostic typed envelopes and responses.
+- `desktop/src/ipc`: target-agnostic frames, responses, and IPC policies.
 - `desktop/src/runtime`: app lifecycle, native windows, and IPC handlers.
 - `desktop/src/frontend`: JS-target client helpers for frontend code.
 
@@ -24,13 +24,14 @@ This repository is a `moon.work` workspace with five members:
 The project can build prototype desktop apps today. The runtime is centered on
 an `App` owner that manages the native event loop, one or more windows, window
 ids, close/focus/minimize/maximize operations, lifecycle callbacks, and optional
-startup window restoration. It also supports typed request and response IPC,
-one-way frontend events, synchronous handlers, async handlers, and deferred
+startup window restoration. It also supports typed async request/response IPC,
+command allowlists, payload size limits, host-to-frontend events, and deferred
 responses through `ResponseSender`.
 
-Async IPC handlers currently run inside the webview callback path;
-`Window::handle_deferred` is the recommended API for host work that should
-complete later without blocking that callback.
+Async IPC handlers currently run inside the webview callback path. Use
+`Window::handle_ipc_default` for ordinary typed commands and
+`Window::handle_deferred` only for host work that must complete later without
+blocking that callback.
 
 ## Common Commands
 
@@ -48,7 +49,7 @@ tasks call `tools/msvc-native.cmd` for commands that need MSVC.
 ## Documentation
 
 - `desktop/README.mbt.md`: desktop framework overview.
-- `desktop/src/ipc/README.mbt.md`: IPC envelopes, requests, responses, errors.
+- `desktop/src/ipc/README.mbt.md`: IPC frames, policies, responses, errors.
 - `desktop/src/runtime/README.mbt.md`: runtime window and host handlers.
 - `desktop/src/frontend/README.mbt.md`: JS frontend client helpers.
 - `webview/README.mbt.md`: low-level webview bindings.

@@ -3,6 +3,7 @@ import {
   "moonbitlang/async/fs",
   "moonbitlang/async/io",
   "moonbitlang/core/env",
+  "shiguri-01/desktop/ipc",
   "shiguri-01/desktop/runtime" @desktop,
   "shiguri-01/desktop-counter-example/shared",
 }

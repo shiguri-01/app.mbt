@@ -1,3 +1,4 @@
 import {
   "moonbitlang/core/json",
+  "shiguri-01/desktop/ipc",
 }

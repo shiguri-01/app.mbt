@@ -9,39 +9,58 @@ enum TestChildCommand {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-test "nested enum command round trip through envelope" {
+enum TestReply {
+  CountChanged(Int)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+test "request frame round trip" {
   let command = TestCommand::Parent(Increment(amount=3))
-  let envelope = @ipc.Envelope(command, id="req-1")
-  let decoded : TestCommand = envelope.decode()
+  let frame = @ipc.RequestFrame(command)
+  let decoded : TestCommand = frame.decode()
   assert_true(decoded == command)
-  assert_true(envelope.id == Some("req-1"))
+  assert_true(frame.version == 1)
 }
 
 ///|
-test "parse envelope json" {
+test "parse request frame json" {
   let command = TestCommand::Parent(Increment(amount=4))
-  let envelope = @ipc.Envelope(command, id="req-2")
-  let parsed = parse_envelope(envelope.stringify())
+  let parsed = parse_request_frame(@ipc.RequestFrame(command).stringify())
   let decoded : TestCommand = parsed.decode()
   assert_true(decoded == command)
 }
 
 ///|
-test "event constructor creates envelope" {
-  let command = TestCommand::Parent(Increment(amount=5))
-  let event = @ipc.Event(command)
-  let envelope = event.to_envelope()
-  let decoded : TestCommand = envelope.decode()
-  assert_true(decoded == command)
-  assert_true(envelope.id is None)
+test "response frame round trip" {
+  let frame = @ipc.ResponseFrame(Ok(TestReply::CountChanged(5)))
+  let parsed : ResponseFrame[TestReply] = @json.from_json(frame.to_json())
+  assert_true(parsed.response == Ok(CountChanged(5)))
 }
 
 ///|
-test "request constructor preserves id in envelope" {
-  let command = TestCommand::Parent(Increment(amount=6))
-  let request = @ipc.Request(command, id="req-3")
-  let envelope = request.to_envelope()
-  let decoded : TestCommand = envelope.decode()
-  assert_true(decoded == command)
-  assert_true(envelope.id == Some("req-3"))
+test "ipc error json round trip" {
+  let err = @ipc.IpcError::PayloadTooLarge(size=10, limit=5)
+  let decoded : @ipc.IpcError = @json.from_json(err.to_json())
+  assert_true(decoded == err)
+}
+
+///|
+test "policy rejects unauthorized command" {
+  let policy = IpcPolicy::allow(
+    classify=command => {
+      match command {
+        Parent(Increment(_)) => CommandId("counter.increment")
+      }
+    },
+    allowed=[CommandId("counter.reset")],
+  )
+  let result : Result[Unit, IpcError] = try? policy.check(
+    TestCommand::Parent(Increment(amount=1)),
+  )
+  assert_true(
+    result
+    is Err(
+      @ipc.IpcError::UnauthorizedCommand(@ipc.CommandId("counter.increment"))
+    ),
+  )
 }

@@ -17,53 +17,46 @@ fn binding_payload(req : String) -> String raise @ipc.IpcError {
 }
 
 ///|
-fn[T : ToJson] ok_response(value : T) -> String {
-  let response : @ipc.Response[T] = Ok(value)
-  response.to_json().stringify()
+fn payload_too_large(raw : String, limit : Int) -> Bool {
+  limit >= 0 && raw.length() > limit
 }
 
 ///|
 fn err_response(err : @ipc.IpcError) -> String {
-  let response : @ipc.Response[Json] = Err(err)
-  response.to_json().stringify()
+  @ipc.response_err(err)
 }
 
 ///|
-fn desktop_err_response(err : DesktopError) -> String {
-  err_response(HandlerError(desktop_error_to_string(err)))
-}
-
-///|
-fn[T : FromJson, R : ToJson] binding_response(
-  req : String,
-  handler : (T) -> R raise DesktopError,
-) -> String {
-  let raw = binding_payload(req) catch { err => return err_response(err) }
-  let envelope = @ipc.parse_envelope(raw) catch {
-    err => return err_response(err)
+fn[T : FromJson] decode_command(
+  raw : String,
+  policy : @ipc.IpcPolicy[T],
+) -> T raise @ipc.IpcError {
+  if payload_too_large(raw, policy.max_payload_bytes) {
+    raise PayloadTooLarge(size=raw.length(), limit=policy.max_payload_bytes)
   }
-  let command : T = envelope.decode() catch { err => return err_response(err) }
-  let value = handler(command) catch { err => return desktop_err_response(err) }
-  ok_response(value)
+  let frame = @ipc.parse_request_frame(raw)
+  let command : T = frame.decode()
+  policy.check(command)
+  command
 }
 
 ///|
-fn[T : FromJson, R : ToJson] binding_async_response(
+fn[T : FromJson, R : ToJson] binding_ipc_response(
   req : String,
+  policy : @ipc.IpcPolicy[T],
   handler : async (T) -> R,
 ) -> String {
   let raw = binding_payload(req) catch { err => return err_response(err) }
-  let envelope = @ipc.parse_envelope(raw) catch {
+  let command = decode_command(raw, policy) catch {
     err => return err_response(err)
   }
-  let command : T = envelope.decode() catch { err => return err_response(err) }
   let response = @async_driver.run_response(() => {
     let value = handler(command) catch {
       err => return Err(HandlerError(error_to_string(err)))
     }
     Ok(value)
   })
-  response.to_json().stringify()
+  @ipc.ResponseFrame(response).stringify()
 }
 
 ///|
@@ -80,13 +73,13 @@ fn[T : FromJson] binding_deferred_request(
       return
     }
   }
-  let envelope = @ipc.parse_envelope(raw) catch {
+  let frame = @ipc.parse_request_frame(raw) catch {
     err => {
       sender.reject(err)
       return
     }
   }
-  let command : T = envelope.decode() catch {
+  let command : T = frame.decode() catch {
     err => {
       sender.reject(err)
       return
@@ -99,17 +92,14 @@ fn[T : FromJson] binding_deferred_request(
 
 ///|
 /// Bind a typed async IPC handler to this window.
-///
-/// The async handler runs to completion inside a runtime-owned async driver.
-/// The driver details live in `runtime/async_driver`; applications only see
-/// typed async handlers.
-pub fn[T : FromJson, R : ToJson] Window::handle(
+pub fn[T : FromJson, R : ToJson] Window::handle_ipc(
   self : Window,
   name : String,
-  handler : async (T) -> R,
+  policy~ : @ipc.IpcPolicy[T],
+  handler~ : async (T) -> R,
 ) -> Unit raise DesktopError {
   self.view.bind(name, (id, req) => {
-    let result = binding_async_response(req, handler)
+    let result = binding_ipc_response(req, policy, handler)
     self.view.return_(id, 0, result) catch {
       _ => ()
     }
@@ -121,9 +111,8 @@ pub fn[T : FromJson, R : ToJson] Window::handle(
 ///|
 /// Bind a typed IPC handler that may respond after the binding callback returns.
 ///
-/// The handler receives a `ResponseSender`. It should arrange work and return
-/// quickly, then call `sender.resolve(...)` or `sender.reject(...)` when the
-/// result is ready.
+/// This is a low-level escape hatch. Prefer `Window::handle_ipc` for ordinary
+/// request/response commands.
 pub fn[T : FromJson] Window::handle_deferred(
   self : Window,
   name : String,
@@ -139,21 +128,19 @@ pub fn[T : FromJson] Window::handle_deferred(
 }
 
 ///|
-/// Bind a typed synchronous IPC handler to this window.
-///
-/// JavaScript calls the binding with one argument: an `Envelope` JSON string.
-/// The webview binding promise resolves with a serialized `Response[R]`.
-pub fn[T : FromJson, R : ToJson] Window::handle_sync(
+pub fn[T : ToJson] Window::emit_event(
   self : Window,
   name : String,
-  handler : (T) -> R raise DesktopError,
+  event : T,
 ) -> Unit raise DesktopError {
-  self.view.bind(name, (id, req) => {
-    let result = binding_response(req, handler)
-    self.view.return_(id, 0, result) catch {
-      _ => ()
-    }
-  }) catch {
-    err => raise_webview(err)
-  }
+  let raw = @ipc.RequestFrame(event).stringify()
+  let target = Json::string(name).stringify()
+  let payload = Json::string(raw).stringify()
+  self.eval(
+    "(function(){ const fn = globalThis[" +
+    target +
+    "]; if (typeof fn === 'function') fn(" +
+    payload +
+    "); })()",
+  )
 }

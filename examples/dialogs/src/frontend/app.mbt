@@ -1,7 +1,7 @@
 ///|
 struct DialogModel {
   status : Element
-  mut client : @desktop.Client
+  client : @desktop.Client
 }
 
 ///|
@@ -20,8 +20,8 @@ fn DialogModel::send_command(
   command : @shared.DialogCommand,
 ) -> Unit {
   self.status.set_text("Waiting for native dialog...")
-  self.client = self.client.request_with_callback_default(command, (
-    response : @ipc.Response[@shared.DialogEvent],
+  self.client.request_with_callback_default(command, (
+    response : @ipc.IpcResponse[@shared.DialogEvent],
   ) => {
     match response {
       Ok(DialogClosed(choice)) =>

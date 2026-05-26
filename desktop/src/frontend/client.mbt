@@ -1,21 +1,6 @@
 ///|
 /// UI-library-agnostic frontend IPC client.
-///
-/// This package only prepares typed JSON messages. A Rabbita, Luna, or plain DOM
-/// layer can decide how to deliver them to the host bridge.
-pub struct Client {
-  priv next_id : Int
-}
-
-///|
-extern "js" fn call_bridge(name : String, raw : String) -> Unit =
-  #| (name, raw) => {
-  #|   const bridge = globalThis[name]
-  #|   if (typeof bridge !== "function") {
-  #|     throw new Error(`desktop bridge '${name}' is not available`)
-  #|   }
-  #|   bridge(raw)
-  #| }
+pub struct Client {}
 
 ///|
 extern "js" fn call_bridge_response(
@@ -50,106 +35,96 @@ extern "js" fn call_bridge_promise(
   #| }
 
 ///|
-/// Create a frontend IPC client with request ids starting at `req-0`.
+extern "js" fn install_listener(
+  name : String,
+  callback : (String) -> Unit,
+) -> Unit =
+  #| (name, callback) => {
+  #|   globalThis[name] = raw => callback(String(raw))
+  #| }
+
+///|
 pub fn Client::Client() -> Client {
-  { next_id: 0 }
+  Client::{  }
 }
 
 ///|
-/// Serialize a one-way event envelope without calling the JavaScript bridge.
-pub fn[T : ToJson] Client::event(self : Client, body : T) -> String {
+pub fn[T : ToJson] Client::frame(self : Client, body : T) -> String {
   ignore(self)
-  @ipc.Envelope(body).stringify()
+  @ipc.RequestFrame(body).stringify()
 }
 
 ///|
-/// Send a one-way event through the named JavaScript bridge.
-pub fn[T : ToJson] Client::emit(self : Client, name : String, body : T) -> Unit {
-  call_bridge(name, self.event(body))
+fn[R : FromJson] decode_response(raw : String) -> @ipc.IpcResponse[R] {
+  let frame : @ipc.ResponseFrame[R] = @ipc.parse_response_frame(raw) catch {
+    err => return Err(err)
+  }
+  frame.response
 }
 
 ///|
-/// Send a one-way event through the default bridge, `moonbitDesktop`.
-pub fn[T : ToJson] Client::emit_default(self : Client, body : T) -> Unit {
-  self.emit(@ipc.default_bridge_name(), body)
-}
-
-///|
-/// Build a request envelope and return the next client state.
-pub fn[T : ToJson] Client::request_envelope(
-  self : Client,
-  body : T,
-) -> (Client, String) {
-  let id = "req-\{self.next_id}"
-  let next = { next_id: self.next_id + 1 }
-  (next, @ipc.Envelope(body, id~).stringify())
-}
-
-///|
-/// Alias of `request_envelope` for callers that do their own bridge call.
-pub fn[T : ToJson] Client::request(self : Client, body : T) -> (Client, String) {
-  self.request_envelope(body)
-}
-
-///|
-/// Send a request and deliver the decoded response to a callback.
 pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
   self : Client,
   name : String,
   body : T,
-  callback : (@ipc.Response[R]) -> Unit,
-) -> Client {
-  let (next, raw) = self.request_envelope(body)
+  callback : (@ipc.IpcResponse[R]) -> Unit,
+) -> Unit {
+  let raw = self.frame(body)
   call_bridge_response(
     name,
     raw,
-    response => {
-      let result : @ipc.Response[R] = @json.from_json(@json.parse(response)) catch {
-        err => Err(DecodeError(err.to_string()))
-      }
-      callback(result)
-    },
+    response => callback(decode_response(response)),
     message => callback(Err(TransportClosed(message))),
   )
-  next
 }
 
 ///|
-/// Send a callback-style request through the default bridge.
 pub fn[T : ToJson, R : FromJson] Client::request_with_callback_default(
   self : Client,
   body : T,
-  callback : (@ipc.Response[R]) -> Unit,
-) -> Client {
+  callback : (@ipc.IpcResponse[R]) -> Unit,
+) -> Unit {
   self.request_with_callback(@ipc.default_bridge_name(), body, callback)
 }
 
 ///|
-/// Send a request and wait for the JavaScript bridge promise.
 pub async fn[T : ToJson, R : FromJson] Client::request_async(
   self : Client,
   name : String,
   body : T,
-) -> (Client, @ipc.Response[R]) {
-  let (next, raw) = self.request_envelope(body)
-  let response = call_bridge_promise(name, raw).wait()
-  let result : @ipc.Response[R] = @json.from_json(@json.parse(response)) catch {
-    err => Err(DecodeError(err.to_string()))
+) -> @ipc.IpcResponse[R] {
+  let response = call_bridge_promise(name, self.frame(body)).wait() catch {
+    err => return Err(TransportClosed(err.to_string()))
   }
-  (next, result)
+  decode_response(response)
 }
 
 ///|
-/// Send an async request through the default bridge.
 pub async fn[T : ToJson, R : FromJson] Client::request_async_default(
   self : Client,
   body : T,
-) -> (Client, @ipc.Response[R]) {
+) -> @ipc.IpcResponse[R] {
   self.request_async(@ipc.default_bridge_name(), body)
 }
 
 ///|
-/// Decode a raw event envelope received by frontend-side code.
-pub fn[T : FromJson] decode_event(raw : String) -> T raise @ipc.IpcError {
-  @ipc.parse_envelope(raw).decode()
+pub fn[E : FromJson] Client::listen(
+  self : Client,
+  name : String,
+  callback : (E) -> Unit,
+) -> Unit {
+  ignore(self)
+  install_listener(name, raw => {
+    let frame = @ipc.parse_request_frame(raw) catch { _ => return }
+    let event : E = frame.decode() catch { _ => return }
+    callback(event)
+  })
+}
+
+///|
+pub fn[E : FromJson] Client::listen_default(
+  self : Client,
+  callback : (E) -> Unit,
+) -> Unit {
+  self.listen(@ipc.default_event_name(), callback)
 }
