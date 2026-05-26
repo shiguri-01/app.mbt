@@ -8,6 +8,7 @@
 
 typedef void (*MoonBitWebViewBindingCallback)(void *, moonbit_bytes_t,
                                               moonbit_bytes_t);
+typedef void (*MoonBitWebViewDispatchCallback)(void *);
 
 struct MoonBitWebViewBinding {
   std::string name;
@@ -19,6 +20,11 @@ struct MoonBitWebView {
   webview_t handle;
   int destroyed;
   std::vector<MoonBitWebViewBinding *> bindings;
+};
+
+struct MoonBitWebViewDispatch {
+  MoonBitWebViewDispatchCallback callback;
+  void *closure;
 };
 
 static webview_error_t require_handle(MoonBitWebView *view) {
@@ -80,6 +86,22 @@ static void moonbit_webview_binding_trampoline(const char *id, const char *req,
   moonbit_decref(binding->closure);
   moonbit_decref(id_bytes);
   moonbit_decref(req_bytes);
+}
+
+static void moonbit_webview_dispatch_trampoline(webview_t, void *arg) {
+  auto *dispatch = static_cast<MoonBitWebViewDispatch *>(arg);
+  if (dispatch == nullptr) {
+    return;
+  }
+  if (dispatch->callback != nullptr && dispatch->closure != nullptr) {
+    moonbit_incref(dispatch->closure);
+    dispatch->callback(dispatch->closure);
+    moonbit_decref(dispatch->closure);
+  }
+  if (dispatch->closure != nullptr) {
+    moonbit_decref(dispatch->closure);
+  }
+  delete dispatch;
 }
 
 extern "C" {
@@ -233,6 +255,25 @@ int32_t moonbit_webview_return(MoonBitWebView *view, moonbit_bytes_t id,
   }
   return webview_return(view->handle, as_c_string(id), status,
                         as_c_string(result));
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_dispatch(MoonBitWebView *view,
+                                 MoonBitWebViewDispatchCallback callback,
+                                 void *closure) {
+  webview_error_t status = require_handle(view);
+  if (status != WEBVIEW_ERROR_OK) {
+    moonbit_decref(closure);
+    return status;
+  }
+  auto *dispatch = new MoonBitWebViewDispatch{callback, closure};
+  status = webview_dispatch(view->handle, moonbit_webview_dispatch_trampoline,
+                            dispatch);
+  if (status != WEBVIEW_ERROR_OK) {
+    moonbit_decref(closure);
+    delete dispatch;
+  }
+  return status;
 }
 
 MOONBIT_FFI_EXPORT

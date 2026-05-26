@@ -18,13 +18,14 @@ Implemented:
 - `WebView::set_html`
 - `WebView::init`
 - `WebView::eval`
+- `WebView::bind`
+- `WebView::unbind`
+- `WebView::return_`
+- `WebView::dispatch`
 - `version_number`
 
 Not implemented yet:
 
-- `webview_bind`
-- `webview_unbind`
-- `webview_return`
 - typed JSON helpers for JavaScript callbacks
 
 ## Native Files

@@ -10,7 +10,7 @@ fn CounterModel::send_command(
   self : CounterModel,
   command : @shared.CounterAppCommand,
 ) -> Unit {
-  self.client = self.client.request_with_callback("moonbitDesktop", command, (
+  self.client = self.client.request_with_callback_default(command, (
     response : @ipc.Response[@shared.CounterEvent],
   ) => {
     match response {

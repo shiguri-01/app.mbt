@@ -65,7 +65,7 @@ fn main {
     on_ready=window => {
       window.set_title("MoonBit Counter")
       let count = Ref(0)
-      window.handle("moonbitDesktop", command => {
+      window.handle_default(command => {
         @async.sleep(1)
         let (next, event) = handle_command(count.val, command)
         count.val = next

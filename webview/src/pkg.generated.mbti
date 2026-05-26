@@ -32,6 +32,7 @@ pub(all) enum SizeHint {
 pub type WebView
 pub fn WebView::bind(Self, String, (String, String) -> Unit) -> Unit raise WebViewError
 pub fn WebView::destroy(Self) -> Unit raise WebViewError
+pub fn WebView::dispatch(Self, () -> Unit) -> Unit raise WebViewError
 pub fn WebView::eval(Self, String) -> Unit raise WebViewError
 pub fn WebView::init(Self, String) -> Unit raise WebViewError
 pub fn WebView::is_valid(Self) -> Bool

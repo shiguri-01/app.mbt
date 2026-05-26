@@ -69,4 +69,12 @@ extern "C" fn ffi_return(
 ) -> Int = "moonbit_webview_return"
 
 ///|
+#borrow(view)
+extern "C" fn ffi_dispatch(
+  view : WebView,
+  call_handler : FuncRef[(() -> Unit) -> Unit],
+  handler : () -> Unit,
+) -> Int = "moonbit_webview_dispatch"
+
+///|
 extern "C" fn ffi_version_number() -> Bytes = "moonbit_webview_version_number"

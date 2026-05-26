@@ -44,6 +44,21 @@ enter the async driver:
 window.handle_sync("moonbitDesktop", command => handle_command(command))
 ```
 
+`Window::handle_deferred` is the non-blocking integration point for work that
+finishes outside the webview binding callback. The handler receives a
+`ResponseSender`, returns quickly, and completes the JavaScript promise later
+with `sender.resolve(...)` or `sender.reject(...)`:
+
+```mbt nocheck
+window.handle_deferred("moonbitDesktop", (command, sender) => {
+  enqueue_work(command, result => sender.resolve(result))
+})
+```
+
+The sender schedules the final `webview_return` through `WebView::dispatch`,
+so completion paths can return to the GUI event-loop thread before touching the
+native webview API.
+
 ## Async driver boundary
 
 The current async driver runs each IPC handler to completion before returning

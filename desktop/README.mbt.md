@@ -12,6 +12,17 @@ as separate packages:
 Applications define their own nested enum protocol and derive `ToJson` /
 `FromJson` for it.
 
+The default bridge name is `moonbitDesktop`. Native code can use
+`Window::handle_default`, `Window::handle_sync_default`, or
+`Window::handle_deferred_default`; frontend code can use
+`Client::request_with_callback_default` or `Client::request_async_default`.
+Use the explicit-name variants when an app needs multiple bridges.
+
+For long-running host work, prefer `Window::handle_deferred`. It decodes the
+request in the webview callback, passes a `ResponseSender` to the handler, and
+lets the handler complete the JavaScript promise later with `resolve` or
+`reject`.
+
 Package-level README files contain the API-oriented details:
 
 - `src/ipc/README.mbt.md`: typed envelopes, requests, responses, and errors.

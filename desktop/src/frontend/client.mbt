@@ -66,6 +66,11 @@ pub fn[T : ToJson] Client::emit(self : Client, name : String, body : T) -> Unit 
 }
 
 ///|
+pub fn[T : ToJson] Client::emit_default(self : Client, body : T) -> Unit {
+  self.emit(@ipc.default_bridge_name(), body)
+}
+
+///|
 pub fn[T : ToJson] Client::request_envelope(
   self : Client,
   body : T,
@@ -103,6 +108,15 @@ pub fn[T : ToJson, R : FromJson] Client::request_with_callback(
 }
 
 ///|
+pub fn[T : ToJson, R : FromJson] Client::request_with_callback_default(
+  self : Client,
+  body : T,
+  callback : (@ipc.Response[R]) -> Unit,
+) -> Client {
+  self.request_with_callback(@ipc.default_bridge_name(), body, callback)
+}
+
+///|
 pub async fn[T : ToJson, R : FromJson] Client::request_async(
   self : Client,
   name : String,
@@ -114,6 +128,14 @@ pub async fn[T : ToJson, R : FromJson] Client::request_async(
     err => Err(@ipc.IpcError::DecodeError(err.to_string()))
   }
   (next, result)
+}
+
+///|
+pub async fn[T : ToJson, R : FromJson] Client::request_async_default(
+  self : Client,
+  body : T,
+) -> (Client, @ipc.Response[R]) {
+  self.request_async(@ipc.default_bridge_name(), body)
 }
 
 ///|

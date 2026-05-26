@@ -74,6 +74,37 @@ fn[T : FromJson, R : ToJson] binding_async_response(
 }
 
 ///|
+fn[T : FromJson] binding_deferred_request(
+  view : @webview.WebView,
+  id : String,
+  req : String,
+  handler : (T, ResponseSender) -> Unit raise DesktopError,
+) -> Unit raise DesktopError {
+  let sender = ResponseSender::new(view, id)
+  let raw = binding_payload(req) catch {
+    err => {
+      sender.reject(err)
+      return
+    }
+  }
+  let envelope = @ipc.parse_envelope(raw) catch {
+    err => {
+      sender.reject(err)
+      return
+    }
+  }
+  let command : T = envelope.decode() catch {
+    err => {
+      sender.reject(err)
+      return
+    }
+  }
+  handler(command, sender) catch {
+    err => sender.reject_desktop(err)
+  }
+}
+
+///|
 /// Bind a typed async IPC handler to this window.
 ///
 /// The async handler runs to completion inside a runtime-owned async driver.
@@ -87,6 +118,26 @@ pub fn[T : FromJson, R : ToJson] Window::handle(
   self.view.bind(name, (id, req) => {
     let result = binding_async_response(req, handler)
     self.view.return_(id, 0, result) catch {
+      _ => ()
+    }
+  }) catch {
+    err => raise_webview(err)
+  }
+}
+
+///|
+/// Bind a typed IPC handler that may respond after the binding callback returns.
+///
+/// The handler receives a `ResponseSender`. It should arrange work and return
+/// quickly, then call `sender.resolve(...)` or `sender.reject(...)` when the
+/// result is ready.
+pub fn[T : FromJson] Window::handle_deferred(
+  self : Window,
+  name : String,
+  handler : (T, ResponseSender) -> Unit raise DesktopError,
+) -> Unit raise DesktopError {
+  self.view.bind(name, (id, req) => {
+    binding_deferred_request(self.view, id, req, handler) catch {
       _ => ()
     }
   }) catch {

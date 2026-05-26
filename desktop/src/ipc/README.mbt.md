@@ -22,6 +22,10 @@ pub(all) enum CounterCommand {
 Nested enums are the preferred way to group commands. They keep routing typed
 without falling back to stringly-typed command names.
 
+`default_bridge_name()` returns the framework's conventional JavaScript bridge
+name, `moonbitDesktop`. Runtime and frontend packages use it for their
+`*_default` helpers.
+
 ## Transport shape
 
 `Envelope` is the transport-level JSON value. Its `payload` contains the

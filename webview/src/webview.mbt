@@ -127,6 +127,18 @@ pub fn WebView::return_(
 }
 
 ///|
+/// Schedule a callback on the native GUI event-loop thread.
+///
+/// This is the safe way to return to webview APIs from work that completes
+/// outside the binding callback path.
+pub fn WebView::dispatch(
+  self : WebView,
+  handler : () -> Unit,
+) -> Unit raise WebViewError {
+  check_status(ffi_dispatch(self, callback => callback(), handler))
+}
+
+///|
 /// Return the bundled webview library version string.
 pub fn version_number() -> String {
   @utf8.decode_lossy(ffi_version_number())
