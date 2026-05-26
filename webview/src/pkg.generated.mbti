@@ -34,21 +34,40 @@ pub(all) enum SizeHint {
 
 pub type WebView
 pub fn WebView::bind(Self, String, (String, String) -> Unit) -> Unit raise WebViewError
+pub fn WebView::close_window(Self) -> Unit raise WebViewError
 pub fn WebView::destroy(Self) -> Unit raise WebViewError
 pub fn WebView::dispatch(Self, () -> Unit) -> Unit raise WebViewError
 pub fn WebView::eval(Self, String) -> Unit raise WebViewError
+pub fn WebView::focus_window(Self) -> Unit raise WebViewError
+pub fn WebView::hide_window(Self) -> Unit raise WebViewError
 pub fn WebView::init(Self, String) -> Unit raise WebViewError
 pub fn WebView::is_valid(Self) -> Bool
+pub fn WebView::is_window_closed(Self) -> Bool
+pub fn WebView::maximize_window(Self) -> Unit raise WebViewError
+pub fn WebView::minimize_window(Self) -> Unit raise WebViewError
 pub fn WebView::native_window(Self) -> NativeWindow raise WebViewError
 pub fn WebView::navigate(Self, String) -> Unit raise WebViewError
 pub fn WebView::new(debug? : Bool) -> Self raise WebViewError
+pub fn WebView::on_window_event(Self, (WindowEvent) -> Unit) -> Unit raise WebViewError
+pub fn WebView::restore_window(Self) -> Unit raise WebViewError
 pub fn WebView::return_(Self, String, Int, String) -> Unit raise WebViewError
 pub fn WebView::run(Self) -> Unit raise WebViewError
 pub fn WebView::set_html(Self, String) -> Unit raise WebViewError
 pub fn WebView::set_size(Self, Int, Int, hint? : SizeHint) -> Unit raise WebViewError
 pub fn WebView::set_title(Self, String) -> Unit raise WebViewError
+pub fn WebView::show_window(Self) -> Unit raise WebViewError
 pub fn WebView::terminate(Self) -> Unit raise WebViewError
 pub fn WebView::unbind(Self, String) -> Unit raise WebViewError
+
+pub(all) enum WindowEvent {
+  CloseRequested
+  Closed
+  Focused
+  Blurred
+  Minimized
+  Maximized
+  Restored
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 

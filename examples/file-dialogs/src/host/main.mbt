@@ -124,15 +124,18 @@ fn main {
       return
     }
   }
-  @desktop.run(
-    title="MoonBit File Dialogs",
-    width=760,
-    height=500,
-    load=Html(html),
-    on_ready=window => {
-      window.handle_sync_default(command => handle_command(window, command))
-    },
-  ) catch {
+  @desktop.run(on_startup=app => {
+    let window = app.create_window(
+      WindowOptions(
+        key="main",
+        title="MoonBit File Dialogs",
+        width=760,
+        height=500,
+        load=Html(html),
+      ),
+    )
+    window.handle_sync_default(command => handle_command(window, command))
+  }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }
 }

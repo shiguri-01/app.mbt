@@ -28,3 +28,29 @@ fn SizeHint::to_int(self : SizeHint) -> Int {
     Fixed => 3
   }
 }
+
+///|
+/// Native top-level window events reported by the host backend.
+pub(all) enum WindowEvent {
+  CloseRequested
+  Closed
+  Focused
+  Blurred
+  Minimized
+  Maximized
+  Restored
+} derive(Debug, Eq)
+
+///|
+fn WindowEvent::from_int(code : Int) -> WindowEvent? {
+  match code {
+    1 => Some(CloseRequested)
+    2 => Some(Closed)
+    3 => Some(Focused)
+    4 => Some(Blurred)
+    5 => Some(Minimized)
+    6 => Some(Maximized)
+    7 => Some(Restored)
+    _ => None
+  }
+}

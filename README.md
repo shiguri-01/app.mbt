@@ -16,19 +16,21 @@ This repository is a `moon.work` workspace with five members:
 `desktop` is split into focused packages:
 
 - `desktop/src/ipc`: target-agnostic typed envelopes and responses.
-- `desktop/src/runtime`: native host window and IPC handler registration.
+- `desktop/src/runtime`: app lifecycle, native windows, and IPC handlers.
 - `desktop/src/frontend`: JS-target client helpers for frontend code.
 
 ## Status
 
-The project can build prototype desktop apps today. It supports typed request
-and response IPC, one-way frontend events, synchronous handlers, async handlers,
-and deferred responses through `ResponseSender`.
+The project can build prototype desktop apps today. The runtime is centered on
+an `App` owner that manages the native event loop, one or more windows, window
+ids, close/focus/minimize/maximize operations, lifecycle callbacks, and optional
+startup window restoration. It also supports typed request and response IPC,
+one-way frontend events, synchronous handlers, async handlers, and deferred
+responses through `ResponseSender`.
 
-The main remaining design constraint is async integration. Current async
-handlers run inside the webview callback path; `Window::handle_deferred` is the
-recommended API for host work that should complete later without blocking that
-callback.
+Async IPC handlers currently run inside the webview callback path;
+`Window::handle_deferred` is the recommended API for host work that should
+complete later without blocking that callback.
 
 ## Common Commands
 

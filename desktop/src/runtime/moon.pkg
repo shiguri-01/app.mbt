@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/async",
   "moonbitlang/core/json",
   "shiguri-01/desktop/ipc",
   "shiguri-01/desktop/runtime/async_driver",

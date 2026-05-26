@@ -2,23 +2,85 @@
 
 Native desktop application runtime backed by `shiguri-01/webview`.
 
-This package owns the host window, content loading, and host-side IPC handler
-registration. Applications normally use `Window::handle` to register typed
-async IPC handlers.
+This package owns the application event loop, host windows, content loading,
+host-side IPC handler registration, and window lifecycle callbacks.
+Applications normally create windows from `App::create_window` and use
+`Window::handle` to register typed async IPC handlers.
 
 ```mbt nocheck
-@desktop.run(
-  title="MoonBit Counter",
-  width=640,
-  height=420,
-  load=Html(html),
-  on_ready=window => {
+@desktop.run(on_startup=app => {
+  let window = app.create_window(
+    WindowOptions(
+      key="main",
+      title="MoonBit Counter",
+      width=640,
+      height=420,
+      load=Html(html),
+    ),
+  )
     window.handle("moonbitDesktop", command => {
       @async.sleep(1)
       handle_command(command)
     })
-  },
+})
+```
+
+## Application lifecycle
+
+`App` is the event-loop owner. Single-window and multi-window applications use
+the same startup shape:
+
+```mbt nocheck
+@desktop.run(on_startup=app => {
+  let main = app.create_window(WindowOptions(key="main", title="Main"))
+  let tools = app.create_window(WindowOptions(key="tools", title="Tools"))
+  main.focus()
+  tools.minimize()
+})
+```
+
+Each window receives a runtime-only `WindowId`. Use `WindowOptions.key` and
+`WindowSnapshot.key` for persistent restoration.
+
+`WindowLifecycle::before_close` handles user close requests and programmatic
+`Window::request_close` calls. Return `Prevent` to keep the window open, or
+`Allow` to close it:
+
+```mbt nocheck
+///|
+let lifecycle = WindowLifecycle(before_close=(window, reason) => {
+  let answer = window.show_message_dialog(
+    "Close this window?",
+    title="Confirm",
+    kind=Question,
+    buttons=YesNo,
+  )
+  if answer is Yes {
+    Allow
+  } else {
+    Prevent
+  }
+})
+
+///|
+let window = app.create_window(
+  WindowOptions(key="main", title="Main"),
+  lifecycle,
 )
+```
+
+For startup restore, provide a `WindowStateStore` and call
+`App::restore_windows` from startup. The runtime saves snapshots when windows
+close and after the event loop exits:
+
+```mbt nocheck
+let store = WindowStateStore(
+  load_windows=() => load_snapshots(),
+  save_windows=snapshots => save_snapshots(snapshots),
+)
+@desktop.run(options=AppOptions(state_store=store), on_startup=app => {
+  ignore(app.restore_windows())
+})
 ```
 
 ## IPC handlers

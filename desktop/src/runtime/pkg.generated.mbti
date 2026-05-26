@@ -10,9 +10,7 @@ import {
 // Values
 pub fn default_bridge_name() -> String
 
-pub fn run(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load, on_ready~ : async (Window) -> Unit) -> Unit raise DesktopError
-
-pub fn run_with_options(WindowOptions, on_ready~ : async (Window) -> Unit) -> Unit raise DesktopError
+pub fn run(options? : AppOptions, lifecycle? : AppLifecycle, on_startup~ : async (App) -> Unit) -> Unit raise DesktopError
 
 // Errors
 pub(all) suberror DesktopError {
@@ -23,6 +21,47 @@ pub(all) suberror DesktopError {
 } derive(Eq, @debug.Debug)
 
 // Types and methods
+pub struct App {
+  // private fields
+}
+pub fn App::create_window(Self, WindowOptions, lifecycle? : WindowLifecycle) -> Window raise DesktopError
+pub fn App::new(options? : AppOptions, lifecycle? : AppLifecycle) -> Self
+pub fn App::quit(Self) -> Unit raise DesktopError
+pub fn App::request_quit(Self) -> Unit raise DesktopError
+pub fn App::restore_windows(Self, lifecycle? : WindowLifecycle) -> Array[Window] raise DesktopError
+pub fn App::run(Self, on_startup~ : async (Self) -> Unit) -> Unit raise DesktopError
+pub fn App::save_window_state(Self) -> Unit raise DesktopError
+pub fn App::window(Self, WindowId) -> Window?
+pub fn App::windows(Self) -> Array[Window]
+
+pub struct AppLifecycle {
+  before_quit : (async (App, QuitReason) -> CloseDecision)?
+  on_quit : ((App) -> Unit)?
+}
+pub fn AppLifecycle::AppLifecycle(before_quit? : async (App, QuitReason) -> CloseDecision, on_quit? : (App) -> Unit) -> Self
+
+pub struct AppOptions {
+  quit_when_last_window_closed : Bool
+  restore_windows : Bool
+  state_store : WindowStateStore?
+}
+pub fn AppOptions::AppOptions(quit_when_last_window_closed? : Bool, restore_windows? : Bool, state_store? : WindowStateStore) -> Self
+pub fn AppOptions::default() -> Self
+
+type AppState
+
+pub(all) enum CloseDecision {
+  Allow
+  Prevent
+} derive(Eq, @debug.Debug)
+
+pub(all) enum CloseReason {
+  User
+  AppQuit
+  Programmatic
+  SystemShutdown
+} derive(Eq, @debug.Debug)
+
 pub(all) struct FileFilter {
   name : String
   extensions : Array[String]
@@ -54,6 +93,12 @@ pub(all) enum MessageDialogResult {
   No
 } derive(Eq, @debug.Debug)
 
+pub(all) enum QuitReason {
+  Requested
+  LastWindowClosed
+  Programmatic
+} derive(Eq, @debug.Debug)
+
 pub struct ResponseSender {
   // private fields
 }
@@ -63,32 +108,82 @@ pub fn[T : ToJson] ResponseSender::resolve(Self, T) -> Unit raise DesktopError
 pub struct Window {
   // private fields
 }
+pub fn Window::close(Self) -> Unit raise DesktopError
 pub fn Window::eval(Self, String) -> Unit raise DesktopError
+pub fn Window::focus(Self) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle(Self, String, async (T) -> R) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_default(Self, async (T) -> R) -> Unit raise DesktopError
 pub fn[T : @json.FromJson] Window::handle_deferred(Self, String, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson] Window::handle_deferred_default(Self, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync(Self, String, (T) -> R raise DesktopError) -> Unit raise DesktopError
 pub fn[T : @json.FromJson, R : ToJson] Window::handle_sync_default(Self, (T) -> R raise DesktopError) -> Unit raise DesktopError
+pub fn Window::hide(Self) -> Unit raise DesktopError
+pub fn Window::id(Self) -> WindowId
+pub fn Window::is_closed(Self) -> Bool
+pub fn Window::key(Self) -> String?
+pub fn Window::maximize(Self) -> Unit raise DesktopError
+pub fn Window::minimize(Self) -> Unit raise DesktopError
 pub fn Window::navigate(Self, String) -> Unit raise DesktopError
 pub fn Window::open_file_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> String? raise DesktopError
 pub fn Window::open_files_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> Array[String]? raise DesktopError
 pub fn Window::open_folder_dialog(Self, default_path? : String) -> String? raise DesktopError
+pub fn Window::request_close(Self) -> Unit raise DesktopError
+pub fn Window::restore(Self) -> Unit raise DesktopError
 pub fn Window::save_file_dialog(Self, filters? : Array[FileFilter], default_path? : String, default_name? : String) -> String? raise DesktopError
 pub fn Window::set_html(Self, String) -> Unit raise DesktopError
 pub fn Window::set_title(Self, String) -> Unit raise DesktopError
+pub fn Window::show(Self) -> Unit raise DesktopError
 pub fn Window::show_message_dialog(Self, String, title? : String, kind? : MessageDialogKind, buttons? : MessageDialogButtons) -> MessageDialogResult raise DesktopError
-pub fn Window::terminate(Self) -> Unit raise DesktopError
 pub fn Window::unbind(Self, String) -> Unit raise DesktopError
 
+pub(all) struct WindowId {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn WindowId::to_int(Self) -> Int
+
+pub struct WindowLifecycle {
+  on_created : (async (Window) -> Unit)?
+  on_ready : (async (Window) -> Unit)?
+  on_focus : ((Window) -> Unit)?
+  on_blur : ((Window) -> Unit)?
+  on_minimize : ((Window) -> Unit)?
+  on_maximize : ((Window) -> Unit)?
+  on_restore : ((Window) -> Unit)?
+  before_close : (async (Window, CloseReason) -> CloseDecision)?
+  on_closed : ((Window) -> Unit)?
+}
+pub fn WindowLifecycle::WindowLifecycle(on_created? : async (Window) -> Unit, on_ready? : async (Window) -> Unit, on_focus? : (Window) -> Unit, on_blur? : (Window) -> Unit, on_minimize? : (Window) -> Unit, on_maximize? : (Window) -> Unit, on_restore? : (Window) -> Unit, before_close? : async (Window, CloseReason) -> CloseDecision, on_closed? : (Window) -> Unit) -> Self
+
 pub struct WindowOptions {
+  key : String?
   title : String
   width : Int
   height : Int
   debug : Bool
+  resizable : Bool
+  visible : Bool
+  min_width : Int?
+  min_height : Int?
   load : Load?
 } derive(Eq, @debug.Debug)
-pub fn WindowOptions::WindowOptions(title~ : String, width? : Int, height? : Int, debug? : Bool, load? : Load) -> Self
+pub fn WindowOptions::WindowOptions(key? : String, title~ : String, width? : Int, height? : Int, debug? : Bool, resizable? : Bool, visible? : Bool, min_width? : Int, min_height? : Int, load? : Load) -> Self
+
+pub(all) struct WindowSnapshot {
+  key : String
+  title : String
+  width : Int
+  height : Int
+  maximized : Bool
+  minimized : Bool
+  visible : Bool
+  load : Load?
+} derive(Eq, @debug.Debug)
+
+pub struct WindowStateStore {
+  load_windows : () -> Array[WindowSnapshot] raise DesktopError
+  save_windows : (Array[WindowSnapshot]) -> Unit raise DesktopError
+}
+pub fn WindowStateStore::WindowStateStore(load_windows~ : () -> Array[WindowSnapshot] raise DesktopError, save_windows~ : (Array[WindowSnapshot]) -> Unit raise DesktopError) -> Self
 
 // Type aliases
 

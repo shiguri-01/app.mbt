@@ -9,6 +9,7 @@
 typedef void (*MoonBitWebViewBindingCallback)(void *, moonbit_bytes_t,
                                               moonbit_bytes_t);
 typedef void (*MoonBitWebViewDispatchCallback)(void *);
+typedef void (*MoonBitWebViewWindowEventCallback)(void *, int32_t);
 
 struct MoonBitWebViewBinding {
   std::string name;
@@ -19,7 +20,11 @@ struct MoonBitWebViewBinding {
 struct MoonBitWebView {
   webview_t handle;
   int destroyed;
+  int window_closed;
+  int closing_window;
   std::vector<MoonBitWebViewBinding *> bindings;
+  MoonBitWebViewWindowEventCallback window_event_callback;
+  void *window_event_closure;
 };
 
 struct MoonBitWebViewDispatch {
@@ -27,11 +32,61 @@ struct MoonBitWebViewDispatch {
   void *closure;
 };
 
+struct MoonBitWebViewWindowEventDispatch {
+  MoonBitWebView *view;
+  int32_t code;
+};
+
 static webview_error_t require_handle(MoonBitWebView *view) {
   if (view == nullptr || view->destroyed || view->handle == nullptr) {
     return WEBVIEW_ERROR_INVALID_STATE;
   }
   return WEBVIEW_ERROR_OK;
+}
+
+static webview_error_t require_native_window(MoonBitWebView *view,
+                                             void **window) {
+  webview_error_t status = require_handle(view);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+  void *native_window = webview_get_window(view->handle);
+  if (native_window == nullptr || view->window_closed) {
+    return WEBVIEW_ERROR_INVALID_STATE;
+  }
+  *window = native_window;
+  return WEBVIEW_ERROR_OK;
+}
+
+static void emit_window_event(MoonBitWebView *view, int32_t code) {
+  if (view == nullptr || view->window_event_callback == nullptr ||
+      view->window_event_closure == nullptr) {
+    return;
+  }
+  moonbit_incref(view->window_event_closure);
+  view->window_event_callback(view->window_event_closure, code);
+  moonbit_decref(view->window_event_closure);
+}
+
+static void moonbit_webview_window_event_dispatch_trampoline(webview_t,
+                                                             void *arg) {
+  auto *event = static_cast<MoonBitWebViewWindowEventDispatch *>(arg);
+  if (event != nullptr) {
+    emit_window_event(event->view, event->code);
+    delete event;
+  }
+}
+
+static void dispatch_window_event(MoonBitWebView *view, int32_t code) {
+  if (view == nullptr || view->destroyed || view->handle == nullptr) {
+    return;
+  }
+  auto *event = new MoonBitWebViewWindowEventDispatch{view, code};
+  webview_error_t status = webview_dispatch(
+      view->handle, moonbit_webview_window_event_dispatch_trampoline, event);
+  if (status != WEBVIEW_ERROR_OK) {
+    delete event;
+  }
 }
 
 static webview_error_t destroy_handle(MoonBitWebView *view) {
@@ -51,6 +106,11 @@ static webview_error_t destroy_handle(MoonBitWebView *view) {
     }
   }
   view->bindings.clear();
+  if (view->window_event_closure != nullptr) {
+    moonbit_decref(view->window_event_closure);
+    view->window_event_closure = nullptr;
+  }
+  view->window_event_callback = nullptr;
   return status;
 }
 
@@ -112,6 +172,10 @@ MoonBitWebView *moonbit_webview_create(int32_t debug) {
       moonbit_make_external_object(finalize_webview, sizeof(MoonBitWebView)));
   view->handle = webview_create(debug, nullptr);
   view->destroyed = view->handle == nullptr ? 1 : 0;
+  view->window_closed = view->destroyed;
+  view->closing_window = 0;
+  view->window_event_callback = nullptr;
+  view->window_event_closure = nullptr;
   return view;
 }
 
@@ -123,15 +187,17 @@ int32_t moonbit_webview_is_valid(MoonBitWebView *view) {
 MOONBIT_FFI_EXPORT
 int32_t moonbit_webview_has_native_window(MoonBitWebView *view) {
   return require_handle(view) == WEBVIEW_ERROR_OK &&
+         !view->window_closed &&
          webview_get_window(view->handle) != nullptr;
 }
 
 MOONBIT_FFI_EXPORT
 void *moonbit_webview_get_native_window(MoonBitWebView *view) {
-  if (require_handle(view) != WEBVIEW_ERROR_OK) {
+  void *window{};
+  if (require_native_window(view, &window) != WEBVIEW_ERROR_OK) {
     return nullptr;
   }
-  return webview_get_window(view->handle);
+  return window;
 }
 
 MOONBIT_FFI_EXPORT
@@ -145,7 +211,10 @@ int32_t moonbit_webview_run(MoonBitWebView *view) {
   if (status != WEBVIEW_ERROR_OK) {
     return status;
   }
-  return webview_run(view->handle);
+  moonbit_incref(view);
+  status = webview_run(view->handle);
+  moonbit_decref(view);
+  return status;
 }
 
 MOONBIT_FFI_EXPORT
@@ -288,6 +357,148 @@ int32_t moonbit_webview_dispatch(MoonBitWebView *view,
     delete dispatch;
   }
   return status;
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_close_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  HWND hwnd = static_cast<HWND>(native_window);
+  view->closing_window = 1;
+  DestroyWindow(hwnd);
+  view->closing_window = 0;
+  view->window_closed = 1;
+  emit_window_event(view, 2);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_focus_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  HWND hwnd = static_cast<HWND>(native_window);
+  ShowWindow(hwnd, SW_SHOWNORMAL);
+  SetForegroundWindow(hwnd);
+  SetFocus(hwnd);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_minimize_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  ShowWindow(static_cast<HWND>(native_window), SW_MINIMIZE);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_maximize_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  ShowWindow(static_cast<HWND>(native_window), SW_MAXIMIZE);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_restore_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  ShowWindow(static_cast<HWND>(native_window), SW_RESTORE);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_show_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  ShowWindow(static_cast<HWND>(native_window), SW_SHOW);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_hide_window(MoonBitWebView *view) {
+  void *native_window{};
+  webview_error_t status = require_native_window(view, &native_window);
+  if (status != WEBVIEW_ERROR_OK) {
+    return status;
+  }
+#if defined(_WIN32)
+  ShowWindow(static_cast<HWND>(native_window), SW_HIDE);
+  return WEBVIEW_ERROR_OK;
+#else
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_is_window_closed(MoonBitWebView *view) {
+  return view == nullptr || view->window_closed;
+}
+
+MOONBIT_FFI_EXPORT
+int32_t moonbit_webview_set_window_event_handler(
+    MoonBitWebView *view, MoonBitWebViewWindowEventCallback callback,
+    void *closure) {
+  webview_error_t status = require_handle(view);
+  if (status != WEBVIEW_ERROR_OK) {
+    moonbit_decref(closure);
+    return status;
+  }
+#if defined(_WIN32)
+  if (view->window_event_closure != nullptr) {
+    moonbit_decref(view->window_event_closure);
+  }
+  view->window_event_callback = callback;
+  view->window_event_closure = closure;
+  return WEBVIEW_ERROR_OK;
+#else
+  (void)callback;
+  moonbit_decref(closure);
+  (void)closure;
+  return WEBVIEW_ERROR_INVALID_STATE;
+#endif
 }
 
 MOONBIT_FFI_EXPORT

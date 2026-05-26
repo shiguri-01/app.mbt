@@ -40,7 +40,10 @@ pub fn WebView::destroy(self : WebView) -> Unit raise WebViewError {
 ///|
 /// Run the GUI event loop until the webview is terminated.
 pub fn WebView::run(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_run(self))
+  let status = ffi_run(self)
+  // Keep the external object alive for the whole blocking native run call.
+  ignore(self.is_valid())
+  check_status(status)
 }
 
 ///|
@@ -152,6 +155,70 @@ pub fn WebView::dispatch(
   handler : () -> Unit,
 ) -> Unit raise WebViewError {
   check_status(ffi_dispatch(self, callback => callback(), handler))
+}
+
+///|
+/// Close the native top-level window without asking the runtime to confirm.
+pub fn WebView::close_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_close_window(self))
+}
+
+///|
+/// Focus the native top-level window.
+pub fn WebView::focus_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_focus_window(self))
+}
+
+///|
+/// Minimize the native top-level window.
+pub fn WebView::minimize_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_minimize_window(self))
+}
+
+///|
+/// Maximize the native top-level window.
+pub fn WebView::maximize_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_maximize_window(self))
+}
+
+///|
+/// Restore the native top-level window from minimized or maximized state.
+pub fn WebView::restore_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_restore_window(self))
+}
+
+///|
+/// Show the native top-level window.
+pub fn WebView::show_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_show_window(self))
+}
+
+///|
+/// Hide the native top-level window.
+pub fn WebView::hide_window(self : WebView) -> Unit raise WebViewError {
+  check_status(ffi_hide_window(self))
+}
+
+///|
+/// Return whether the native top-level window has been closed.
+pub fn WebView::is_window_closed(self : WebView) -> Bool {
+  ffi_is_window_closed(self)
+}
+
+///|
+/// Register a native top-level window event callback.
+pub fn WebView::on_window_event(
+  self : WebView,
+  handler : (WindowEvent) -> Unit,
+) -> Unit raise WebViewError {
+  check_status(
+    ffi_set_window_event_handler(self, (callback, code) => callback(code), code => {
+      match WindowEvent::from_int(code) {
+        Some(event) => handler(event)
+        None => ()
+      }
+    }),
+  )
 }
 
 ///|

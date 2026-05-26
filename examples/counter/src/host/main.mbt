@@ -57,22 +57,25 @@ fn main {
       return
     }
   }
-  @desktop.run(
-    title="MoonBit Counter",
-    width=640,
-    height=420,
-    load=Html(html),
-    on_ready=window => {
-      window.set_title("MoonBit Counter")
-      let count = Ref(0)
-      window.handle_default(command => {
-        @async.sleep(1)
-        let (next, event) = handle_command(count.val, command)
-        count.val = next
-        event
-      })
-    },
-  ) catch {
+  @desktop.run(on_startup=app => {
+    let window = app.create_window(
+      WindowOptions(
+        key="main",
+        title="MoonBit Counter",
+        width=640,
+        height=420,
+        load=Html(html),
+      ),
+    )
+    window.set_title("MoonBit Counter")
+    let count = Ref(0)
+    window.handle_default(command => {
+      @async.sleep(1)
+      let (next, event) = handle_command(count.val, command)
+      count.val = next
+      event
+    })
+  }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }
 }

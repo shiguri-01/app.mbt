@@ -85,4 +85,44 @@ extern "C" fn ffi_dispatch(
 ) -> Int = "moonbit_webview_dispatch"
 
 ///|
+#borrow(view)
+extern "C" fn ffi_close_window(view : WebView) -> Int = "moonbit_webview_close_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_focus_window(view : WebView) -> Int = "moonbit_webview_focus_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_minimize_window(view : WebView) -> Int = "moonbit_webview_minimize_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_maximize_window(view : WebView) -> Int = "moonbit_webview_maximize_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_restore_window(view : WebView) -> Int = "moonbit_webview_restore_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_show_window(view : WebView) -> Int = "moonbit_webview_show_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_hide_window(view : WebView) -> Int = "moonbit_webview_hide_window"
+
+///|
+#borrow(view)
+extern "C" fn ffi_is_window_closed(view : WebView) -> Bool = "moonbit_webview_is_window_closed"
+
+///|
+#borrow(view)
+extern "C" fn ffi_set_window_event_handler(
+  view : WebView,
+  call_handler : FuncRef[((Int) -> Unit, Int) -> Unit],
+  handler : (Int) -> Unit,
+) -> Int = "moonbit_webview_set_window_event_handler"
+
+///|
 extern "C" fn ffi_version_number() -> Bytes = "moonbit_webview_version_number"

@@ -22,6 +22,14 @@ Implemented:
 - `WebView::unbind`
 - `WebView::return_`
 - `WebView::dispatch`
+- `WebView::close_window`
+- `WebView::focus_window`
+- `WebView::minimize_window`
+- `WebView::maximize_window`
+- `WebView::restore_window`
+- `WebView::show_window`
+- `WebView::hide_window`
+- `WebView::on_window_event`
 - `version_number`
 
 Not implemented yet:
