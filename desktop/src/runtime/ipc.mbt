@@ -73,7 +73,7 @@ fn[T : FromJson] binding_deferred_request(
   req : String,
   handler : (T, ResponseSender) -> Unit raise DesktopError,
 ) -> Unit raise DesktopError {
-  let sender = ResponseSender::ResponseSender(view, id)
+  let sender = ResponseSender(view, id)
   let raw = binding_payload(req) catch {
     err => {
       sender.reject(err)
