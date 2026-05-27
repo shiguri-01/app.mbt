@@ -2,7 +2,7 @@
 pub fn default_request() -> @contract.SavedRequest {
   @contract.SavedRequest::{
     id: "draft",
-    name: "Untitled request",
+    name: "New request",
     http_method: Get,
     url: "https://httpbin.org/get",
     headers: [
@@ -14,6 +14,40 @@ pub fn default_request() -> @contract.SavedRequest {
     ],
     body: "",
   }
+}
+
+///|
+fn sample_requests() -> Array[@contract.SavedRequest] {
+  [
+    @contract.SavedRequest::{
+      id: "sample-get",
+      name: "GET httpbin",
+      http_method: Get,
+      url: "https://httpbin.org/get",
+      headers: [
+        @contract.Header::{
+          name: "Accept",
+          value: "application/json",
+          enabled: true,
+        },
+      ],
+      body: "",
+    },
+    @contract.SavedRequest::{
+      id: "sample-post",
+      name: "POST echo",
+      http_method: Post,
+      url: "https://httpbin.org/post",
+      headers: [
+        @contract.Header::{
+          name: "Content-Type",
+          value: "application/json",
+          enabled: true,
+        },
+      ],
+      body: "{\n  \"message\": \"hello\"\n}",
+    },
+  ]
 }
 
 ///|

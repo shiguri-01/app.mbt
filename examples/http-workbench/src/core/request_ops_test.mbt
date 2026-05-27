@@ -19,5 +19,13 @@ test "enabled headers skip disabled and blank names" {
 test "saved request upsert assigns a fresh id for draft" {
   let (_, request) = upsert_saved_request([], default_request(), new_id="req-1")
   assert_true(request.id == "req-1")
-  assert_true(request.name == "Untitled request")
+  assert_true(request.name == "New request")
+}
+
+///|
+test "default state includes starter requests" {
+  let state = default_state()
+  assert_true(state.saved_requests.length() == 2)
+  assert_true(state.saved_requests[0].name == "GET httpbin")
+  assert_true(state.active_draft.id == "draft")
 }

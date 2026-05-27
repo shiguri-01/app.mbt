@@ -138,7 +138,7 @@ pub async fn save_state_to_path(
     state.to_json().stringify(),
     create_mode=CreateOrTruncate,
   )
-  @contract.SaveStateReply::{ saved: true, message: "saved" }
+  @contract.SaveStateReply::{ saved: true, message: "Saved" }
 }
 
 ///|

@@ -2,7 +2,6 @@
 enum Msg {
   LoadState
   StateLoaded(@ipc.IpcResponse[@contract.WorkbenchState])
-  SaveWorkspace
   StateSaved(@ipc.IpcResponse[@contract.SaveStateReply])
   MethodChanged(String)
   UrlChanged(String)
@@ -15,6 +14,7 @@ enum Msg {
   HeaderValueChanged(Int, String)
   SendRequest
   RequestSent(@ipc.IpcResponse[@contract.SendHttpReply])
+  NewRequest
   SaveCurrentRequest
   SelectSaved(String)
   DeleteSaved(String)
@@ -57,7 +57,7 @@ fn update(
     LoadState =>
       (
         load_state_cmd(emit, model.client),
-        { ..model, loading: true, notice: "loading state" },
+        { ..model, loading: true, notice: "Loading" },
       )
     StateLoaded(response) =>
       match response {
@@ -69,22 +69,15 @@ fn update(
               state,
               draft: state.active_draft,
               loading: false,
-              notice: "state loaded",
+              notice: "Ready",
             },
           )
         Err(err) =>
           (
             @rabbita.none,
-            { ..model, loading: false, notice: "load failed: \{to_repr(err)}" },
+            { ..model, loading: false, notice: "Load failed: \{to_repr(err)}" },
           )
       }
-    SaveWorkspace => {
-      let state = { ..model.state, active_draft: model.draft }
-      (
-        save_state_cmd(emit, model.client, state),
-        { ..model, state, saving: true, notice: "saving" },
-      )
-    }
     StateSaved(response) =>
       match response {
         Ok(reply) =>
@@ -92,7 +85,7 @@ fn update(
         Err(err) =>
           (
             @rabbita.none,
-            { ..model, saving: false, notice: "save failed: \{to_repr(err)}" },
+            { ..model, saving: false, notice: "Save failed: \{to_repr(err)}" },
           )
       }
     MethodChanged(value) =>
@@ -165,7 +158,7 @@ fn update(
       } else {
         (
           send_http_cmd(emit, model.client, { ..model.draft, url, }),
-          { ..model, sending: true, response: None, notice: "sending" },
+          { ..model, sending: true, response: None, notice: "Sending" },
         )
       }
     }
@@ -198,7 +191,7 @@ fn update(
               response: Some(reply),
               sending: false,
               saving: true,
-              notice: "response received",
+              notice: "Response received",
             },
           )
         }
@@ -208,10 +201,15 @@ fn update(
             {
               ..model,
               sending: false,
-              notice: "request failed: \{to_repr(err)}",
+              notice: "Request failed: \{to_repr(err)}",
             },
           )
       }
+    NewRequest => {
+      let draft = @core.default_request()
+      let state = { ..model.state, active_draft: draft }
+      (@rabbita.none, { ..model, state, draft, response: None, notice: "" })
+    }
     SaveCurrentRequest => {
       let (saved, draft) = @core.upsert_saved_request(
         model.state.saved_requests,
@@ -221,7 +219,7 @@ fn update(
       let state = { ..model.state, saved_requests: saved, active_draft: draft }
       (
         save_state_cmd(emit, model.client, state),
-        { ..model, state, draft, saving: true, notice: "saving request" },
+        { ..model, state, draft, saving: true, notice: "Saving request" },
       )
     }
     SelectSaved(id) => {
@@ -238,14 +236,14 @@ fn update(
       let state = { ..model.state, saved_requests: saved }
       (
         save_state_cmd(emit, model.client, state),
-        { ..model, state, saving: true, notice: "deleting request" },
+        { ..model, state, saving: true, notice: "Deleting request" },
       )
     }
     ClearHistory => {
       let state = { ..model.state, recent_history: [] }
       (
         save_state_cmd(emit, model.client, state),
-        { ..model, state, saving: true, notice: "clearing history" },
+        { ..model, state, saving: true, notice: "Clearing history" },
       )
     }
   }

@@ -34,14 +34,14 @@ fn header_row(
 ) -> @rabbita.Html {
   div(class="header-row") <| [
     button(
-      class=if header.enabled { "icon-toggle active" } else { "icon-toggle" },
-      title="Toggle header",
-      on_click=emit(ToggleHeader(index)),
-      if header.enabled {
-        "on"
+      class=if header.enabled {
+        "switch-toggle active"
       } else {
-        "off"
+        "switch-toggle"
       },
+      title=if header.enabled { "Disable header" } else { "Enable header" },
+      on_click=emit(ToggleHeader(index)),
+      span(class="switch-knob", ""),
     ),
     input(
       class="header-name",
@@ -58,10 +58,10 @@ fn header_row(
       nothing,
     ),
     button(
-      class="icon-button",
+      class="icon-button danger",
       title="Remove header",
       on_click=emit(RemoveHeader(index)),
-      "x",
+      "Remove",
     ),
   ]
 }
@@ -83,7 +83,7 @@ fn header_rows(
 ///|
 fn response_view(response : @contract.SendHttpReply?) -> @rabbita.Html {
   match response {
-    None => div(class="empty-panel", "No response yet")
+    None => div(class="empty-panel", "Response")
     Some(reply) => {
       let status = match reply.status {
         Some(code) => "\{code} \{reply.status_text}"
@@ -98,15 +98,26 @@ fn response_view(response : @contract.SendHttpReply?) -> @rabbita.Html {
           Some(error) => pre(class="error-body", error)
           None =>
             div(class="response-content") <| [
-              h2(class="panel-title", "Headers"),
+              h2(class="panel-title", "Response headers"),
               pre(
                 class="headers-body",
-                reply.headers
-                .map(header => "\{header.name}: \{header.value}")
-                .join("\n"),
+                if reply.headers.is_empty() {
+                  "(none)"
+                } else {
+                  reply.headers
+                  .map(header => "\{header.name}: \{header.value}")
+                  .join("\n")
+                },
               ),
-              h2(class="panel-title", "Body"),
-              pre(class="response-body", reply.body),
+              h2(class="panel-title", "Response body"),
+              pre(
+                class="response-body",
+                if reply.body == "" {
+                  "(empty)"
+                } else {
+                  reply.body
+                },
+              ),
             ]
         },
       ]
@@ -124,13 +135,13 @@ fn saved_request_row(
       class="saved-main",
       title="Load request",
       on_click=emit(SelectSaved(request.id)),
-      "\{request.http_method.to_string()}  \{@core.display_name(request)}",
+      "\{request.http_method.to_string()} \{@core.display_name(request)}",
     ),
     button(
-      class="icon-button",
+      class="icon-button danger saved-remove",
       title="Delete saved request",
       on_click=emit(DeleteSaved(request.id)),
-      "x",
+      "Del",
     ),
   ]
 }
@@ -154,8 +165,8 @@ fn history_row(entry : @contract.HistoryEntry) -> @rabbita.Html {
 fn sidebar(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
   div(class="sidebar") <| [
     div(class="sidebar-head") <| [
-      h2(class="panel-title", "Saved"),
-      button(class="mini-button", on_click=emit(SaveCurrentRequest), "save"),
+      h2(class="panel-title", "Requests"),
+      button(class="mini-button", on_click=emit(NewRequest), "New"),
     ],
     if model.state.saved_requests.is_empty() {
       p(class="muted", "No saved requests")
@@ -165,8 +176,8 @@ fn sidebar(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
       })
     },
     div(class="sidebar-head spaced") <| [
-      h2(class="panel-title", "Recent"),
-      button(class="mini-button", on_click=emit(ClearHistory), "clear"),
+      h2(class="panel-title", "History"),
+      button(class="mini-button", on_click=emit(ClearHistory), "Clear"),
     ],
     if model.state.recent_history.is_empty() {
       p(class="muted", "No history")
@@ -179,29 +190,25 @@ fn sidebar(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
 }
 
 ///|
+fn notice_view(model : Model) -> @rabbita.Html {
+  if model.loading {
+    span(class="notice", "Loading")
+  } else if model.notice.contains("failed") ||
+    model.notice.contains("Failed") ||
+    model.notice.contains("required") {
+    span(class="notice", model.notice)
+  } else {
+    nothing
+  }
+}
+
+///|
 fn request_editor(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
   div(class="editor") <| [
     div(class="topbar") <| [
       h1("HTTP/API Workbench"),
       div(class="top-actions") <| [
-        span(
-          class="notice",
-          if model.loading {
-            "loading state"
-          } else {
-            model.notice
-          },
-        ),
-        button(
-          class="secondary",
-          disabled=model.saving,
-          on_click=emit(SaveWorkspace),
-          if model.saving {
-            "saving"
-          } else {
-            "save state"
-          },
-        ),
+        notice_view(model),
       ],
     ],
     div(class="name-row") <| [
@@ -212,6 +219,12 @@ fn request_editor(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
         placeholder="Request name",
         on_input=emit.map(value => NameChanged(value)),
         nothing,
+      ),
+      button(
+        class="secondary name-save",
+        disabled=model.saving,
+        on_click=emit(SaveCurrentRequest),
+        "Save request",
       ),
     ],
     div(class="request-line") <| [
@@ -240,21 +253,21 @@ fn request_editor(emit : @rabbita.Emit[Msg], model : Model) -> @rabbita.Html {
         disabled=model.sending,
         on_click=emit(SendRequest),
         if model.sending {
-          "sending"
+          "Sending"
         } else {
-          "send"
+          "Send"
         },
       ),
     ],
     section(class="request-panel") <| [
       div(class="panel-head") <| [
-        h2(class="panel-title", "Headers"),
-        button(class="mini-button", on_click=emit(AddHeader), "add"),
+        h2(class="panel-title", "Request headers"),
+        button(class="mini-button", on_click=emit(AddHeader), "Add header"),
       ],
       div(class="headers-grid") <| header_rows(emit, model.draft.headers),
     ],
     section(class="request-panel") <| [
-      h2(class="panel-title", "Body"),
+      h2(class="panel-title", "Request body"),
       textarea(
         class="body-editor",
         rows=10,

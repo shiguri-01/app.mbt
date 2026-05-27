@@ -1,9 +1,10 @@
 ///|
 pub fn default_state() -> @contract.WorkbenchState {
+  let active_draft = default_request()
   @contract.WorkbenchState::{
-    saved_requests: [],
+    saved_requests: sample_requests(),
     recent_history: [],
-    active_draft: default_request(),
+    active_draft,
   }
 }
 
