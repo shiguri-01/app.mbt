@@ -32,3 +32,15 @@ let image = window.open_file_dialog(filters=[
   { name: "Images", extensions: ["png", "jpg", "jpeg"] },
 ])
 ```
+
+## Third-Party Credits
+
+The Windows file dialog backend vendors code from
+[Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended):
+
+- `nfd.h`
+- `nfd_win.cpp`
+
+NFDe is distributed under the Zlib License. The vendored files retain their
+upstream attribution, and the full license text is included in
+`NFD_LICENSE.txt`.

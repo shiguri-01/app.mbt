@@ -39,3 +39,16 @@ are usable but long handlers still occupy the webview callback path.
 On Windows, native builds use the bundled webview C++ stub. Run native
 test/build/run commands from a Visual Studio C++ environment or through the
 repository `just` tasks, which call `vcvarsall.bat x64`.
+
+## Third-Party Credits
+
+The native desktop implementation uses third-party C/C++ code:
+
+- Window hosting is backed by the `shiguri-01/webview` module. That module
+  vendors [`webview/webview`](https://github.com/webview/webview) under the MIT
+  License and the Microsoft WebView2 SDK header under Microsoft's WebView2
+  license and notices.
+- Windows file dialogs in `src/shell` vendor
+  [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended)
+  under the Zlib License. See `src/shell/NFD_LICENSE.txt` and
+  `src/shell/README.mbt.md`.

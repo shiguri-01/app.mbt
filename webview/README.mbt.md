@@ -47,13 +47,27 @@ options(
   "is-main": true,
   link: {
     "native": {
-      "cc-link-flags": "-lstdc++ -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion",
+      "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",
     },
   },
 )
 ```
 
-The library package compiles its stub with `g++`, while leaving MoonBit-generated C files on the default C compiler.
+The library package compiles its stub with `cl`, while leaving MoonBit-generated C files on the default C compiler.
+
+## Third-Party Credits
+
+This package vendors native headers from external projects:
+
+- `src/vendor/webview.h` is generated from
+  [`webview/webview`](https://github.com/webview/webview). It is distributed
+  under the MIT License and retains the upstream copyright notice for Serge
+  Zaitsev and Steffen Andre Langnes. The full license is included in
+  `src/vendor/webview.LICENSE.txt`.
+- `src/vendor/WebView2.h` is from the Microsoft WebView2 SDK
+  (`Microsoft.Web.WebView2` NuGet package). Its license and third-party notices
+  are included in `src/vendor/WebView2.LICENSE.txt` and
+  `src/vendor/WebView2.NOTICE.txt`.
 
 ## Example
 
