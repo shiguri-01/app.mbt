@@ -1,0 +1,22 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "shiguri-01/desktop/runtime" @desktop,
+  "shiguri-01/desktop-http-workbench-example/core",
+}
+
+supported_targets = "+native"
+
+options(
+  "is-main": true,
+  link: {
+    "native": {
+      "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",
+    },
+  },
+)

@@ -3,6 +3,7 @@ members = [
   "./examples/counter",
   "./examples/dialogs",
   "./examples/file-dialogs",
+  "./examples/http-workbench",
   "./packager",
   "./webview",
 ]

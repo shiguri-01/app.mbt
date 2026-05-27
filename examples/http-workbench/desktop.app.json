@@ -1,0 +1,13 @@
+{
+  "id": "com.shiguri-01.http-workbench",
+  "name": "HTTP/API Workbench",
+  "version": "0.1.0",
+  "module_name": "shiguri-01/desktop-http-workbench-example",
+  "host": "examples/http-workbench/src/host",
+  "frontend": "examples/http-workbench/src/frontend",
+  "static_dir": "examples/http-workbench/dist",
+  "dist": "dist/http-workbench",
+  "executable": "HttpWorkbench.exe",
+  "bundle": "single-exe",
+  "windows_subsystem": "windows"
+}

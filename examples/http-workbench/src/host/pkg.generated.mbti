@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-http-workbench-example/host"
+
+import {
+  "moonbitlang/async/http",
+  "shiguri-01/desktop-http-workbench-example/core",
+}
+
+// Values
+pub async fn load_state_from_path(String) -> @core.WorkbenchState
+
+pub fn method_to_request_method(@core.HttpMethod) -> @http.RequestMethod
+
+pub async fn save_state_to_path(String, @core.WorkbenchState) -> @core.SaveStateReply
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+
