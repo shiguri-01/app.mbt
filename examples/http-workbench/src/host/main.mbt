@@ -44,7 +44,7 @@ fn load_workbench_html() -> Result[String, String] {
 
 ///|
 pub fn method_to_request_method(
-  http_method : @core.HttpMethod,
+  http_method : @contract.HttpMethod,
 ) -> @http.RequestMethod {
   match http_method {
     Get => @http.RequestMethod::Get
@@ -86,7 +86,7 @@ fn parse_url(uri : String) -> (String, Int, String, String) raise {
 
 ///|
 async fn perform_http_request(
-  request : @core.SavedRequest,
+  request : @contract.SavedRequest,
 ) -> (@http.Response, String, Int64) {
   let headers = @core.enabled_headers(request.headers)
   let (protocol, port, host, path) = parse_url(request.url.trim().to_owned())
@@ -106,16 +106,16 @@ async fn perform_http_request(
 ///|
 fn response_headers(
   headers : Map[String, String],
-) -> Array[@core.ResponseHeader] {
+) -> Array[@contract.ResponseHeader] {
   let result = []
   for name, value in headers {
-    result.push(@core.ResponseHeader::{ name, value })
+    result.push(@contract.ResponseHeader::{ name, value })
   }
   result
 }
 
 ///|
-pub async fn load_state_from_path(path : String) -> @core.WorkbenchState {
+pub async fn load_state_from_path(path : String) -> @contract.WorkbenchState {
   if !@fs.exists(path) {
     return @core.default_state()
   }
@@ -131,24 +131,24 @@ pub async fn load_state_from_path(path : String) -> @core.WorkbenchState {
 ///|
 pub async fn save_state_to_path(
   path : String,
-  state : @core.WorkbenchState,
-) -> @core.SaveStateReply {
+  state : @contract.WorkbenchState,
+) -> @contract.SaveStateReply {
   @fs.write_file(
     path,
     state.to_json().stringify(),
     create_mode=CreateOrTruncate,
   )
-  @core.SaveStateReply::{ saved: true, message: "saved" }
+  @contract.SaveStateReply::{ saved: true, message: "saved" }
 }
 
 ///|
 async fn handle_send_http(
-  request : @core.SendHttpRequest,
-) -> @core.SendHttpReply {
+  request : @contract.SendHttpRequest,
+) -> @contract.SendHttpReply {
   let start = @async.now()
   let (response, body, duration) = perform_http_request(request.request) catch {
     err =>
-      return @core.SendHttpReply::{
+      return @contract.SendHttpReply::{
         status: None,
         status_text: "",
         headers: [],
@@ -157,7 +157,7 @@ async fn handle_send_http(
         error: Some("\{to_repr(err)}"),
       }
   }
-  @core.SendHttpReply::{
+  @contract.SendHttpReply::{
     status: Some(response.code),
     status_text: response.reason,
     headers: response_headers(response.headers),
@@ -190,13 +190,13 @@ fn main {
       ),
     )
     let router = @desktop.IpcRouter::new()
-      .handle(@core.load_state_endpoint, handler=_ => {
+      .handle(@contract.load_state_endpoint, handler=_ => {
         load_state_from_path(state_file_path())
       })
-      .handle(@core.save_state_endpoint, handler=state => {
+      .handle(@contract.save_state_endpoint, handler=state => {
         save_state_to_path(state_file_path(), state)
       })
-      .handle(@core.send_http_endpoint, handler=request => {
+      .handle(@contract.send_http_endpoint, handler=request => {
         handle_send_http(request)
       })
     window.mount_ipc(router)

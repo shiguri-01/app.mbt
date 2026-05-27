@@ -1,9 +1,9 @@
 ///|
 enum Msg {
   LoadState
-  StateLoaded(@ipc.IpcResponse[@core.WorkbenchState])
+  StateLoaded(@ipc.IpcResponse[@contract.WorkbenchState])
   SaveWorkspace
-  StateSaved(@ipc.IpcResponse[@core.SaveStateReply])
+  StateSaved(@ipc.IpcResponse[@contract.SaveStateReply])
   MethodChanged(String)
   UrlChanged(String)
   NameChanged(String)
@@ -14,7 +14,7 @@ enum Msg {
   HeaderNameChanged(Int, String)
   HeaderValueChanged(Int, String)
   SendRequest
-  RequestSent(@ipc.IpcResponse[@core.SendHttpReply])
+  RequestSent(@ipc.IpcResponse[@contract.SendHttpReply])
   SaveCurrentRequest
   SelectSaved(String)
   DeleteSaved(String)
@@ -24,9 +24,9 @@ enum Msg {
 ///|
 struct Model {
   client : @desktop.Client
-  state : @core.WorkbenchState
-  draft : @core.SavedRequest
-  response : @core.SendHttpReply?
+  state : @contract.WorkbenchState
+  draft : @contract.SavedRequest
+  response : @contract.SendHttpReply?
   loading : Bool
   saving : Bool
   sending : Bool
@@ -41,7 +41,7 @@ fn new_request_id() -> String {
 ///|
 fn with_draft(
   model : Model,
-  draft : @core.SavedRequest,
+  draft : @contract.SavedRequest,
   notice? : String = "",
 ) -> Model {
   { ..model, draft, state: { ..model.state, active_draft: draft }, notice }
@@ -100,7 +100,7 @@ fn update(
         @rabbita.none,
         with_draft(model, {
           ..model.draft,
-          http_method: @core.parse_method(value),
+          http_method: @contract.HttpMethod::parse(value),
         }),
       )
     UrlChanged(url) =>
@@ -172,7 +172,7 @@ fn update(
     RequestSent(response) =>
       match response {
         Ok(reply) => {
-          let history = @core.HistoryEntry::{
+          let history = @contract.HistoryEntry::{
             id: "hist-\{@async.now()}",
             name: @core.display_name(model.draft),
             http_method: model.draft.http_method,

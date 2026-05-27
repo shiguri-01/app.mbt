@@ -10,6 +10,32 @@ pub(all) enum HttpMethod {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub fn HttpMethod::to_string(self : HttpMethod) -> String {
+  match self {
+    Get => "GET"
+    Post => "POST"
+    Put => "PUT"
+    Patch => "PATCH"
+    Delete => "DELETE"
+    Head => "HEAD"
+    Options => "OPTIONS"
+  }
+}
+
+///|
+pub fn HttpMethod::parse(value : String) -> HttpMethod {
+  match value {
+    "POST" => Post
+    "PUT" => Put
+    "PATCH" => Patch
+    "DELETE" => Delete
+    "HEAD" => Head
+    "OPTIONS" => Options
+    _ => Get
+  }
+}
+
+///|
 pub(all) struct Header {
   name : String
   value : String

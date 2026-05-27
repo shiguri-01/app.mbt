@@ -2,109 +2,33 @@
 package "shiguri-01/desktop-http-workbench-example/core"
 
 import {
-  "moonbitlang/core/debug",
-  "moonbitlang/core/json",
-  "shiguri-01/desktop/ipc",
+  "shiguri-01/desktop-http-workbench-example/contract",
 }
 
 // Values
-pub fn append_header(Array[Header]) -> Array[Header]
+pub fn append_header(Array[@contract.Header]) -> Array[@contract.Header]
 
-pub fn capped_history(Array[HistoryEntry], HistoryEntry) -> Array[HistoryEntry]
+pub fn capped_history(Array[@contract.HistoryEntry], @contract.HistoryEntry) -> Array[@contract.HistoryEntry]
 
-pub fn default_request() -> SavedRequest
+pub fn default_request() -> @contract.SavedRequest
 
-pub fn default_state() -> WorkbenchState
+pub fn default_state() -> @contract.WorkbenchState
 
-pub fn delete_saved_request(Array[SavedRequest], String) -> Array[SavedRequest]
+pub fn delete_saved_request(Array[@contract.SavedRequest], String) -> Array[@contract.SavedRequest]
 
-pub fn display_name(SavedRequest) -> String
+pub fn display_name(@contract.SavedRequest) -> String
 
-pub fn enabled_headers(Array[Header]) -> Map[String, String]
+pub fn enabled_headers(Array[@contract.Header]) -> Map[String, String]
 
-pub let load_state_endpoint : @ipc.IpcEndpoint[Unit, WorkbenchState]
+pub fn remove_header(Array[@contract.Header], Int) -> Array[@contract.Header]
 
-pub fn method_to_string(HttpMethod) -> String
+pub fn update_header(Array[@contract.Header], Int, (@contract.Header) -> @contract.Header) -> Array[@contract.Header]
 
-pub fn parse_method(String) -> HttpMethod
-
-pub fn remove_header(Array[Header], Int) -> Array[Header]
-
-pub let save_state_endpoint : @ipc.IpcEndpoint[WorkbenchState, SaveStateReply]
-
-pub let send_http_endpoint : @ipc.IpcEndpoint[SendHttpRequest, SendHttpReply]
-
-pub fn update_header(Array[Header], Int, (Header) -> Header) -> Array[Header]
-
-pub fn upsert_saved_request(Array[SavedRequest], SavedRequest, new_id~ : String) -> (Array[SavedRequest], SavedRequest)
+pub fn upsert_saved_request(Array[@contract.SavedRequest], @contract.SavedRequest, new_id~ : String) -> (Array[@contract.SavedRequest], @contract.SavedRequest)
 
 // Errors
 
 // Types and methods
-pub(all) struct Header {
-  name : String
-  value : String
-  enabled : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct HistoryEntry {
-  id : String
-  name : String
-  http_method : HttpMethod
-  url : String
-  status : Int?
-  error : String?
-  duration_ms : Int64
-  created_at_ms : Int64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) enum HttpMethod {
-  Get
-  Post
-  Put
-  Patch
-  Delete
-  Head
-  Options
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct ResponseHeader {
-  name : String
-  value : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct SaveStateReply {
-  saved : Bool
-  message : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct SavedRequest {
-  id : String
-  name : String
-  http_method : HttpMethod
-  url : String
-  headers : Array[Header]
-  body : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct SendHttpReply {
-  status : Int?
-  status_text : String
-  headers : Array[ResponseHeader]
-  body : String
-  duration_ms : Int64
-  error : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct SendHttpRequest {
-  request : SavedRequest
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub(all) struct WorkbenchState {
-  saved_requests : Array[SavedRequest]
-  recent_history : Array[HistoryEntry]
-  active_draft : SavedRequest
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

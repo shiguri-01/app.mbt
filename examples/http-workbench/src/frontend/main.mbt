@@ -1,5 +1,5 @@
 ///|
-let initial_state : @core.WorkbenchState = @core.default_state()
+let initial_state : @contract.WorkbenchState = @core.default_state()
 
 ///|
 let initial_model : Model = {

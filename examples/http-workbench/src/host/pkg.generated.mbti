@@ -3,15 +3,15 @@ package "shiguri-01/desktop-http-workbench-example/host"
 
 import {
   "moonbitlang/async/http",
-  "shiguri-01/desktop-http-workbench-example/core",
+  "shiguri-01/desktop-http-workbench-example/contract",
 }
 
 // Values
-pub async fn load_state_from_path(String) -> @core.WorkbenchState
+pub async fn load_state_from_path(String) -> @contract.WorkbenchState
 
-pub fn method_to_request_method(@core.HttpMethod) -> @http.RequestMethod
+pub fn method_to_request_method(@contract.HttpMethod) -> @http.RequestMethod
 
-pub async fn save_state_to_path(String, @core.WorkbenchState) -> @core.SaveStateReply
+pub async fn save_state_to_path(String, @contract.WorkbenchState) -> @contract.SaveStateReply
 
 // Errors
 

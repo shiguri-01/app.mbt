@@ -5,7 +5,7 @@ fn load_state_cmd(
 ) -> @rabbita.Cmd {
   @desktop_rabbita.request_cmd(
     client~,
-    endpoint=@core.load_state_endpoint,
+    endpoint=@contract.load_state_endpoint,
     body=(),
     on_response=response => emit(StateLoaded(response)),
   )
@@ -15,11 +15,11 @@ fn load_state_cmd(
 fn save_state_cmd(
   emit : @rabbita.Emit[Msg],
   client : @desktop.Client,
-  state : @core.WorkbenchState,
+  state : @contract.WorkbenchState,
 ) -> @rabbita.Cmd {
   @desktop_rabbita.request_cmd(
     client~,
-    endpoint=@core.save_state_endpoint,
+    endpoint=@contract.save_state_endpoint,
     body=state,
     on_response=response => emit(StateSaved(response)),
   )
@@ -29,12 +29,12 @@ fn save_state_cmd(
 fn send_http_cmd(
   emit : @rabbita.Emit[Msg],
   client : @desktop.Client,
-  request : @core.SavedRequest,
+  request : @contract.SavedRequest,
 ) -> @rabbita.Cmd {
   @desktop_rabbita.request_cmd(
     client~,
-    endpoint=@core.send_http_endpoint,
-    body=@core.SendHttpRequest::{ request, },
+    endpoint=@contract.send_http_endpoint,
+    body=@contract.SendHttpRequest::{ request, },
     on_response=response => emit(RequestSent(response)),
   )
 }

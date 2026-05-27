@@ -1,36 +1,45 @@
 ///|
-pub fn default_request() -> SavedRequest {
-  SavedRequest::{
+pub fn default_request() -> @contract.SavedRequest {
+  @contract.SavedRequest::{
     id: "draft",
     name: "Untitled request",
     http_method: Get,
     url: "https://httpbin.org/get",
     headers: [
-      Header::{ name: "Accept", value: "application/json", enabled: true },
+      @contract.Header::{
+        name: "Accept",
+        value: "application/json",
+        enabled: true,
+      },
     ],
     body: "",
   }
 }
 
 ///|
-pub fn display_name(request : SavedRequest) -> String {
+pub fn display_name(request : @contract.SavedRequest) -> String {
   let name = request.name.trim().to_owned()
   if name == "" {
-    "\{method_to_string(request.http_method)} \{request.url}"
+    "\{request.http_method.to_string()} \{request.url}"
   } else {
     name
   }
 }
 
 ///|
-pub fn append_header(headers : Array[Header]) -> Array[Header] {
+pub fn append_header(
+  headers : Array[@contract.Header],
+) -> Array[@contract.Header] {
   let next = headers.copy()
-  next.push(Header::{ name: "", value: "", enabled: true })
+  next.push(@contract.Header::{ name: "", value: "", enabled: true })
   next
 }
 
 ///|
-pub fn remove_header(headers : Array[Header], index : Int) -> Array[Header] {
+pub fn remove_header(
+  headers : Array[@contract.Header],
+  index : Int,
+) -> Array[@contract.Header] {
   let next = []
   let mut i = 0
   for header in headers {
@@ -44,10 +53,10 @@ pub fn remove_header(headers : Array[Header], index : Int) -> Array[Header] {
 
 ///|
 pub fn update_header(
-  headers : Array[Header],
+  headers : Array[@contract.Header],
   index : Int,
-  f : (Header) -> Header,
-) -> Array[Header] {
+  f : (@contract.Header) -> @contract.Header,
+) -> Array[@contract.Header] {
   let next = []
   let mut i = 0
   for header in headers {
@@ -58,7 +67,9 @@ pub fn update_header(
 }
 
 ///|
-pub fn enabled_headers(headers : Array[Header]) -> Map[String, String] {
+pub fn enabled_headers(
+  headers : Array[@contract.Header],
+) -> Map[String, String] {
   let result : Map[String, String] = {}
   for header in headers {
     let name = header.name.trim().to_owned()

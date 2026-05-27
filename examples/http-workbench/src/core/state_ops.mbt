@@ -1,6 +1,6 @@
 ///|
-pub fn default_state() -> WorkbenchState {
-  WorkbenchState::{
+pub fn default_state() -> @contract.WorkbenchState {
+  @contract.WorkbenchState::{
     saved_requests: [],
     recent_history: [],
     active_draft: default_request(),
@@ -9,9 +9,9 @@ pub fn default_state() -> WorkbenchState {
 
 ///|
 pub fn capped_history(
-  entries : Array[HistoryEntry],
-  entry : HistoryEntry,
-) -> Array[HistoryEntry] {
+  entries : Array[@contract.HistoryEntry],
+  entry : @contract.HistoryEntry,
+) -> Array[@contract.HistoryEntry] {
   let next = entries.copy()
   next.insert(0, entry)
   if next.length() > 30 {
@@ -22,10 +22,10 @@ pub fn capped_history(
 
 ///|
 pub fn upsert_saved_request(
-  saved : Array[SavedRequest],
-  draft : SavedRequest,
+  saved : Array[@contract.SavedRequest],
+  draft : @contract.SavedRequest,
   new_id~ : String,
-) -> (Array[SavedRequest], SavedRequest) {
+) -> (Array[@contract.SavedRequest], @contract.SavedRequest) {
   let id = if draft.id == "draft" { new_id } else { draft.id }
   let request = { ..draft, id, name: display_name(draft) }
   let next = []
@@ -46,9 +46,9 @@ pub fn upsert_saved_request(
 
 ///|
 pub fn delete_saved_request(
-  saved : Array[SavedRequest],
+  saved : Array[@contract.SavedRequest],
   id : String,
-) -> Array[SavedRequest] {
+) -> Array[@contract.SavedRequest] {
   let next = []
   for request in saved {
     if request.id != id {

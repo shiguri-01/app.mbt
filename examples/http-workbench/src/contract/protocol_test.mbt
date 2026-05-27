@@ -13,8 +13,18 @@ test "workbench endpoints carry stable command ids" {
 
 ///|
 test "workbench state json roundtrip" {
+  let draft = SavedRequest::{
+    id: "draft",
+    name: "HTTPBin",
+    http_method: Get,
+    url: "https://httpbin.org/get",
+    headers: [
+      Header::{ name: "Accept", value: "application/json", enabled: true },
+    ],
+    body: "",
+  }
   let state = WorkbenchState::{
-    saved_requests: [default_request()],
+    saved_requests: [draft],
     recent_history: [
       HistoryEntry::{
         id: "hist-1",
@@ -27,7 +37,7 @@ test "workbench state json roundtrip" {
         created_at_ms: 1234L,
       },
     ],
-    active_draft: default_request(),
+    active_draft: draft,
   }
   let decoded : WorkbenchState = @json.from_json(state.to_json())
   assert_true(decoded == state)
@@ -35,7 +45,18 @@ test "workbench state json roundtrip" {
 
 ///|
 test "send request and reply json roundtrip" {
-  let request = SendHttpRequest::{ request: default_request() }
+  let request = SendHttpRequest::{
+    request: SavedRequest::{
+      id: "draft",
+      name: "HTTPBin",
+      http_method: Get,
+      url: "https://httpbin.org/get",
+      headers: [
+        Header::{ name: "Accept", value: "application/json", enabled: true },
+      ],
+      body: "",
+    },
+  }
   let reply = SendHttpReply::{
     status: Some(200),
     status_text: "OK",

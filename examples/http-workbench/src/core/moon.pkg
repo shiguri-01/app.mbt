@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/json",
   "moonbitlang/core/string",
-  "shiguri-01/desktop/ipc",
+  "shiguri-01/desktop-http-workbench-example/contract",
 }

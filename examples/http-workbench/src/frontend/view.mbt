@@ -19,10 +19,10 @@ using @html {
 
 ///|
 fn method_option(
-  http_method : @core.HttpMethod,
-  current : @core.HttpMethod,
+  http_method : @contract.HttpMethod,
+  current : @contract.HttpMethod,
 ) -> @rabbita.Html {
-  let label = @core.method_to_string(http_method)
+  let label = http_method.to_string()
   option(value=label, selected=http_method == current, label)
 }
 
@@ -30,7 +30,7 @@ fn method_option(
 fn header_row(
   emit : @rabbita.Emit[Msg],
   index : Int,
-  header : @core.Header,
+  header : @contract.Header,
 ) -> @rabbita.Html {
   div(class="header-row") <| [
     button(
@@ -69,7 +69,7 @@ fn header_row(
 ///|
 fn header_rows(
   emit : @rabbita.Emit[Msg],
-  headers : Array[@core.Header],
+  headers : Array[@contract.Header],
 ) -> Array[@rabbita.Html] {
   let rows = []
   let mut index = 0
@@ -81,7 +81,7 @@ fn header_rows(
 }
 
 ///|
-fn response_view(response : @core.SendHttpReply?) -> @rabbita.Html {
+fn response_view(response : @contract.SendHttpReply?) -> @rabbita.Html {
   match response {
     None => div(class="empty-panel", "No response yet")
     Some(reply) => {
@@ -117,14 +117,14 @@ fn response_view(response : @core.SendHttpReply?) -> @rabbita.Html {
 ///|
 fn saved_request_row(
   emit : @rabbita.Emit[Msg],
-  request : @core.SavedRequest,
+  request : @contract.SavedRequest,
 ) -> @rabbita.Html {
   div(class="saved-row") <| [
     button(
       class="saved-main",
       title="Load request",
       on_click=emit(SelectSaved(request.id)),
-      "\{@core.method_to_string(request.http_method)}  \{@core.display_name(request)}",
+      "\{request.http_method.to_string()}  \{@core.display_name(request)}",
     ),
     button(
       class="icon-button",
@@ -136,14 +136,14 @@ fn saved_request_row(
 }
 
 ///|
-fn history_row(entry : @core.HistoryEntry) -> @rabbita.Html {
+fn history_row(entry : @contract.HistoryEntry) -> @rabbita.Html {
   let result = match (entry.status, entry.error) {
     (Some(status), _) => "\{status}"
     (_, Some(error)) => error
     _ => "-"
   }
   div(class="history-row") <| [
-    span(class="history-method", @core.method_to_string(entry.http_method)),
+    span(class="history-method", entry.http_method.to_string()),
     span(class="history-url", entry.url),
     span(class="history-result", result),
     span(class="history-duration", "\{entry.duration_ms} ms"),
