@@ -37,6 +37,7 @@ the router on a window.
 just check
 just test
 just run-counter-example
+just package-counter-example
 just run-dialogs-example
 just run-file-dialogs-example
 ```

@@ -1,0 +1,13 @@
+{
+  "id": "com.shiguri-01.counter",
+  "name": "MoonBit Counter",
+  "version": "0.1.0",
+  "module_name": "shiguri-01/desktop-counter-example",
+  "host": "examples/counter/src/host",
+  "frontend": "examples/counter/src/frontend",
+  "static_dir": "examples/counter/static",
+  "dist": "dist/counter",
+  "executable": "MoonBitCounter.exe",
+  "bundle": "single-exe",
+  "windows_subsystem": "windows"
+}

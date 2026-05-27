@@ -23,6 +23,10 @@ build-counter-example-frontend:
 run-counter-example: build-counter-example-frontend
     cmd.exe /C tools\msvc-native.cmd moon run examples/counter/src/host --target native
 
+# Package the counter example as a portable Windows app directory.
+package-counter-example:
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/counter/desktop.app.json
+
 # Build the MoonBit JS frontend for the dialogs desktop example.
 build-dialogs-example-frontend:
     moon build examples/dialogs/src/frontend --target js

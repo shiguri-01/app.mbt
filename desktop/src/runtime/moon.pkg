@@ -1,5 +1,6 @@
 import {
   "moonbitlang/async",
+  "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/json",
   "shiguri-01/desktop/ipc",
   "shiguri-01/desktop/runtime/async_driver",
@@ -10,8 +11,11 @@ import {
 supported_targets = "+native"
 
 options(
+  "native-stub": [ "app_paths_win32.cc" ],
   link: {
     "native": {
+      "stub-cc": "cl",
+      "stub-cc-flags": "/std:c++14 /EHsc /utf-8",
       "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",
     },
   },

@@ -39,3 +39,18 @@ are returned as `IpcResponse::Err`.
 
 Window lifecycle, restoration, content loading, message dialogs, and file
 dialogs are unchanged from the higher-level `desktop` package overview.
+
+## Content loading
+
+`Load::Html` embeds an HTML string directly. `Load::Url` navigates the webview
+to a URL. The runtime does not depend on any frontend bundler; applications can
+load frontend output from a dev server, generated HTML, or bundled assets.
+
+Packaged applications can read assets through `resource_text` or
+`resource_bytes`. Embedded single-exe resources are checked first, then the
+runtime falls back to `resources` next to the executable:
+
+```mbt nocheck
+///|
+let html = @desktop.resource_text("index.html")
+```

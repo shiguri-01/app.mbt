@@ -3,11 +3,19 @@ async fn counter_html() -> String {
   guard @env.current_dir() is Some(cwd) else {
     fail("could not determine current directory")
   }
-  let html = @fs.read_file(cwd + "/examples/counter/static/index.html").text()
-  let frontend = @fs.read_file(
-    cwd +
-    "/_build/js/debug/build/shiguri-01/desktop-counter-example/frontend/frontend.js",
-  ).text()
+  let html = match (@desktop.resource_text("index.html") catch { _ => None }) {
+    Some(html) => html
+    None => @fs.read_file(cwd + "/examples/counter/static/index.html").text()
+  }
+  let frontend = match
+    (@desktop.resource_text("frontend.js") catch { _ => None }) {
+    Some(frontend) => frontend
+    None =>
+      @fs.read_file(
+        cwd +
+        "/_build/js/debug/build/shiguri-01/desktop-counter-example/frontend/frontend.js",
+      ).text()
+  }
   html.replace(old="__MOONBIT_COUNTER_FRONTEND__", new=frontend)
 }
 
