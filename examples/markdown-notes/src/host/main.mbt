@@ -51,20 +51,22 @@ fn markdown_filters() -> Array[@desktop.FileFilter] {
 }
 
 ///|
+fn default_app_state() -> @contract.AppState {
+  @core.app_state_from_startup(@core.default_startup_state())
+}
+
+///|
+async fn read_app_state(path : String) -> @contract.AppState {
+  let raw = @fs.read_file(path).text()
+  let json = @json.parse(raw)
+  @json.from_json(json)
+}
+
+///|
 async fn load_state() -> @contract.StartupState {
   let path = state_file_path()
-  if !@fs.exists(path) {
-    return @core.default_startup_state()
-  }
-  let raw = @fs.read_file(path).text() catch {
-    _ => return @core.default_startup_state()
-  }
-  let json = @json.parse(raw) catch {
-    _ => return @core.default_startup_state()
-  }
-  let app_state : @contract.AppState = @json.from_json(json) catch {
-    _ => return @core.default_startup_state()
-  }
+  guard @fs.exists(path) else { @core.default_startup_state() }
+  let app_state = read_app_state(path) catch { _ => default_app_state() }
   @contract.StartupState::{
     recent_files: app_state.recent_files,
     last_file: app_state.last_file,
@@ -139,9 +141,7 @@ fn main {
       ),
       lifecycle=WindowLifecycle(before_close=(window, reason) => {
         ignore(reason)
-        if !is_dirty.val {
-          return Allow
-        }
+        guard is_dirty.val else { Allow }
         let result = window.show_message_dialog(
           "This document has unsaved changes. Close it anyway?",
           title="Unsaved changes",

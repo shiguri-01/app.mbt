@@ -1,24 +1,4 @@
 ///|
-fn topbar_class() -> String {
-  "topbar"
-}
-
-///|
-fn topbar_main_class() -> String {
-  "topbar-main"
-}
-
-///|
-fn title_block_class() -> String {
-  "title-block"
-}
-
-///|
-fn document_title_class() -> String {
-  "document-title"
-}
-
-///|
 fn document_path_class(path : String?) -> String {
   match path {
     Some(_) => "document-path"
@@ -27,26 +7,18 @@ fn document_path_class(path : String?) -> String {
 }
 
 ///|
-fn document_actions_class() -> String {
-  "document-actions"
+fn notice_class(notice : String?) -> String {
+  match notice {
+    Some(_) => "notice"
+    None => "notice empty"
+  }
 }
 
 ///|
-fn topbar_controls_class() -> String {
-  "topbar-controls"
-}
-
-///|
-fn mode_tabs_class() -> String {
-  "mode-tabs"
-}
-
-///|
-fn notice_class(notice : String) -> String {
-  if notice == "" {
-    "notice empty"
-  } else {
-    "notice"
+fn notice_label(notice : String?) -> String {
+  match notice {
+    Some(message) => message
+    None => ""
   }
 }
 
@@ -54,13 +26,13 @@ fn notice_class(notice : String) -> String {
 fn document_path_label(path : String?) -> String {
   match path {
     Some(value) => value
-    None => "\u{00A0}"
+    None => ""
   }
 }
 
 ///|
 fn document_actions(model : NotesModel) -> DomNode {
-  div(class=document_actions_class()) <| [
+  div(class="document-actions") <| [
     action_button({
       label: "Save",
       title: "Save",
@@ -80,28 +52,28 @@ fn document_actions(model : NotesModel) -> DomNode {
 
 ///|
 fn mode_tabs(model : NotesModel) -> DomNode {
-  div(class=mode_tabs_class()) <| [
+  div(class="mode-tabs") <| [
     mode_button({
       label: "Split",
-      active: fn() { model.mode.get() == "split" },
-      on_press: fn() { model.mode.set("split") },
+      active: fn() { model.mode.get() is Split },
+      on_press: fn() { model.mode.set(Split) },
     }),
     mode_button({
       label: "Edit",
-      active: fn() { model.mode.get() == "editor" },
-      on_press: fn() { model.mode.set("editor") },
+      active: fn() { model.mode.get() is Editor },
+      on_press: fn() { model.mode.set(Editor) },
     }),
     mode_button({
       label: "Preview",
-      active: fn() { model.mode.get() == "preview" },
-      on_press: fn() { model.mode.set("preview") },
+      active: fn() { model.mode.get() is Preview },
+      on_press: fn() { model.mode.set(Preview) },
     }),
   ]
 }
 
 ///|
 fn topbar_controls(model : NotesModel) -> DomNode {
-  div(class=topbar_controls_class()) <| [
+  div(class="topbar-controls") <| [
     mode_tabs(model),
     document_actions(model),
   ]
@@ -109,10 +81,10 @@ fn topbar_controls(model : NotesModel) -> DomNode {
 
 ///|
 fn topbar(model : NotesModel) -> DomNode {
-  header_(class=topbar_class()) <| [
-    div(class=topbar_main_class()) <| [
-      div(class=title_block_class()) <| [
-        h1(class=document_title_class()) <| [
+  header_(class="topbar") <| [
+    div(class="topbar-main") <| [
+      div(class="title-block") <| [
+        h1(class="document-title") <| [
           text_dyn(fn() { model.title.get() }),
           text_dyn(fn() { if (model.dirty)() { " *" } else { "" } }),
         ],
@@ -123,7 +95,7 @@ fn topbar(model : NotesModel) -> DomNode {
       topbar_controls(model),
     ],
     div(dyn_class=fn() { notice_class(model.notice.get()) }) <| [
-      text_dyn(fn() { model.notice.get() }),
+      text_dyn(fn() { notice_label(model.notice.get()) }),
     ],
   ]
 }

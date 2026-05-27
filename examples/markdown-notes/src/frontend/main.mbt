@@ -20,20 +20,25 @@ struct NotesModel {
   content : @resource.Signal[String]
   saved_content : @resource.Signal[String]
   recent_files : @resource.Signal[Array[String]]
-  notice : @resource.Signal[String]
+  notice : @resource.Signal[String?]
   busy : @resource.Signal[Bool]
-  mode : @resource.Signal[String]
+  reported_dirty : @resource.Signal[Bool]
+  mode : @resource.Signal[ViewMode]
   dirty : () -> Bool
 }
 
 ///|
-fn NotesModel::notify_dirty(self : NotesModel) -> Unit {
-  self.client.request_callback(
-    @contract.set_dirty_endpoint,
-    @contract.DirtyState::{ dirty: (self.dirty)() },
-    _ => (),
-  )
-  let suffix = if (self.dirty)() { " *" } else { "" }
+fn NotesModel::sync_window_state(self : NotesModel) -> Unit {
+  let dirty = (self.dirty)()
+  if self.reported_dirty.get() != dirty {
+    self.reported_dirty.set(dirty)
+    self.client.request_callback(
+      @contract.set_dirty_endpoint,
+      @contract.DirtyState::{ dirty, },
+      _ => (),
+    )
+  }
+  let suffix = if dirty { " *" } else { "" }
   @dom.document().setTitle(self.title.get() + suffix + " - Markdown Notes")
 }
 
@@ -48,8 +53,8 @@ fn NotesModel::replace_document(
   self.title.set(name)
   self.content.set(content)
   self.saved_content.set(content)
-  self.notice.set("")
-  self.notify_dirty()
+  self.notice.set(None)
+  self.sync_window_state()
 }
 
 ///|
@@ -58,14 +63,41 @@ fn NotesModel::can_discard_current_document(self : NotesModel) -> Bool {
 }
 
 ///|
+fn NotesModel::can_start_file_task(self : NotesModel) -> Bool {
+  !self.busy.get()
+}
+
+///|
 fn NotesModel::start_file_task(self : NotesModel) -> Unit {
   self.busy.set(true)
-  self.notice.set("")
+  self.notice.set(None)
 }
 
 ///|
 fn NotesModel::finish_file_task(self : NotesModel) -> Unit {
   self.busy.set(false)
+}
+
+///|
+fn ipc_error_message(err : @ipc.IpcError) -> String {
+  match err {
+    DecodeError(message) => "Could not decode the desktop response: \{message}"
+    EncodeError(message) => "Could not encode the desktop request: \{message}"
+    HandlerError(message) => message
+    TransportClosed(message) => "Desktop bridge is unavailable: \{message}"
+    UnsupportedVersion(version) => "IPC version mismatch: \{version}"
+    PayloadTooLarge(size~, limit~) =>
+      "Request is too large: \{size} bytes, limit is \{limit} bytes"
+  }
+}
+
+///|
+fn NotesModel::show_file_error(
+  self : NotesModel,
+  action : String,
+  err : @ipc.IpcError,
+) -> Unit {
+  self.notice.set(Some("\{action} failed: \{ipc_error_message(err)}"))
 }
 
 ///|
@@ -85,8 +117,8 @@ fn NotesModel::record_saved_file(
   self.path.set(Some(file.path))
   self.title.set(file.name)
   self.saved_content.set(self.content.get())
-  self.notice.set("")
-  self.notify_dirty()
+  self.notice.set(None)
+  self.sync_window_state()
   self.refresh_startup_state()
 }
 
@@ -98,7 +130,7 @@ fn NotesModel::handle_open_reply(
   self.finish_file_task()
   match response {
     Ok(document) => self.open_document(document)
-    Err(err) => self.notice.set("Open failed: \{to_repr(err)}")
+    Err(err) => self.show_file_error("Open", err)
   }
 }
 
@@ -114,7 +146,7 @@ fn NotesModel::handle_save_reply(
         Some(file) => self.record_saved_file(file)
         None => ()
       }
-    Err(err) => self.notice.set("Save failed: \{to_repr(err)}")
+    Err(err) => self.show_file_error("Save", err)
   }
 }
 
@@ -130,7 +162,7 @@ fn NotesModel::handle_open_dialog_reply(
         Some(document) => self.open_document(document)
         None => ()
       }
-    Err(err) => self.notice.set("Open failed: \{to_repr(err)}")
+    Err(err) => self.show_file_error("Open", err)
   }
 }
 
@@ -146,7 +178,8 @@ fn NotesModel::refresh_startup_state(self : NotesModel) -> Unit {
 
 ///|
 fn NotesModel::open_dialog(self : NotesModel) -> Unit {
-  guard self.can_discard_current_document() else { return }
+  guard self.can_start_file_task() else {  }
+  guard self.can_discard_current_document() else {  }
   self.start_file_task()
   self.client.request_callback(@contract.open_file_dialog_endpoint, (), response => {
     self.handle_open_dialog_reply(response)
@@ -155,7 +188,8 @@ fn NotesModel::open_dialog(self : NotesModel) -> Unit {
 
 ///|
 fn NotesModel::open_recent(self : NotesModel, path : String) -> Unit {
-  guard self.can_discard_current_document() else { return }
+  guard self.can_start_file_task() else {  }
+  guard self.can_discard_current_document() else {  }
   self.start_file_task()
   self.client.request_callback(
     @contract.open_file_endpoint,
@@ -166,6 +200,7 @@ fn NotesModel::open_recent(self : NotesModel, path : String) -> Unit {
 
 ///|
 fn NotesModel::save(self : NotesModel) -> Unit {
+  guard self.can_start_file_task() else {  }
   self.start_file_task()
   self.client.request_callback(
     @contract.save_file_endpoint,
@@ -179,6 +214,7 @@ fn NotesModel::save(self : NotesModel) -> Unit {
 
 ///|
 fn NotesModel::save_as(self : NotesModel) -> Unit {
+  guard self.can_start_file_task() else {  }
   self.start_file_task()
   self.client.request_callback(
     @contract.save_file_as_endpoint,
@@ -192,13 +228,14 @@ fn NotesModel::save_as(self : NotesModel) -> Unit {
 
 ///|
 fn NotesModel::new_document(self : NotesModel) -> Unit {
-  guard self.can_discard_current_document() else { return }
+  guard self.can_start_file_task() else {  }
+  guard self.can_discard_current_document() else {  }
   self.path.set(None)
   self.title.set(@core.file_name(None))
   self.content.set(@core.welcome_markdown())
   self.saved_content.set(@core.welcome_markdown())
-  self.notice.set("")
-  self.notify_dirty()
+  self.notice.set(None)
+  self.sync_window_state()
 }
 
 ///|
@@ -213,9 +250,10 @@ fn create_model() -> NotesModel {
     content,
     saved_content,
     recent_files: signal([]),
-    notice: signal(""),
+    notice: signal(None),
     busy: signal(false),
-    mode: signal("split"),
+    reported_dirty: signal(false),
+    mode: signal(Split),
     dirty,
   }
 }
@@ -226,9 +264,8 @@ fn main {
   let doc = @dom.document()
   guard doc.getElementById("app") is Some(el) else {
     println("Could not find #app")
-    return
   }
   render(el |> DomElement::from_dom, app_view(model))
   model.refresh_startup_state()
-  model.notify_dirty()
+  model.sync_window_state()
 }

@@ -28,10 +28,11 @@ fn action_button(props : ActionButtonProps) -> DomNode {
   button(
     dyn_class=fn() { action_button_class((props.kind)()) },
     attrs=[("title", AttrString(props.title))],
-    dyn_attrs=[
-      ("disabled", attr_dynamic(fn() { (props.disabled)().to_string() })),
-    ],
-    on=events().click(_ => if !(props.disabled)() { (props.on_press)() }),
+    dyn_disabled=props.disabled,
+    on=events().click(_ => {
+      guard !(props.disabled)() else {  }
+      (props.on_press)()
+    }),
   ) <| [
     text(props.label),
   ]

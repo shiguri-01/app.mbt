@@ -355,6 +355,10 @@ button.recent-file:focus-visible {
   font-size: 12px;
 }
 
+.empty-recent.hidden {
+  display: none;
+}
+
 .workspace {
   height: 100%;
   min-height: 0;
@@ -418,6 +422,7 @@ button.recent-file:focus-visible {
   padding: 14px 34px 56px;
   color: var(--text-editor);
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .markdown-preview > :first-child {
@@ -432,6 +437,7 @@ button.recent-file:focus-visible {
 
 .markdown-preview pre {
   overflow: auto;
+  overflow-wrap: normal;
   padding: 12px;
   background: #eef2f4;
   border-radius: 6px;
@@ -439,6 +445,12 @@ button.recent-file:focus-visible {
 
 .markdown-preview code {
   font-family: var(--font-mono);
+  overflow-wrap: break-word;
+}
+
+.markdown-preview pre code {
+  overflow-wrap: normal;
+  white-space: pre;
 }
 
 .markdown-preview blockquote {

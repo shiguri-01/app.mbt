@@ -1,36 +1,6 @@
 ///|
-fn sidebar_shell_class() -> String {
-  "sidebar"
-}
-
-///|
-fn sidebar_header_class() -> String {
-  "sidebar-header"
-}
-
-///|
-fn sidebar_actions_class() -> String {
-  "sidebar-actions"
-}
-
-///|
-fn sidebar_title_class() -> String {
-  "sidebar-title"
-}
-
-///|
-fn recent_header_class() -> String {
-  "recent-header"
-}
-
-///|
-fn recent_list_class() -> String {
-  "recent-list"
-}
-
-///|
 fn sidebar_actions(model : NotesModel) -> DomNode {
-  div(class=sidebar_actions_class()) <| [
+  div(class="sidebar-actions") <| [
     action_button({
       label: "New",
       title: "New document",
@@ -49,11 +19,6 @@ fn sidebar_actions(model : NotesModel) -> DomNode {
 }
 
 ///|
-fn empty_recent_class() -> String {
-  "empty-recent"
-}
-
-///|
 fn recent_file_class(path : String, current_path : String?) -> String {
   match current_path {
     Some(current) =>
@@ -68,20 +33,21 @@ fn recent_file_class(path : String, current_path : String?) -> String {
 
 ///|
 fn sidebar(model : NotesModel) -> DomNode {
-  aside(class=sidebar_shell_class()) <| [
-    div(class=sidebar_header_class()) <| [
+  aside(class="sidebar") <| [
+    div(class="sidebar-header") <| [
       sidebar_actions(model),
     ],
-    div(class=recent_header_class()) <| [
-      h2(class=sidebar_title_class()) <| [
+    div(class="recent-header") <| [
+      h2(class="sidebar-title") <| [
         text("Recent"),
       ],
     ],
-    div(class=recent_list_class()) <| [
+    div(class="recent-list") <| [
       for_each(fn() { model.recent_files.get() }, fn(path, _index) {
         button(
           dyn_class=fn() { recent_file_class(path, model.path.get()) },
           attrs=[("title", AttrString(path))],
+          dyn_disabled=fn() { model.busy.get() },
           on=events().click(_ => model.open_recent(path)),
         ) <| [
           span(class="recent-file-name") <| [
@@ -93,14 +59,16 @@ fn sidebar(model : NotesModel) -> DomNode {
         ]
       }),
     ],
-    div(class=empty_recent_class()) <| [
-      text_dyn(fn() {
+    div(
+      dyn_class=fn() {
         if model.recent_files.get().is_empty() {
-          "No recent files"
+          "empty-recent"
         } else {
-          ""
+          "empty-recent hidden"
         }
-      }),
+      },
+    ) <| [
+      text("No recent files"),
     ],
   ]
 }
