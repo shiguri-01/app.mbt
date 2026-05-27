@@ -62,7 +62,6 @@ button:disabled {
 .sidebar-head,
 .response-meta,
 .saved-row,
-.history-row,
 .top-actions {
   display: flex;
   align-items: center;
@@ -136,24 +135,72 @@ h1 {
 
 .history-row {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 58px 68px;
-  gap: 8px;
+  gap: 5px;
   border-bottom: 1px solid #edf1f5;
   background: transparent;
-  padding: 8px 0;
+  padding: 9px 0;
   font-size: 12px;
 }
 
-.history-url,
-.history-result {
+.history-main,
+.history-detail {
+  display: grid;
+  min-width: 0;
+}
+
+.history-main {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.history-detail {
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  color: #66717f;
+}
+
+.history-name,
+.history-url {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.history-name {
+  color: #22272f;
+  font-weight: 700;
+}
+
 .history-method {
   font-weight: 700;
   color: #0b5cad;
+}
+
+.history-status {
+  border-radius: 999px;
+  background: #eef2f6;
+  color: #536070;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.history-status.ok {
+  background: #e6f4ee;
+  color: #16794c;
+}
+
+.history-status.redirect {
+  background: #fff4d6;
+  color: #8a5a00;
+}
+
+.history-status.bad,
+.history-status.error {
+  background: #fff1f0;
+  color: #b42318;
 }
 
 .field-label {

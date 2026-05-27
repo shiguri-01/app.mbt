@@ -147,17 +147,44 @@ fn saved_request_row(
 }
 
 ///|
-fn history_row(entry : @contract.HistoryEntry) -> @rabbita.Html {
-  let result = match (entry.status, entry.error) {
+fn history_status_text(entry : @contract.HistoryEntry) -> String {
+  match (entry.status, entry.error) {
     (Some(status), _) => "\{status}"
-    (_, Some(error)) => error
-    _ => "-"
+    (_, Some(_)) => "Error"
+    _ => "Pending"
   }
+}
+
+///|
+fn history_status_class(entry : @contract.HistoryEntry) -> String {
+  match (entry.status, entry.error) {
+    (_, Some(_)) => "history-status error"
+    (Some(status), _) =>
+      if status >= 200 && status < 300 {
+        "history-status ok"
+      } else if status >= 300 && status < 400 {
+        "history-status redirect"
+      } else if status >= 400 {
+        "history-status bad"
+      } else {
+        "history-status"
+      }
+    _ => "history-status"
+  }
+}
+
+///|
+fn history_row(entry : @contract.HistoryEntry) -> @rabbita.Html {
   div(class="history-row") <| [
-    span(class="history-method", entry.http_method.to_string()),
-    span(class="history-url", entry.url),
-    span(class="history-result", result),
-    span(class="history-duration", "\{entry.duration_ms} ms"),
+    div(class="history-main") <| [
+      span(class="history-name", entry.name),
+      span(class=history_status_class(entry), history_status_text(entry)),
+    ],
+    div(class="history-detail") <| [
+      span(class="history-method", entry.http_method.to_string()),
+      span(class="history-url", title=entry.url, entry.url),
+      span(class="history-duration", "\{entry.duration_ms} ms"),
+    ],
   ]
 }
 
