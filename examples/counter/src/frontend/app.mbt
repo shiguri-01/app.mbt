@@ -27,26 +27,24 @@ fn CounterModel::render(self : CounterModel) -> Unit {
 }
 
 ///|
-fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
-  self.client.request_endpoint_with_callback(
-    @shared.increment_endpoint,
-    @shared.IncrementRequest::{ amount, },
-    response => self.handle_count_response(response),
-  )
+async fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
+  let response = self.client.request(@shared.increment_endpoint, @shared.IncrementRequest::{
+    amount,
+  })
+  self.handle_count_response(response)
 }
 
 ///|
-fn CounterModel::reset(self : CounterModel) -> Unit {
-  self.client.request_endpoint_with_callback(@shared.reset_endpoint, (), response => {
-    self.handle_count_response(response)
-  })
+async fn CounterModel::reset(self : CounterModel) -> Unit {
+  let response = self.client.request(@shared.reset_endpoint, ())
+  self.handle_count_response(response)
 }
 
 ///|
 fn main {
   let model = { count: 0, view: element_by_id("count"), client: Client() }
-  element_by_id("inc").on_click(() => model.increment(1))
-  element_by_id("dec").on_click(() => model.increment(-1))
-  element_by_id("reset").on_click(() => model.reset())
+  element_by_id("inc").on_click_async(() => model.increment(1))
+  element_by_id("dec").on_click_async(() => model.increment(-1))
+  element_by_id("reset").on_click_async(() => model.reset())
   model.render()
 }

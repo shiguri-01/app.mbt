@@ -102,15 +102,17 @@ fn main {
         load=Html(html),
       ),
     )
-    window.handle_ipc_endpoint(@shared.show_info_endpoint, handler=_request => {
-      show_info_dialog(window)
-    })
-    window.handle_ipc_endpoint(@shared.show_warning_endpoint, handler=_request => {
-      show_warning_dialog(window)
-    })
-    window.handle_ipc_endpoint(@shared.ask_question_endpoint, handler=_request => {
-      ask_question_dialog(window)
-    })
+    let router = @desktop.IpcRouter::new()
+      .handle(@shared.show_info_endpoint, handler=_request => {
+        show_info_dialog(window)
+      })
+      .handle(@shared.show_warning_endpoint, handler=_request => {
+        show_warning_dialog(window)
+      })
+      .handle(@shared.ask_question_endpoint, handler=_request => {
+        ask_question_dialog(window)
+      })
+    window.mount_ipc(router)
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }

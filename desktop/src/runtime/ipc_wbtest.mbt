@@ -9,13 +9,6 @@ enum TestEvent {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-fn command_id(command : TestCommand) -> @ipc.CommandId {
-  match command {
-    Increment(_) => @ipc.CommandId("counter.increment")
-  }
-}
-
-///|
 fn bridge_request(body : TestCommand) -> String {
   let raw = @ipc.RequestFrame(body).stringify()
   Json::array([Json::string(raw)]).stringify()
@@ -29,12 +22,9 @@ test "binding payload extracts first bridge argument" {
 }
 
 ///|
-test "binding ipc response returns typed ok response" {
-  let policy = @ipc.IpcPolicy::allow(classify=command_id, allowed=[
-    @ipc.CommandId("counter.increment"),
-  ])
+test "binding endpoint response returns typed ok response" {
   let req = bridge_request(Increment(amount=4))
-  let raw = binding_ipc_response(req, policy, command => {
+  let raw = binding_endpoint_response(req, 65536, command => {
     match command {
       Increment(amount~) => CountChanged(amount + 1)
     }
@@ -44,9 +34,8 @@ test "binding ipc response returns typed ok response" {
 }
 
 ///|
-test "binding ipc response reports decode error" {
-  let policy = @ipc.IpcPolicy::allow_all(classify=command_id)
-  let raw = binding_ipc_response("[1]", policy, (_ : TestCommand) => {
+test "binding endpoint response reports decode error" {
+  let raw = binding_endpoint_response("[1]", 65536, (_ : TestCommand) => {
     CountChanged(0)
   })
   let frame : @ipc.ResponseFrame[TestEvent] = @json.from_json(@json.parse(raw))
@@ -54,16 +43,10 @@ test "binding ipc response reports decode error" {
 }
 
 ///|
-test "binding ipc response reports unauthorized command" {
-  let policy = @ipc.IpcPolicy::allow(classify=command_id, allowed=[
-    @ipc.CommandId("counter.reset"),
-  ])
-  let raw = binding_ipc_response(bridge_request(Increment(amount=1)), policy, (
+test "binding endpoint response reports payload size limit" {
+  let raw = binding_endpoint_response(bridge_request(Increment(amount=1)), 1, (
     _ : TestCommand,
-  ) => CountChanged(0))
+  ) => CountChanged(1))
   let frame : @ipc.ResponseFrame[TestEvent] = @json.from_json(@json.parse(raw))
-  assert_true(
-    frame.response
-    is Err(UnauthorizedCommand(@ipc.CommandId("counter.increment"))),
-  )
+  assert_true(frame.response is Err(PayloadTooLarge(size=_, limit=1)))
 }

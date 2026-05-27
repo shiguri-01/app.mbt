@@ -62,20 +62,22 @@ fn main {
     )
     window.set_title("MoonBit Counter")
     let count = Ref(0)
-    window.handle_ipc_endpoint(@shared.increment_endpoint, handler=request => {
-      @async.sleep(1)
-      let (next, event) = handle_command(count.val, request)
-      count.val = next
-      event
-    })
-    window.handle_ipc_endpoint(@shared.reset_endpoint, handler=_request => {
-      @async.sleep(1)
-      count.val = 0
-      @shared.CountChangedReply::{ count: 0 }
-    })
-    window.handle_ipc_endpoint(@shared.set_title_endpoint, handler=request => @shared.WindowTitleChangedReply::{
-      title: request.title,
-    })
+    let router = @desktop.IpcRouter::new()
+      .handle(@shared.increment_endpoint, handler=request => {
+        @async.sleep(1)
+        let (next, event) = handle_command(count.val, request)
+        count.val = next
+        event
+      })
+      .handle(@shared.reset_endpoint, handler=_request => {
+        @async.sleep(1)
+        count.val = 0
+        @shared.CountChangedReply::{ count: 0 }
+      })
+      .handle(@shared.set_title_endpoint, handler=request => @shared.WindowTitleChangedReply::{
+        title: request.title,
+      })
+    window.mount_ipc(router)
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }

@@ -5,7 +5,9 @@ pub(all) enum FileDialogEvent {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub let event_endpoint : @ipc.IpcEvent[FileDialogEvent] = @ipc.IpcEvent::default()
+pub let event_endpoint : @ipc.IpcEvent[FileDialogEvent] = @ipc.IpcEvent::named(
+  "file_dialog.event",
+)
 
 ///|
 pub let open_file_endpoint : @ipc.IpcEndpoint[Unit, FileDialogEvent] = @ipc.IpcEndpoint::named(

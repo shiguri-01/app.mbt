@@ -12,7 +12,9 @@ pub(all) enum DialogEvent {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub let event_endpoint : @ipc.IpcEvent[DialogEvent] = @ipc.IpcEvent::default()
+pub let event_endpoint : @ipc.IpcEvent[DialogEvent] = @ipc.IpcEvent::named(
+  "dialog.event",
+)
 
 ///|
 pub let show_info_endpoint : @ipc.IpcEndpoint[Unit, DialogEvent] = @ipc.IpcEndpoint::named(

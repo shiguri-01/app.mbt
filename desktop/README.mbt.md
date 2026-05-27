@@ -9,17 +9,14 @@ as separate packages:
 - `runtime`: native host runtime backed by `shiguri-01/webview`.
 - `frontend`: JS-target helper package that does not depend on a UI library.
 
-Applications define their own nested enum protocol and derive `ToJson` /
-`FromJson` for it.
+Applications define shared endpoint values and request/reply protocol types,
+then derive or implement `ToJson` / `FromJson` for those types.
 
 Native applications start with `@desktop.run`, receive an `App`, and create one
 or more windows with `App::create_window`. Native code should use
-`Window::handle_ipc_endpoint` with shared command endpoints such as
-`IpcEndpoint[IncrementRequest, CountChangedReply]`; frontend code can use
-`Client::request_endpoint_async` or the endpoint callback helper.
-
-For long-running host work that must finish after the callback returns,
-`Window::handle_deferred` remains available as a lower-level escape hatch.
+`IpcRouter::handle` with shared command endpoints such as
+`IpcEndpoint[IncrementRequest, CountChangedReply]`, then mount the router with
+`Window::mount_ipc`. Frontend code uses `Client::request`.
 
 `WindowId` values are runtime-only. Use `WindowOptions.key` and
 `WindowSnapshot.key` for persistent startup restoration.
@@ -35,13 +32,9 @@ Package-level README files contain the API-oriented details:
 
 ## Async IPC direction
 
-The runtime uses async host handlers today. `Window::handle_ipc` runs each
+The runtime uses async host handlers today. `IpcRouter::handle` runs each
 handler to completion inside a runtime-owned async driver, so MoonBit async APIs
 are usable but long handlers still occupy the webview callback path.
-
-For work that must complete after the callback returns, use
-`Window::handle_deferred` and `ResponseSender`. Lower-level async driver
-details are kept in `src/runtime/async_driver`.
 
 On Windows, native builds use the bundled webview C++ stub. Run native
 test/build/run commands from a Visual Studio C++ environment or through the

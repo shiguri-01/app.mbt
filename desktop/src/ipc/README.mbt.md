@@ -30,8 +30,5 @@ command id string and binds one request type to one response type, so frontend
 and runtime code use the same `T` and `R` pair instead of each side choosing
 types independently.
 
-`IpcPolicy[T]` remains available for lower-level enum-aggregated bridges. It
-stores a plain `classify : (T) -> CommandId` function and an optional allowlist.
-
-`default_event_name()` returns `moonbitDesktopEvent` for host-to-frontend
-events.
+Host-to-frontend events use the same typed descriptor style through
+`IpcEvent[T]`.

@@ -1,11 +1,9 @@
 ///|
 pub fn info_message() -> String {
-  let client = @desktop.Client()
-  client.frame(())
+  @ipc.RequestFrame(()).stringify()
 }
 
 ///|
 pub fn question_message() -> String {
-  let client = @desktop.Client()
-  client.frame(())
+  @ipc.RequestFrame(()).stringify()
 }

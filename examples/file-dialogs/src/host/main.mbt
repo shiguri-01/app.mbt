@@ -121,18 +121,20 @@ fn main {
         load=Html(html),
       ),
     )
-    window.handle_ipc_endpoint(@shared.open_file_endpoint, handler=_request => {
-      selected_path(window.open_file_dialog(filters=filters()))
-    })
-    window.handle_ipc_endpoint(@shared.open_files_endpoint, handler=_request => {
-      selected_paths(window.open_files_dialog(filters=filters()))
-    })
-    window.handle_ipc_endpoint(@shared.save_file_endpoint, handler=_request => {
-      save_sample_file(window)
-    })
-    window.handle_ipc_endpoint(@shared.open_folder_endpoint, handler=_request => {
-      selected_path(window.open_folder_dialog())
-    })
+    let router = @desktop.IpcRouter::new()
+      .handle(@shared.open_file_endpoint, handler=_request => {
+        selected_path(window.open_file_dialog(filters=filters()))
+      })
+      .handle(@shared.open_files_endpoint, handler=_request => {
+        selected_paths(window.open_files_dialog(filters=filters()))
+      })
+      .handle(@shared.save_file_endpoint, handler=_request => {
+        save_sample_file(window)
+      })
+      .handle(@shared.open_folder_endpoint, handler=_request => {
+        selected_path(window.open_folder_dialog())
+      })
+    window.mount_ipc(router)
   }) catch {
     err => println("desktop runtime failed: \{to_repr(err)}")
   }

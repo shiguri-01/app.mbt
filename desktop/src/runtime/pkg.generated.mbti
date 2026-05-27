@@ -8,10 +8,6 @@ import {
 }
 
 // Values
-pub fn default_bridge_name() -> String
-
-pub fn default_event_name() -> String
-
 pub fn run(options? : AppOptions, lifecycle? : AppLifecycle, on_startup~ : async (App) -> Unit) -> Unit raise DesktopError
 
 // Errors
@@ -69,6 +65,12 @@ pub(all) struct FileFilter {
   extensions : Array[String]
 } derive(Eq, @debug.Debug)
 
+pub struct IpcRouter {
+  // private fields
+}
+pub fn[T : @json.FromJson, R : ToJson] IpcRouter::handle(Self, @ipc.IpcEndpoint[T, R], max_payload_bytes? : Int, handler~ : async (T) -> R) -> Self
+pub fn IpcRouter::new() -> Self
+
 pub(all) enum Load {
   Url(String)
   Html(String)
@@ -101,32 +103,20 @@ pub(all) enum QuitReason {
   Programmatic
 } derive(Eq, @debug.Debug)
 
-pub struct ResponseSender {
-  // private fields
-}
-pub fn ResponseSender::reject(Self, @ipc.IpcError) -> Unit raise DesktopError
-pub fn[T : ToJson] ResponseSender::resolve(Self, T) -> Unit raise DesktopError
-
 pub struct Window {
   // private fields
 }
 pub fn Window::close(Self) -> Unit raise DesktopError
-pub fn[T : ToJson] Window::emit_event(Self, String, T) -> Unit raise DesktopError
-pub fn[T : ToJson] Window::emit_event_default(Self, T) -> Unit raise DesktopError
-pub fn[T : ToJson] Window::emit_event_endpoint(Self, @ipc.IpcEvent[T], T) -> Unit raise DesktopError
+pub fn[T : ToJson] Window::emit(Self, @ipc.IpcEvent[T], T) -> Unit raise DesktopError
 pub fn Window::eval(Self, String) -> Unit raise DesktopError
 pub fn Window::focus(Self) -> Unit raise DesktopError
-pub fn[T : @json.FromJson] Window::handle_deferred(Self, String, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
-pub fn[T : @json.FromJson] Window::handle_deferred_default(Self, (T, ResponseSender) -> Unit raise DesktopError) -> Unit raise DesktopError
-pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc(Self, String, policy~ : @ipc.IpcPolicy[T], handler~ : async (T) -> R) -> Unit raise DesktopError
-pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc_default(Self, policy~ : @ipc.IpcPolicy[T], handler~ : async (T) -> R) -> Unit raise DesktopError
-pub fn[T : @json.FromJson, R : ToJson] Window::handle_ipc_endpoint(Self, @ipc.IpcEndpoint[T, R], max_payload_bytes? : Int, handler~ : async (T) -> R) -> Unit raise DesktopError
 pub fn Window::hide(Self) -> Unit raise DesktopError
 pub fn Window::id(Self) -> WindowId
 pub fn Window::is_closed(Self) -> Bool
 pub fn Window::key(Self) -> String?
 pub fn Window::maximize(Self) -> Unit raise DesktopError
 pub fn Window::minimize(Self) -> Unit raise DesktopError
+pub fn Window::mount_ipc(Self, IpcRouter) -> Unit raise DesktopError
 pub fn Window::navigate(Self, String) -> Unit raise DesktopError
 pub fn Window::open_file_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> String? raise DesktopError
 pub fn Window::open_files_dialog(Self, filters? : Array[FileFilter], default_path? : String) -> Array[String]? raise DesktopError

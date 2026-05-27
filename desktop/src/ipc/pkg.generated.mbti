@@ -4,14 +4,9 @@ package "shiguri-01/desktop/ipc"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
-  "moonbitlang/core/set",
 }
 
 // Values
-pub fn default_bridge_name() -> String
-
-pub fn default_event_name() -> String
-
 pub fn parse_request_frame(String) -> RequestFrame raise IpcError
 
 pub fn[T : @json.FromJson] parse_response_frame(String) -> ResponseFrame[T] raise IpcError
@@ -28,7 +23,6 @@ pub(all) suberror IpcError {
   TransportClosed(String)
   UnsupportedVersion(Int)
   PayloadTooLarge(size~ : Int, limit~ : Int)
-  UnauthorizedCommand(CommandId)
 } derive(Eq, @debug.Debug)
 pub impl ToJson for IpcError
 pub impl @json.FromJson for IpcError
@@ -39,28 +33,18 @@ pub fn CommandId::to_string(Self) -> String
 pub impl ToJson for CommandId
 pub impl @json.FromJson for CommandId
 
-pub struct IpcEndpoint[T, R](CommandId, T?, R?)
+pub struct IpcEndpoint[T, R] {
+  // private fields
+}
 pub fn[T, R] IpcEndpoint::command_id(Self[T, R]) -> CommandId
-pub fn[T, R] IpcEndpoint::default() -> Self[T, R]
-pub fn[T, R] IpcEndpoint::from_command_id(CommandId) -> Self[T, R]
 pub fn[T, R] IpcEndpoint::name(Self[T, R]) -> String
 pub fn[T, R] IpcEndpoint::named(String) -> Self[T, R]
 
-pub struct IpcEvent[E](String, E?)
-pub fn[E] IpcEvent::default() -> Self[E]
+pub struct IpcEvent[E] {
+  // private fields
+}
 pub fn[E] IpcEvent::name(Self[E]) -> String
 pub fn[E] IpcEvent::named(String) -> Self[E]
-
-pub struct IpcPolicy[T] {
-  classify : (T) -> CommandId
-  allowed : @set.Set[CommandId]?
-  max_payload_bytes : Int
-}
-pub fn[T] IpcPolicy::allow(classify~ : (T) -> CommandId, allowed~ : Array[CommandId], max_payload_bytes? : Int) -> Self[T]
-pub fn[T] IpcPolicy::allow_all(classify~ : (T) -> CommandId, max_payload_bytes? : Int) -> Self[T]
-pub fn[T, R] IpcPolicy::allow_endpoint(classify~ : (T) -> CommandId, IpcEndpoint[T, R], max_payload_bytes? : Int) -> Self[T]
-pub fn[T, R] IpcPolicy::allow_endpoints(classify~ : (T) -> CommandId, endpoints~ : Array[IpcEndpoint[T, R]], max_payload_bytes? : Int) -> Self[T]
-pub fn[T] IpcPolicy::check(Self[T], T) -> Unit raise IpcError
 
 pub(all) enum IpcResponse[T] {
   Ok(T)

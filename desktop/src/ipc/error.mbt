@@ -7,7 +7,6 @@ pub(all) suberror IpcError {
   TransportClosed(String)
   UnsupportedVersion(Int)
   PayloadTooLarge(size~ : Int, limit~ : Int)
-  UnauthorizedCommand(CommandId)
 } derive(Debug, Eq)
 
 ///|
@@ -34,8 +33,6 @@ pub impl ToJson for IpcError with fn to_json(self) {
         "size": size.to_json(),
         "limit": limit.to_json(),
       })
-    UnauthorizedCommand(command) =>
-      ipc_error_object("UnauthorizedCommand", { "command": command.to_json() })
   }
 }
 
@@ -57,13 +54,6 @@ pub impl @json.FromJson for IpcError with fn from_json(json, path) {
             size=int_field(object, "size", path),
             limit=int_field(object, "limit", path),
           )
-        "UnauthorizedCommand" => {
-          let command : CommandId = @json.FromJson::from_json(
-            field(object, "command", path),
-            path.add_key("command"),
-          )
-          UnauthorizedCommand(command)
-        }
         _ => json_decode_error(path.add_key("tag"), "unknown IPC error tag")
       }
     }

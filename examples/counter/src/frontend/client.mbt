@@ -1,11 +1,9 @@
 ///|
 pub fn increment_message(amount : Int) -> String {
-  let client = @desktop.Client()
-  client.frame(@shared.IncrementRequest::{ amount, })
+  @ipc.RequestFrame(@shared.IncrementRequest::{ amount, }).stringify()
 }
 
 ///|
 pub fn set_title_message(title : String) -> String {
-  let client = @desktop.Client()
-  client.frame(@shared.SetTitleRequest::{ title, })
+  @ipc.RequestFrame(@shared.SetTitleRequest::{ title, }).stringify()
 }

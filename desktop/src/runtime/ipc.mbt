@@ -27,20 +27,6 @@ fn err_response(err : @ipc.IpcError) -> String {
 }
 
 ///|
-fn[T : FromJson] decode_command(
-  raw : String,
-  policy : @ipc.IpcPolicy[T],
-) -> T raise @ipc.IpcError {
-  if payload_too_large(raw, policy.max_payload_bytes) {
-    raise PayloadTooLarge(size=raw.length(), limit=policy.max_payload_bytes)
-  }
-  let frame = @ipc.parse_request_frame(raw)
-  let command : T = frame.decode()
-  policy.check(command)
-  command
-}
-
-///|
 fn[T : FromJson] decode_endpoint_command(
   raw : String,
   max_payload_bytes : Int,
@@ -50,25 +36,6 @@ fn[T : FromJson] decode_endpoint_command(
   }
   let frame = @ipc.parse_request_frame(raw)
   frame.decode()
-}
-
-///|
-fn[T : FromJson, R : ToJson] binding_ipc_response(
-  req : String,
-  policy : @ipc.IpcPolicy[T],
-  handler : async (T) -> R,
-) -> String {
-  let raw = binding_payload(req) catch { err => return err_response(err) }
-  let command = decode_command(raw, policy) catch {
-    err => return err_response(err)
-  }
-  let response = @async_driver.run_response(() => {
-    let value = handler(command) catch {
-      err => return Err(HandlerError(error_to_string(err)))
-    }
-    Ok(value)
-  })
-  @ipc.ResponseFrame(response).stringify()
 }
 
 ///|
@@ -91,56 +58,7 @@ fn[T : FromJson, R : ToJson] binding_endpoint_response(
 }
 
 ///|
-fn[T : FromJson] binding_deferred_request(
-  view : @webview.WebView,
-  id : String,
-  req : String,
-  handler : (T, ResponseSender) -> Unit raise DesktopError,
-) -> Unit raise DesktopError {
-  let sender = ResponseSender(view, id)
-  let raw = binding_payload(req) catch {
-    err => {
-      sender.reject(err)
-      return
-    }
-  }
-  let frame = @ipc.parse_request_frame(raw) catch {
-    err => {
-      sender.reject(err)
-      return
-    }
-  }
-  let command : T = frame.decode() catch {
-    err => {
-      sender.reject(err)
-      return
-    }
-  }
-  handler(command, sender) catch {
-    err => sender.reject_desktop(err)
-  }
-}
-
-///|
-/// Bind a typed async IPC handler to this window.
-pub fn[T : FromJson, R : ToJson] Window::handle_ipc(
-  self : Window,
-  name : String,
-  policy~ : @ipc.IpcPolicy[T],
-  handler~ : async (T) -> R,
-) -> Unit raise DesktopError {
-  self.view.bind(name, (id, req) => {
-    let result = binding_ipc_response(req, policy, handler)
-    self.view.return_(id, 0, result) catch {
-      _ => ()
-    }
-  }) catch {
-    err => raise_webview(err)
-  }
-}
-
-///|
-pub fn[T : FromJson, R : ToJson] Window::handle_ipc_endpoint(
+fn[T : FromJson, R : ToJson] Window::bind_ipc_endpoint(
   self : Window,
   endpoint : @ipc.IpcEndpoint[T, R],
   max_payload_bytes? : Int = 65536,
@@ -157,26 +75,7 @@ pub fn[T : FromJson, R : ToJson] Window::handle_ipc_endpoint(
 }
 
 ///|
-/// Bind a typed IPC handler that may respond after the binding callback returns.
-///
-/// This is a low-level escape hatch. Prefer `Window::handle_ipc` for ordinary
-/// request/response commands.
-pub fn[T : FromJson] Window::handle_deferred(
-  self : Window,
-  name : String,
-  handler : (T, ResponseSender) -> Unit raise DesktopError,
-) -> Unit raise DesktopError {
-  self.view.bind(name, (id, req) => {
-    binding_deferred_request(self.view, id, req, handler) catch {
-      _ => ()
-    }
-  }) catch {
-    err => raise_webview(err)
-  }
-}
-
-///|
-pub fn[T : ToJson] Window::emit_event(
+fn[T : ToJson] Window::emit_raw(
   self : Window,
   name : String,
   event : T,
@@ -194,10 +93,10 @@ pub fn[T : ToJson] Window::emit_event(
 }
 
 ///|
-pub fn[T : ToJson] Window::emit_event_endpoint(
+pub fn[T : ToJson] Window::emit(
   self : Window,
   endpoint : @ipc.IpcEvent[T],
   event : T,
 ) -> Unit raise DesktopError {
-  self.emit_event(endpoint.name(), event)
+  self.emit_raw(endpoint.name(), event)
 }

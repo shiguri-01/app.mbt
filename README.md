@@ -15,7 +15,7 @@ This repository is a `moon.work` workspace with five members:
 
 `desktop` is split into focused packages:
 
-- `desktop/src/ipc`: target-agnostic frames, responses, and IPC policies.
+- `desktop/src/ipc`: target-agnostic endpoints, frames, responses, and errors.
 - `desktop/src/runtime`: app lifecycle, native windows, and IPC handlers.
 - `desktop/src/frontend`: JS-target client helpers for frontend code.
 
@@ -25,13 +25,11 @@ The project can build prototype desktop apps today. The runtime is centered on
 an `App` owner that manages the native event loop, one or more windows, window
 ids, close/focus/minimize/maximize operations, lifecycle callbacks, and optional
 startup window restoration. It also supports typed async request/response IPC,
-command allowlists, payload size limits, host-to-frontend events, and deferred
-responses through `ResponseSender`.
+payload size limits, and host-to-frontend events.
 
-Async IPC handlers currently run inside the webview callback path. Use
-shared `IpcEndpoint[T, R]` values with `Window::handle_ipc_endpoint` for
-ordinary typed commands, and `Window::handle_deferred` only for host work that
-must complete later without blocking that callback.
+Async IPC handlers currently run inside the webview callback path. Define
+shared `IpcEndpoint[T, R]` values, register them on an `IpcRouter`, and mount
+the router on a window.
 
 ## Common Commands
 

@@ -15,5 +15,10 @@ extern "js" fn Element::set_text(self : Element, text : String) -> Unit =
 ///|
 extern "js" fn Element::on_click(self : Element, handler : () -> Unit) -> Unit =
   #| (element, handler) => {
-  #|   element.addEventListener("click", handler)
+  #|   element.addEventListener("click", () => handler())
   #| }
+
+///|
+fn Element::on_click_async(self : Element, handler : async () -> Unit) -> Unit {
+  self.on_click(() => ignore(@js_async.Promise::from_async(handler)))
+}

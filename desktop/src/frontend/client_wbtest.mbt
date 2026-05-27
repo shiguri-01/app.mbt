@@ -5,7 +5,7 @@ enum TestCommand {
 
 ///|
 test "client serializes request frame" {
-  let raw = Client().frame(Increment(amount=2))
+  let raw = encode_request_frame(Increment(amount=2))
   let frame = @ipc.parse_request_frame(raw)
   let decoded : TestCommand = frame.decode()
   assert_true(decoded == Increment(amount=2))
