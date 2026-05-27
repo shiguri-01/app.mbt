@@ -1,0 +1,18 @@
+import {
+  "mizchi/js/browser/dom",
+  "mizchi/js/core" @js,
+  "mizchi/luna/dom" @element,
+  "mizchi/luna/js/resource",
+  "mizchi/markdown",
+  "mizchi/signals",
+  "shiguri-01/desktop/frontend" @desktop,
+  "shiguri-01/desktop/ipc",
+  "shiguri-01/desktop-markdown-notes-example/contract",
+  "shiguri-01/desktop-markdown-notes-example/core",
+}
+
+supported_targets = "+js"
+
+options(
+  "is-main": true,
+)

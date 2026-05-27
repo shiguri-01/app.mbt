@@ -4,6 +4,7 @@ members = [
   "./examples/dialogs",
   "./examples/file-dialogs",
   "./examples/http-workbench",
+  "./examples/markdown-notes",
   "./packager",
   "./webview",
 ]

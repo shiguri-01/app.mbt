@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "moon build src/frontend --target js --release && vite build"
+  },
+  "dependencies": {
+    "vite": "^7.2.4"
+  }
+}
