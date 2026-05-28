@@ -90,7 +90,7 @@ async fn perform_http_request(
 ) -> (@http.Response, String, Int64) {
   let headers = @core.enabled_headers(request.headers)
   let (protocol, port, host, path) = parse_url(request.url.trim().to_owned())
-  let client = @http.Client::new("\{protocol}://\{host}:\{port}")
+  let client = @http.Client("\{protocol}://\{host}:\{port}")
   defer client.close()
   let http_method = method_to_request_method(request.http_method)
   let start = @async.now()
