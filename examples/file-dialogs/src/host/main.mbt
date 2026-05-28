@@ -121,7 +121,7 @@ fn main {
         load=Html(html),
       ),
     )
-    let router = @desktop.IpcRouter::new()
+    let router = @desktop.IpcRouter()
       .handle(@shared.open_file_endpoint, handler=_request => {
         selected_path(window.open_file_dialog(filters=filters()))
       })

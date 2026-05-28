@@ -32,8 +32,8 @@ pub(all) suberror DesktopError {
 pub struct App {
   // private fields
 }
+pub fn App::App(options? : AppOptions, lifecycle? : AppLifecycle) -> Self
 pub fn App::create_window(Self, WindowOptions, lifecycle? : WindowLifecycle) -> Window raise DesktopError
-pub fn App::new(options? : AppOptions, lifecycle? : AppLifecycle) -> Self
 pub fn App::quit(Self) -> Unit raise DesktopError
 pub fn App::request_quit(Self) -> Unit raise DesktopError
 pub fn App::restore_windows(Self, lifecycle? : WindowLifecycle) -> Array[Window] raise DesktopError
@@ -78,8 +78,8 @@ pub(all) struct FileFilter {
 pub struct IpcRouter {
   // private fields
 }
+pub fn IpcRouter::IpcRouter() -> Self
 pub fn[T : @json.FromJson, R : ToJson] IpcRouter::handle(Self, @ipc.IpcEndpoint[T, R], max_payload_bytes? : Int, handler~ : async (T) -> R) -> Self
-pub fn IpcRouter::new() -> Self
 
 pub(all) enum Load {
   Url(String)

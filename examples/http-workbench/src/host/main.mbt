@@ -189,7 +189,7 @@ fn main {
         load=Html(html),
       ),
     )
-    let router = @desktop.IpcRouter::new()
+    let router = @desktop.IpcRouter()
       .handle(@contract.load_state_endpoint, handler=_ => {
         load_state_from_path(state_file_path())
       })

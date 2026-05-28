@@ -4,7 +4,7 @@ pub struct IpcRouter {
 }
 
 ///|
-pub fn IpcRouter::new() -> IpcRouter {
+pub fn IpcRouter::IpcRouter() -> IpcRouter {
   { routes: [] }
 }
 

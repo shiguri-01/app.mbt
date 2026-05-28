@@ -102,7 +102,7 @@ fn main {
         load=Html(html),
       ),
     )
-    let router = @desktop.IpcRouter::new()
+    let router = @desktop.IpcRouter()
       .handle(@shared.show_info_endpoint, handler=_request => {
         show_info_dialog(window)
       })

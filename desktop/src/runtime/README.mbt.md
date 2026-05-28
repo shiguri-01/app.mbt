@@ -20,7 +20,7 @@ Applications normally create windows from `App::create_window`, register shared
       load=Html(html),
     ),
   )
-  let router = @desktop.IpcRouter::new()
+  let router = @desktop.IpcRouter()
     .handle(@shared.increment_endpoint, handler=request => {
       @async.sleep(1)
       handle_increment(request)

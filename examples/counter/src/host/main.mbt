@@ -70,7 +70,7 @@ fn main {
     )
     window.set_title("MoonBit Counter")
     let count = Ref(0)
-    let router = @desktop.IpcRouter::new()
+    let router = @desktop.IpcRouter()
       .handle(@shared.increment_endpoint, handler=request => {
         @async.sleep(1)
         let (next, event) = handle_command(count.val, request)

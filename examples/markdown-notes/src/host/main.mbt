@@ -155,7 +155,7 @@ fn main {
         }
       }),
     )
-    let router = @desktop.IpcRouter::new()
+    let router = @desktop.IpcRouter()
       .handle(@contract.load_startup_state_endpoint, handler=_ => load_state())
       .handle(@contract.open_file_dialog_endpoint, handler=_ => {
         match window.open_file_dialog(filters=markdown_filters()) {

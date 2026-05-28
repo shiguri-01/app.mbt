@@ -41,7 +41,7 @@ pub fn AppOptions::default() -> AppOptions {
 }
 
 ///|
-pub fn App::new(
+pub fn App::App(
   options? : AppOptions = AppOptions::default(),
   lifecycle? : AppLifecycle,
 ) -> App {
@@ -350,5 +350,5 @@ pub fn run(
   lifecycle? : AppLifecycle,
   on_startup~ : async (App) -> Unit,
 ) -> Unit raise DesktopError {
-  App::new(options~, lifecycle?).run(on_startup~)
+  App(options~, lifecycle?).run(on_startup~)
 }
