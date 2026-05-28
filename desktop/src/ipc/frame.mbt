@@ -47,11 +47,13 @@ pub(all) struct RequestFrame {
 } derive(Eq, Debug)
 
 ///|
+/// Encode an application request body in the current IPC frame format.
 pub fn[T : ToJson] RequestFrame::RequestFrame(body : T) -> RequestFrame {
   { version: ipc_version, payload: body.to_json() }
 }
 
 ///|
+/// Decode the application payload after validating the frame version.
 pub fn[T : @json.FromJson] RequestFrame::decode(
   self : RequestFrame,
 ) -> T raise IpcError {
@@ -64,6 +66,7 @@ pub fn[T : @json.FromJson] RequestFrame::decode(
 }
 
 ///|
+/// Serialize this request frame to JSON text.
 pub fn RequestFrame::stringify(self : RequestFrame) -> String {
   self.to_json().stringify()
 }
@@ -86,6 +89,7 @@ pub impl @json.FromJson for RequestFrame with fn from_json(json, path) {
 }
 
 ///|
+/// Parse JSON text into a request frame.
 pub fn parse_request_frame(raw : String) -> RequestFrame raise IpcError {
   let json = @json.parse(raw) catch {
     err => raise DecodeError(err.to_string())
@@ -139,6 +143,7 @@ pub(all) struct ResponseFrame[T] {
 } derive(Eq, Debug)
 
 ///|
+/// Encode a typed IPC response in the current frame format.
 pub fn[T] ResponseFrame::ResponseFrame(
   response : IpcResponse[T],
 ) -> ResponseFrame[T] {
@@ -146,6 +151,7 @@ pub fn[T] ResponseFrame::ResponseFrame(
 }
 
 ///|
+/// Serialize this response frame to JSON text.
 pub fn[T : ToJson] ResponseFrame::stringify(self : ResponseFrame[T]) -> String {
   self.to_json().stringify()
 }
@@ -174,6 +180,7 @@ pub impl[T : @json.FromJson] @json.FromJson for ResponseFrame[T] with fn from_js
 }
 
 ///|
+/// Parse JSON text into a typed response frame and validate its version.
 pub fn[T : @json.FromJson] parse_response_frame(
   raw : String,
 ) -> ResponseFrame[T] raise IpcError {
@@ -190,11 +197,13 @@ pub fn[T : @json.FromJson] parse_response_frame(
 }
 
 ///|
+/// Serialize a successful response frame for a typed result.
 pub fn[T : ToJson] response_ok(value : T) -> String {
   ResponseFrame(Ok(value)).stringify()
 }
 
 ///|
+/// Serialize an error response frame.
 pub fn response_err(err : IpcError) -> String {
   let response : IpcResponse[Json] = Err(err)
   ResponseFrame(response).to_json().stringify()

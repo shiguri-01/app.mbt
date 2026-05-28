@@ -1,46 +1,51 @@
-# desktop/shell
+# shiguri-01/desktop/shell
 
-Native desktop shell helpers used by `desktop/runtime`.
+Low-level native shell integrations for `shiguri-01/desktop/runtime`.
 
-This package owns platform-specific integrations such as message dialogs. It
-accepts opaque native window handles from `shiguri-01/webview`, but callers
-should normally use the higher-level `Window` methods from `desktop/runtime`.
+Most application code should use the higher-level `Window` methods from `shiguri-01/desktop/runtime`.
+Use this package directly only when you already have a `shiguri-01/webview.NativeWindow`
+and need to call the native dialog layer without the full desktop runtime.
 
-```mbt nocheck
-window.show_message_dialog(
-  "The export has finished.",
-  title="Export",
-  kind=Info,
-  buttons=Ok,
-)
-```
+## APIs
 
-The public API uses small enums for dialog kinds, button sets, and results so
-applications can stay portable across Windows, macOS, and Linux backends.
+- `show_message_dialog` displays a native modal message dialog.
+- `open_file_dialog` selects one existing file.
+- `open_files_dialog` selects multiple existing files.
+- `save_file_dialog` returns a destination path for saving.
+- `open_folder_dialog` selects a directory.
 
-On Windows, message dialogs use `TaskDialogIndirect` when available. If the
-common-controls task dialog entry point cannot be loaded, the backend falls back
-to `MessageBoxW` rather than failing an otherwise valid dialog request.
+Dialog configuration uses portable enums:
 
-File, save, and folder dialogs are exposed as portable functions returning
-`None` when the user cancels. On Windows, these dialogs are backed by Native
-File Dialog Extended (NFDe), which uses the modern `IFileDialog` API.
+- `MessageDialogKind`: `Info`, `Warning`, `Error`, or `Question`.
+- `MessageDialogButtons`: `Ok`, `OkCancel`, `YesNo`, or `YesNoCancel`.
+- `MessageDialogResult`: `Ok`, `Cancel`, `Yes`, or `No`.
 
-```mbt nocheck
+File dialogs use `FileFilter` values.
+Extensions should not include a leading dot.
+
+```mbt check
 ///|
-let image = window.open_file_dialog(filters=[
-  { name: "Images", extensions: ["png", "jpg", "jpeg"] },
-])
+/// Call this from code that already has a native webview window handle.
+pub fn select_image(
+  native_window : @webview.NativeWindow,
+) -> String? raise @shell.ShellError {
+  @shell.open_file_dialog(native_window, filters=[
+    { name: "Images", extensions: ["png", "jpg", "jpeg"] },
+  ])
+}
 ```
 
-## Third-Party Credits
+## Platform Notes
 
-The Windows file dialog backend vendors code from
-[Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended):
+On Windows, message dialogs use `TaskDialogIndirect` when available
+and fall back to `MessageBoxW` when the task dialog entry point cannot be loaded.
+File, save, and folder dialogs use Native File Dialog Extended and the modern `IFileDialog` API.
 
-- `nfd.h`
-- `nfd_win.cpp`
+Unsupported platforms raise `ShellError::UnsupportedPlatform`.
 
-NFDe is distributed under the Zlib License. The vendored files retain their
-upstream attribution, and the full license text is included in
-`NFD_LICENSE.txt`.
+## License and Credits
+
+License: Apache-2.0.
+
+Native credits: Native File Dialog Extended (Zlib).
+Vendored files and `NFD_LICENSE.txt` are included in this package.

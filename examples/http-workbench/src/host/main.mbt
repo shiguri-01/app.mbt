@@ -43,6 +43,7 @@ fn load_workbench_html() -> Result[String, String] {
 }
 
 ///|
+/// Convert the shared protocol HTTP method into the async HTTP client method.
 pub fn method_to_request_method(
   http_method : @contract.HttpMethod,
 ) -> @http.RequestMethod {
@@ -115,6 +116,7 @@ fn response_headers(
 }
 
 ///|
+/// Load persisted state, returning defaults when the file is missing or invalid.
 pub async fn load_state_from_path(path : String) -> @contract.WorkbenchState {
   if !@fs.exists(path) {
     return @core.default_state()
@@ -129,6 +131,7 @@ pub async fn load_state_from_path(path : String) -> @contract.WorkbenchState {
 }
 
 ///|
+/// Save workbench state to disk.
 pub async fn save_state_to_path(
   path : String,
   state : @contract.WorkbenchState,

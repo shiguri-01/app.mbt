@@ -25,17 +25,20 @@ fn[T] run_async_value(handler : async () -> T) -> Result[T, Error]? {
 }
 
 ///|
+/// Return the numeric value of this runtime-only window id.
 pub fn WindowId::to_int(self : WindowId) -> Int {
   self.value
 }
 
 ///|
+/// Decision returned by lifecycle hooks that can veto close or quit.
 pub(all) enum CloseDecision {
   Allow
   Prevent
 } derive(Debug, Eq)
 
 ///|
+/// Reason a window close was requested.
 pub(all) enum CloseReason {
   User
   AppQuit
@@ -44,6 +47,7 @@ pub(all) enum CloseReason {
 } derive(Debug, Eq)
 
 ///|
+/// Reason an application quit was requested.
 pub(all) enum QuitReason {
   Requested
   LastWindowClosed
@@ -65,6 +69,7 @@ pub struct WindowLifecycle {
 }
 
 ///|
+/// Build per-window lifecycle callbacks.
 pub fn WindowLifecycle::WindowLifecycle(
   on_created? : async (Window) -> Unit,
   on_ready? : async (Window) -> Unit,
@@ -102,6 +107,7 @@ pub struct AppLifecycle {
 }
 
 ///|
+/// Build application-level lifecycle callbacks.
 pub fn AppLifecycle::AppLifecycle(
   before_quit? : async (App, QuitReason) -> CloseDecision,
   on_quit? : (App) -> Unit,
@@ -135,6 +141,7 @@ pub struct WindowStateStore {
 }
 
 ///|
+/// Build a state store from load and save callbacks.
 pub fn WindowStateStore::WindowStateStore(
   load_windows~ : () -> Array[WindowSnapshot] raise DesktopError,
   save_windows~ : (Array[WindowSnapshot]) -> Unit raise DesktopError,

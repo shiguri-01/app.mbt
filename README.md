@@ -1,73 +1,47 @@
 # app.mbt
 
-MoonBit workspace for building small desktop applications with a native webview
-host and typed IPC between host and frontend code.
+MoonBit workspace for building desktop applications with a native webview host,
+typed IPC, JS-target frontend code, and packaged frontend assets.
 
-## Workspace
+The main module is `shiguri-01/desktop`.
+It provides the runtime, IPC protocol helpers, frontend client, native dialogs,
+and Rabbita integration used by the examples in this repository.
 
-This repository is a `moon.work` workspace with six members:
+## Modules
 
-- `desktop`: higher-level desktop app framework.
-- `webview`: native FFI bindings to `webview/webview`.
-- `packager`: native packager for desktop application bundles.
-- `examples/counter`: sample app that uses `desktop` as an external package.
-- `examples/dialogs`: native message dialog sample app.
-- `examples/file-dialogs`: native file dialog sample app.
+Library and tool modules:
 
-`desktop` is split into focused packages:
+- `shiguri-01/desktop`: desktop application framework.
+- `shiguri-01/webview`: low-level native webview bindings.
+- `shiguri-01/desktop-packager`: native packaging command for desktop apps.
 
-- `desktop/src/ipc`: target-agnostic endpoints, frames, responses, and errors.
-- `desktop/src/runtime`: app lifecycle, native windows, and IPC handlers.
-- `desktop/src/frontend`: JS-target client helpers for frontend code.
+Runnable example modules:
 
-## Status
+- `desktop-counter-example`: minimal typed IPC.
+- `desktop-dialog-example`: native message dialogs.
+- `desktop-file-dialog-example`: native file and folder dialogs.
+- `desktop-http-workbench-example`: async HTTP from the native host.
+- `desktop-markdown-notes-example`: Markdown editor with local files,
+  lifecycle hooks, and frontend state.
 
-The project can build prototype desktop apps today. The runtime is centered on
-an `App` owner that manages the native event loop, one or more windows, window
-ids, close/focus/minimize/maximize operations, lifecycle callbacks, and optional
-startup window restoration. It also supports typed async request/response IPC,
-payload size limits, and host-to-frontend events.
+Each directory with a `moon.mod` is a separate MoonBit module.
+Module README files are written as the public documentation entry points for those modules.
 
-Async IPC handlers currently run inside the webview callback path. Define
-shared `IpcEndpoint[T, R]` values, register them on an `IpcRouter`, and mount
-the router on a window.
+## `shiguri-01/desktop` Packages
 
-## Common Commands
+- `shiguri-01/desktop/ipc`: endpoint descriptors, JSON frames, responses, and IPC errors.
+- `shiguri-01/desktop/runtime`: native app lifecycle, windows, resources, async IPC handlers, and dialogs.
+- `shiguri-01/desktop/frontend`: JS-target frontend IPC client.
+- `shiguri-01/desktop/frontend/rabbita`: Rabbita `Cmd` adapter for frontend IPC calls.
+- `shiguri-01/desktop/shell`: low-level native shell dialog integrations.
 
-```powershell
-just check
-just test
-just run-counter-example
-just package-counter-example
-just run-dialogs-example
-just run-file-dialogs-example
-```
+Most application code uses three packages: a shared protocol package that imports `ipc`,
+a native host package that imports `runtime`, and a JS-target frontend package that imports `frontend`.
 
-On Windows, native commands require a Visual Studio C++ environment. The `just`
-tasks call `tools/msvc-native.cmd` for commands that need MSVC.
+## License and Credits
 
-## Documentation
+License: Apache-2.0.
 
-- `desktop/README.mbt.md`: desktop framework overview.
-- `desktop/src/ipc/README.mbt.md`: IPC frames, policies, responses, errors.
-- `desktop/src/runtime/README.mbt.md`: runtime window and host handlers.
-- `desktop/src/frontend/README.mbt.md`: JS frontend client helpers.
-- `webview/README.mbt.md`: low-level webview bindings.
-- `packager/README.mbt.md`: desktop application packaging.
-
-## Third-Party Native Code
-
-This workspace includes a small amount of third-party C/C++ code for native
-desktop integration:
-
-- `webview/src/vendor/webview.h` is generated from
-  [`webview/webview`](https://github.com/webview/webview) and is distributed
-  under the MIT License. See `webview/src/vendor/webview.LICENSE.txt`.
-- `webview/src/vendor/WebView2.h` comes from the Microsoft WebView2 SDK and is
-  distributed under Microsoft's WebView2 license and notices. See
-  `webview/src/vendor/WebView2.LICENSE.txt` and
-  `webview/src/vendor/WebView2.NOTICE.txt`.
-- `desktop/src/shell/nfd.h` and `desktop/src/shell/nfd_win.cpp` come from
-  [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended)
-  and are distributed under the Zlib License. See
-  `desktop/src/shell/NFD_LICENSE.txt`.
+Native credits: `webview/webview` (MIT), Microsoft WebView2 SDK header
+(Microsoft license and notices), Native File Dialog Extended (Zlib).
+Vendored license and notice files are included next to the native sources.

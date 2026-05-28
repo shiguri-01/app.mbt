@@ -13,6 +13,7 @@ pub impl @json.FromJson for CommandId with fn from_json(json, path) {
 }
 
 ///|
+/// Return the command id as a plain string for transport registration.
 pub fn CommandId::to_string(self : CommandId) -> String {
   self.0
 }

@@ -27,6 +27,7 @@ pub struct AppOptions {
 }
 
 ///|
+/// Build application options.
 pub fn AppOptions::AppOptions(
   quit_when_last_window_closed? : Bool = true,
   restore_windows? : Bool = false,
@@ -36,11 +37,13 @@ pub fn AppOptions::AppOptions(
 }
 
 ///|
+/// Return the default application options.
 pub fn AppOptions::default() -> AppOptions {
   AppOptions()
 }
 
 ///|
+/// Create an application owner without starting the native event loop.
 pub fn App::App(
   options? : AppOptions = AppOptions::default(),
   lifecycle? : AppLifecycle,
@@ -103,11 +106,13 @@ fn App::live_windows(self : App) -> Array[Window] {
 }
 
 ///|
+/// Return all live windows owned by this application.
 pub fn App::windows(self : App) -> Array[Window] {
   self.live_windows()
 }
 
 ///|
+/// Find a live window by runtime id.
 pub fn App::window(self : App, id : WindowId) -> Window? {
   for window in self.state.windows {
     if window.id() == id && !window.is_closed() {
@@ -140,6 +145,7 @@ fn App::snapshot_windows(self : App) -> Array[WindowSnapshot] {
 }
 
 ///|
+/// Persist restorable window state through the configured state store.
 pub fn App::save_window_state(self : App) -> Unit raise DesktopError {
   match self.state.options.state_store {
     Some(store) => (store.save_windows)(self.snapshot_windows())
@@ -148,6 +154,7 @@ pub fn App::save_window_state(self : App) -> Unit raise DesktopError {
 }
 
 ///|
+/// Recreate windows from the configured state store.
 pub fn App::restore_windows(
   self : App,
   lifecycle? : WindowLifecycle,
@@ -216,6 +223,7 @@ fn App::load_pending_windows(self : App) -> Unit raise DesktopError {
 }
 
 ///|
+/// Create and register a native window.
 pub fn App::create_window(
   self : App,
   options : WindowOptions,
@@ -249,6 +257,7 @@ pub fn App::create_window(
 }
 
 ///|
+/// Ask lifecycle hooks whether the app may quit, then close all windows.
 pub fn App::request_quit(self : App) -> Unit raise DesktopError {
   if self.state.quitting {
     return
@@ -269,6 +278,7 @@ pub fn App::request_quit(self : App) -> Unit raise DesktopError {
 }
 
 ///|
+/// Close all live windows and stop the native event loop.
 pub fn App::quit(self : App) -> Unit raise DesktopError {
   self.state.quitting = true
   self.save_window_state()
@@ -319,6 +329,7 @@ fn App::will_quit_after_closing(self : App, window : Window) -> Bool {
 }
 
 ///|
+/// Start the native event loop for this application.
 pub fn App::run(
   self : App,
   on_startup~ : async (App) -> Unit,

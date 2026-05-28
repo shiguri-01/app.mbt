@@ -1,4 +1,5 @@
 ///|
+/// Return the initial draft request shown by the example.
 pub fn default_request() -> @contract.SavedRequest {
   @contract.SavedRequest::{
     id: "draft",
@@ -51,6 +52,7 @@ fn sample_requests() -> Array[@contract.SavedRequest] {
 }
 
 ///|
+/// Return the display name for a saved request.
 pub fn display_name(request : @contract.SavedRequest) -> String {
   let name = request.name.trim().to_owned()
   if name == "" {
@@ -61,6 +63,7 @@ pub fn display_name(request : @contract.SavedRequest) -> String {
 }
 
 ///|
+/// Append an empty enabled header row.
 pub fn append_header(
   headers : Array[@contract.Header],
 ) -> Array[@contract.Header] {
@@ -70,6 +73,7 @@ pub fn append_header(
 }
 
 ///|
+/// Remove the header at `index` when it exists.
 pub fn remove_header(
   headers : Array[@contract.Header],
   index : Int,
@@ -86,6 +90,7 @@ pub fn remove_header(
 }
 
 ///|
+/// Update the header at `index` when it exists.
 pub fn update_header(
   headers : Array[@contract.Header],
   index : Int,
@@ -101,6 +106,7 @@ pub fn update_header(
 }
 
 ///|
+/// Convert enabled non-empty headers into an HTTP header map.
 pub fn enabled_headers(
   headers : Array[@contract.Header],
 ) -> Map[String, String] {

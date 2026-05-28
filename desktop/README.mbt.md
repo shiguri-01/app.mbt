@@ -1,54 +1,80 @@
-# desktop
+# shiguri-01/desktop
 
-Typed MoonBit desktop application framework.
+Typed MoonBit framework for desktop applications with a native webview host and MoonBit frontend code.
 
-The framework keeps the native host, frontend helper, and shared IPC protocol
-as separate packages:
+Use this module when you want a MoonBit native process to own windows, resources, native dialogs, and host-side logic,
+while a JS-target MoonBit frontend calls the host through typed request/reply IPC.
 
-- `ipc`: target-agnostic JSON frames, responses, and command policies.
-- `runtime`: native host runtime backed by `shiguri-01/webview`.
-- `frontend`: JS-target helper package that does not depend on a UI library.
+## Packages
 
-Applications define shared endpoint values and request/reply protocol types,
-then derive or implement `ToJson` / `FromJson` for those types.
+- `runtime`: native application runtime. Use it from host packages that create windows,
+  mount IPC handlers, read packaged resources, and show native dialogs.
+- `frontend`: JS-target IPC client. Use it from frontend packages that call host endpoints or listen for host events.
+- `ipc`: target-agnostic protocol primitives. Use it from a shared package
+  that defines endpoint values and JSON-serializable request and reply types.
+- `shell`: low-level native shell integrations used by the runtime.
+  Most application code should call the `Window` methods from `runtime` instead.
+- `frontend/rabbita`: Rabbita command adapter for frontend endpoint calls.
 
-Native applications start with `@desktop.run`, receive an `App`, and create one
-or more windows with `App::create_window`. Native code should use
-`IpcRouter::handle` with shared command endpoints such as
-`IpcEndpoint[IncrementRequest, CountChangedReply]`, then mount the router with
-`Window::mount_ipc`. Frontend code uses `Client::request`.
+## Application Shape
 
-`WindowId` values are runtime-only. Use `WindowOptions.key` and
-`WindowSnapshot.key` for persistent startup restoration.
+A typical application has three packages:
 
-Package-level README files contain the API-oriented details:
+- A shared protocol package that imports `shiguri-01/desktop/ipc`, defines `IpcEndpoint[T, R]` values,
+  and derives or implements `ToJson` and `FromJson` for protocol types.
+- A native host package that imports `shiguri-01/desktop/runtime`, starts `@desktop.run`,
+  creates windows, and registers `IpcRouter` handlers.
+- A JS-target frontend package that imports `shiguri-01/desktop/frontend`
+  and calls the same endpoint values with `Client::request` or `Client::request_callback`.
 
-- `src/ipc/README.mbt.md`: typed frames, policies, responses, and errors.
-- `src/runtime/README.mbt.md`: native window runtime and async host handlers.
-- `src/runtime/async_driver/README.mbt.md`: native async driver boundary.
-- `src/shell/README.mbt.md`: native shell helpers such as message and file
-  dialogs.
-- `src/frontend/README.mbt.md`: JS-target client helpers for frontend code.
+```mbt check
+///|
+struct IncrementRequest {
+  amount : Int
+} derive(ToJson, FromJson)
 
-## Async IPC direction
+///|
+struct CountChangedReply {
+  count : Int
+} derive(ToJson, FromJson)
 
-The runtime uses async host handlers today. `IpcRouter::handle` runs each
-handler to completion inside a runtime-owned async driver, so MoonBit async APIs
-are usable but long handlers still occupy the webview callback path.
+///|
+/// Host code registers this endpoint with `IpcRouter::handle`.
+/// Frontend code calls the same endpoint with `Client::request`.
+pub let increment_endpoint : @ipc.IpcEndpoint[
+  IncrementRequest,
+  CountChangedReply,
+] = @ipc.IpcEndpoint::named("counter.increment")
+```
 
-On Windows, native builds use the bundled webview C++ stub. Run native
-test/build/run commands from a Visual Studio C++ environment or through the
-repository `just` tasks, which call `vcvarsall.bat x64`.
+## Runtime Model
 
-## Third-Party Credits
+The native runtime owns the event loop and all `Window` values.
+`WindowId` values are runtime identifiers;
+use stable `WindowOptions.key` and `WindowSnapshot.key` values if an application needs startup restoration.
 
-The native desktop implementation uses third-party C/C++ code:
+IPC handlers are async and run through a runtime-owned driver.
+They can call MoonBit async APIs, but long handlers still occupy the webview callback path until they complete.
 
-- Window hosting is backed by the `shiguri-01/webview` module. That module
-  vendors [`webview/webview`](https://github.com/webview/webview) under the MIT
-  License and the Microsoft WebView2 SDK header under Microsoft's WebView2
-  license and notices.
-- Windows file dialogs in `src/shell` vendor
-  [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended)
-  under the Zlib License. See `src/shell/NFD_LICENSE.txt` and
-  `src/shell/README.mbt.md`.
+## Native Builds
+
+Native host packages require a platform C/C++ toolchain for the webview and dialog stubs.
+On Windows, use a Visual Studio C++ environment for native check, test, run, and package commands.
+
+## Examples
+
+The workspace includes runnable example modules for the main workflows:
+
+- `desktop-counter-example`: minimal typed IPC.
+- `desktop-dialog-example`: native message dialogs.
+- `desktop-file-dialog-example`: native file and folder dialogs.
+- `desktop-http-workbench-example`: async HTTP from the native host.
+- `desktop-markdown-notes-example`: local file editing, lifecycle hooks, and frontend state.
+
+## License and Credits
+
+License: Apache-2.0.
+
+Native credits: `webview/webview` (MIT), Microsoft WebView2 SDK header (Microsoft license and notices),
+Native File Dialog Extended (Zlib).
+Vendored license and notice files are included next to the native sources.

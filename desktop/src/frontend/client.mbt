@@ -44,6 +44,7 @@ extern "js" fn install_listener(
   #| }
 
 ///|
+/// Create a frontend IPC client using the default desktop bridge.
 pub fn Client::Client() -> Client {
   Client::{  }
 }
@@ -75,6 +76,7 @@ async fn[T : ToJson, R : FromJson] Client::request_raw(
 }
 
 ///|
+/// Call a typed IPC endpoint through the desktop JavaScript bridge.
 pub async fn[T : ToJson, R : FromJson] Client::request(
   self : Client,
   endpoint : @ipc.IpcEndpoint[T, R],
@@ -128,6 +130,7 @@ fn[E : FromJson] Client::listen_raw(
 }
 
 ///|
+/// Listen for a typed host-to-frontend event.
 pub fn[E : FromJson] Client::listen(
   self : Client,
   event : @ipc.IpcEvent[E],

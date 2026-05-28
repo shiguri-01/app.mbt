@@ -1,4 +1,5 @@
 ///|
+/// Return the default Markdown shown for a new document.
 pub fn welcome_markdown() -> String {
   (
     #|# Markdown Notes
@@ -13,6 +14,7 @@ pub fn welcome_markdown() -> String {
 }
 
 ///|
+/// Return a display file name for a path.
 pub fn file_name(path : String?) -> String {
   match path {
     None => "Untitled.md"
@@ -33,11 +35,13 @@ pub fn file_name(path : String?) -> String {
 }
 
 ///|
+/// Return empty startup state.
 pub fn default_startup_state() -> @contract.StartupState {
   @contract.StartupState::{ recent_files: [], last_file: None }
 }
 
 ///|
+/// Add a recent file path, remove duplicates, and cap the list.
 pub fn add_recent(
   recent : Array[String],
   path : String,
@@ -53,6 +57,7 @@ pub fn add_recent(
 }
 
 ///|
+/// Convert startup state into frontend application state.
 pub fn app_state_from_startup(
   state : @contract.StartupState,
 ) -> @contract.AppState {

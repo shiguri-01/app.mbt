@@ -1,4 +1,5 @@
 ///|
+/// Return the initial persisted state used by the example.
 pub fn default_state() -> @contract.WorkbenchState {
   let active_draft = default_request()
   @contract.WorkbenchState::{
@@ -9,6 +10,7 @@ pub fn default_state() -> @contract.WorkbenchState {
 }
 
 ///|
+/// Add a history entry, keeping only the newest entries.
 pub fn capped_history(
   entries : Array[@contract.HistoryEntry],
   entry : @contract.HistoryEntry,
@@ -22,6 +24,7 @@ pub fn capped_history(
 }
 
 ///|
+/// Insert or replace a saved request and assign `new_id` to drafts.
 pub fn upsert_saved_request(
   saved : Array[@contract.SavedRequest],
   draft : @contract.SavedRequest,
@@ -46,6 +49,7 @@ pub fn upsert_saved_request(
 }
 
 ///|
+/// Delete a saved request by id.
 pub fn delete_saved_request(
   saved : Array[@contract.SavedRequest],
   id : String,

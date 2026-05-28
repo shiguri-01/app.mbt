@@ -11,6 +11,7 @@ pub struct IpcEndpoint[T, R] {
 }
 
 ///|
+/// Create an IPC endpoint with a stable command name.
 pub fn[T, R] IpcEndpoint::named(command_id : String) -> IpcEndpoint[T, R] {
   {
     command_id: CommandId(command_id),
@@ -20,6 +21,7 @@ pub fn[T, R] IpcEndpoint::named(command_id : String) -> IpcEndpoint[T, R] {
 }
 
 ///|
+/// Return the endpoint command name used by the JavaScript bridge.
 pub fn[T, R] IpcEndpoint::name(self : IpcEndpoint[T, R]) -> String {
   ignore(self.request_marker)
   ignore(self.response_marker)
@@ -27,6 +29,7 @@ pub fn[T, R] IpcEndpoint::name(self : IpcEndpoint[T, R]) -> String {
 }
 
 ///|
+/// Return the endpoint command id used by policy and routing code.
 pub fn[T, R] IpcEndpoint::command_id(self : IpcEndpoint[T, R]) -> CommandId {
   ignore(self.request_marker)
   ignore(self.response_marker)
@@ -41,11 +44,13 @@ pub struct IpcEvent[E] {
 }
 
 ///|
+/// Create a typed host-to-frontend event descriptor.
 pub fn[E] IpcEvent::named(name : String) -> IpcEvent[E] {
   { name, event_marker: None }
 }
 
 ///|
+/// Return the event name installed on the frontend bridge.
 pub fn[E] IpcEvent::name(self : IpcEvent[E]) -> String {
   ignore(self.event_marker)
   self.name

@@ -93,6 +93,7 @@ fn[T : ToJson] Window::emit_raw(
 }
 
 ///|
+/// Send a typed event from the host to the frontend.
 pub fn[T : ToJson] Window::emit(
   self : Window,
   endpoint : @ipc.IpcEvent[T],

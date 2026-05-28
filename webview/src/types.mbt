@@ -3,11 +3,11 @@
 pub type WebView
 
 ///|
+#external
 /// Borrowed native top-level window handle associated with a `WebView`.
 ///
 /// This is an opaque platform handle. Callers must not store it beyond the
 /// lifetime of the owning `WebView`.
-#external
 pub type NativeWindow
 
 ///|

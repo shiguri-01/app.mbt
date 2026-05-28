@@ -1,4 +1,5 @@
 ///|
+/// HTTP method supported by the workbench request model.
 pub(all) enum HttpMethod {
   Get
   Post
@@ -10,6 +11,7 @@ pub(all) enum HttpMethod {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Render the method as an uppercase HTTP verb.
 pub fn HttpMethod::to_string(self : HttpMethod) -> String {
   match self {
     Get => "GET"
@@ -23,6 +25,7 @@ pub fn HttpMethod::to_string(self : HttpMethod) -> String {
 }
 
 ///|
+/// Parse an uppercase HTTP verb, defaulting to `Get` for unknown input.
 pub fn HttpMethod::parse(value : String) -> HttpMethod {
   match value {
     "POST" => Post
@@ -36,6 +39,7 @@ pub fn HttpMethod::parse(value : String) -> HttpMethod {
 }
 
 ///|
+/// Editable request header row.
 pub(all) struct Header {
   name : String
   value : String
@@ -43,6 +47,7 @@ pub(all) struct Header {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Saved or draft HTTP request.
 pub(all) struct SavedRequest {
   id : String
   name : String
@@ -53,6 +58,7 @@ pub(all) struct SavedRequest {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Summary of a completed HTTP request.
 pub(all) struct HistoryEntry {
   id : String
   name : String
@@ -65,17 +71,20 @@ pub(all) struct HistoryEntry {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Header returned by an HTTP response.
 pub(all) struct ResponseHeader {
   name : String
   value : String
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// IPC request for sending one HTTP request.
 pub(all) struct SendHttpRequest {
   request : SavedRequest
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// IPC reply containing either response data or an error message.
 pub(all) struct SendHttpReply {
   status : Int?
   status_text : String
@@ -86,12 +95,14 @@ pub(all) struct SendHttpReply {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Reply returned after persisting workbench state.
 pub(all) struct SaveStateReply {
   saved : Bool
   message : String
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Persisted workbench state shared by host and frontend.
 pub(all) struct WorkbenchState {
   saved_requests : Array[SavedRequest]
   recent_history : Array[HistoryEntry]
@@ -99,16 +110,19 @@ pub(all) struct WorkbenchState {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+/// Endpoint for loading persisted workbench state.
 pub let load_state_endpoint : @ipc.IpcEndpoint[Unit, WorkbenchState] = @ipc.IpcEndpoint::named(
   "workbench.load_state",
 )
 
 ///|
+/// Endpoint for saving workbench state.
 pub let save_state_endpoint : @ipc.IpcEndpoint[WorkbenchState, SaveStateReply] = @ipc.IpcEndpoint::named(
   "workbench.save_state",
 )
 
 ///|
+/// Endpoint for executing an HTTP request from the native host.
 pub let send_http_endpoint : @ipc.IpcEndpoint[SendHttpRequest, SendHttpReply] = @ipc.IpcEndpoint::named(
   "workbench.send_http",
 )

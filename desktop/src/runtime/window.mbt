@@ -112,11 +112,13 @@ fn Window::raw_view(self : Window) -> @webview.WebView {
 }
 
 ///|
+/// Return this window's runtime-only id.
 pub fn Window::id(self : Window) -> WindowId {
   self.id
 }
 
 ///|
+/// Return this window's stable restoration key, when one was configured.
 pub fn Window::key(self : Window) -> String? {
   self.key
 }
@@ -235,6 +237,7 @@ pub fn Window::unbind(self : Window, name : String) -> Unit raise DesktopError {
 }
 
 ///|
+/// Close this window immediately.
 pub fn Window::close(self : Window) -> Unit raise DesktopError {
   if self.closed {
     return
@@ -246,6 +249,7 @@ pub fn Window::close(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Request a programmatic close, allowing lifecycle hooks to prevent it.
 pub fn Window::request_close(self : Window) -> Unit raise DesktopError {
   ignore(self.request_close_with_reason(Programmatic))
 }
@@ -294,6 +298,7 @@ fn Window::request_close_with_reason(
 }
 
 ///|
+/// Focus the native top-level window.
 pub fn Window::focus(self : Window) -> Unit raise DesktopError {
   self.view.focus_window() catch {
     err => raise_webview(err)
@@ -301,6 +306,7 @@ pub fn Window::focus(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Minimize the native top-level window.
 pub fn Window::minimize(self : Window) -> Unit raise DesktopError {
   self.minimized = true
   self.maximized = false
@@ -310,6 +316,7 @@ pub fn Window::minimize(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Maximize the native top-level window.
 pub fn Window::maximize(self : Window) -> Unit raise DesktopError {
   self.maximized = true
   self.minimized = false
@@ -319,6 +326,7 @@ pub fn Window::maximize(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Restore the native top-level window from minimized or maximized state.
 pub fn Window::restore(self : Window) -> Unit raise DesktopError {
   self.maximized = false
   self.minimized = false
@@ -328,6 +336,7 @@ pub fn Window::restore(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Show the native top-level window.
 pub fn Window::show(self : Window) -> Unit raise DesktopError {
   self.visible = true
   self.view.show_window() catch {
@@ -336,6 +345,7 @@ pub fn Window::show(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Hide the native top-level window.
 pub fn Window::hide(self : Window) -> Unit raise DesktopError {
   self.visible = false
   self.view.hide_window() catch {
@@ -344,6 +354,7 @@ pub fn Window::hide(self : Window) -> Unit raise DesktopError {
 }
 
 ///|
+/// Return whether this window has been closed.
 pub fn Window::is_closed(self : Window) -> Bool {
   self.closed || self.view.is_window_closed()
 }
