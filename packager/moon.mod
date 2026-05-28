@@ -1,4 +1,4 @@
-name = "shiguri-01/app-packager"
+name = "shiguri-01/desktop-packager"
 
 version = "0.1.0"
 

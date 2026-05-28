@@ -1,4 +1,4 @@
-# app-packager
+# desktop-packager
 
 MoonBit-native packager for `shiguri-01/desktop` applications.
 
