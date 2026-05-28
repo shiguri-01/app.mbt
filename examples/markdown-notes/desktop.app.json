@@ -1,0 +1,13 @@
+{
+  "id": "com.shiguri-01.markdown-notes",
+  "name": "Markdown Notes",
+  "version": "0.1.0",
+  "module_name": "shiguri-01/desktop-markdown-notes-example",
+  "host": "examples/markdown-notes/src/host",
+  "frontend": "examples/markdown-notes/src/frontend",
+  "static_dir": "examples/markdown-notes/dist",
+  "dist": "dist/markdown-notes",
+  "executable": "MarkdownNotes.exe",
+  "bundle": "single-exe",
+  "windows_subsystem": "windows"
+}

@@ -1,0 +1,21 @@
+///|
+using @element {
+  aside,
+  button,
+  div,
+  h1,
+  h2,
+  header_,
+  main_,
+  p,
+  span,
+  textarea,
+  text,
+  text_dyn,
+  for_each,
+  render,
+  events,
+  attr_dynamic,
+  type DomNode,
+  type DomElement,
+}

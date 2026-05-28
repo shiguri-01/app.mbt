@@ -1,0 +1,5 @@
+import {
+  "shiguri-01/desktop-markdown-notes-example/contract",
+}
+
+supported_targets = "js+native"

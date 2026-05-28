@@ -1,0 +1,90 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-http-workbench-example/contract"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "shiguri-01/desktop/ipc",
+}
+
+// Values
+pub let load_state_endpoint : @ipc.IpcEndpoint[Unit, WorkbenchState]
+
+pub let save_state_endpoint : @ipc.IpcEndpoint[WorkbenchState, SaveStateReply]
+
+pub let send_http_endpoint : @ipc.IpcEndpoint[SendHttpRequest, SendHttpReply]
+
+// Errors
+
+// Types and methods
+pub(all) struct Header {
+  name : String
+  value : String
+  enabled : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct HistoryEntry {
+  id : String
+  name : String
+  http_method : HttpMethod
+  url : String
+  status : Int?
+  error : String?
+  duration_ms : Int64
+  created_at_ms : Int64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum HttpMethod {
+  Get
+  Post
+  Put
+  Patch
+  Delete
+  Head
+  Options
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn HttpMethod::parse(String) -> Self
+pub fn HttpMethod::to_string(Self) -> String
+
+pub(all) struct ResponseHeader {
+  name : String
+  value : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SaveStateReply {
+  saved : Bool
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SavedRequest {
+  id : String
+  name : String
+  http_method : HttpMethod
+  url : String
+  headers : Array[Header]
+  body : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SendHttpReply {
+  status : Int?
+  status_text : String
+  headers : Array[ResponseHeader]
+  body : String
+  duration_ms : Int64
+  error : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SendHttpRequest {
+  request : SavedRequest
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct WorkbenchState {
+  saved_requests : Array[SavedRequest]
+  recent_history : Array[HistoryEntry]
+  active_draft : SavedRequest
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

@@ -16,6 +16,25 @@ extern "js" fn call_bridge_promise(
   #| }
 
 ///|
+extern "js" fn call_bridge_callback(
+  name : String,
+  raw : String,
+  resolve : (String) -> Unit,
+  reject : (String) -> Unit,
+) -> Unit =
+  #| (name, raw, resolve, reject) => {
+  #|   const bridge = globalThis[name]
+  #|   if (typeof bridge !== "function") {
+  #|     reject(`desktop bridge '${name}' is not available`)
+  #|     return
+  #|   }
+  #|   bridge(raw).then(
+  #|     value => resolve(JSON.stringify(value)),
+  #|     error => reject(String(error && (error.stack || error.message) || error)),
+  #|   )
+  #| }
+
+///|
 extern "js" fn install_listener(
   name : String,
   callback : (String) -> Unit,
@@ -62,6 +81,36 @@ pub async fn[T : ToJson, R : FromJson] Client::request(
   body : T,
 ) -> @ipc.IpcResponse[R] {
   self.request_raw(endpoint.name(), body)
+}
+
+///|
+fn[T : ToJson, R : FromJson] Client::request_raw_callback(
+  self : Client,
+  name : String,
+  body : T,
+  callback : (@ipc.IpcResponse[R]) -> Unit,
+) -> Unit {
+  ignore(self)
+  call_bridge_callback(
+    name,
+    encode_request_frame(body),
+    raw => callback(decode_response(raw)),
+    message => callback(Err(TransportClosed(message))),
+  )
+}
+
+///|
+/// Call an IPC endpoint and report the response through a JavaScript callback.
+///
+/// This is useful for UI runtimes that already own their own scheduler and
+/// should not block on `moonbitlang/async/js_async.Promise::wait`.
+pub fn[T : ToJson, R : FromJson] Client::request_callback(
+  self : Client,
+  endpoint : @ipc.IpcEndpoint[T, R],
+  body : T,
+  callback : (@ipc.IpcResponse[R]) -> Unit,
+) -> Unit {
+  self.request_raw_callback(endpoint.name(), body, callback)
 }
 
 ///|

@@ -1,0 +1,17 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+  "moonbit-community/rabbita",
+  "moonbit-community/rabbita/html",
+  "shiguri-01/desktop/frontend" @desktop,
+  "shiguri-01/desktop/frontend/rabbita" @desktop_rabbita,
+  "shiguri-01/desktop/ipc",
+  "shiguri-01/desktop-http-workbench-example/contract",
+  "shiguri-01/desktop-http-workbench-example/core",
+}
+
+supported_targets = "+js"
+
+options(
+  "is-main": true,
+)

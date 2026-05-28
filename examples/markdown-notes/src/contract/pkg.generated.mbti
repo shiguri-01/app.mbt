@@ -1,0 +1,71 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-markdown-notes-example/contract"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "shiguri-01/desktop/ipc",
+}
+
+// Values
+pub let load_startup_state_endpoint : @ipc.IpcEndpoint[Unit, StartupState]
+
+pub let open_file_dialog_endpoint : @ipc.IpcEndpoint[Unit, OpenDialogReply]
+
+pub let open_file_endpoint : @ipc.IpcEndpoint[OpenFileRequest, OpenDocument]
+
+pub let save_file_as_endpoint : @ipc.IpcEndpoint[SaveFileRequest, SaveFileReply]
+
+pub let save_file_endpoint : @ipc.IpcEndpoint[SaveFileRequest, SaveFileReply]
+
+pub let set_dirty_endpoint : @ipc.IpcEndpoint[DirtyState, Unit]
+
+// Errors
+
+// Types and methods
+pub(all) struct AppState {
+  recent_files : Array[String]
+  last_file : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct DirtyState {
+  dirty : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct OpenDialogReply {
+  document : OpenDocument?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct OpenDocument {
+  path : String
+  name : String
+  content : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct OpenFileRequest {
+  path : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SaveFileReply {
+  file : SavedFile?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SaveFileRequest {
+  path : String?
+  content : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SavedFile {
+  path : String
+  name : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct StartupState {
+  recent_files : Array[String]
+  last_file : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

@@ -27,6 +27,38 @@ run-counter-example: build-counter-example-frontend
 package-counter-example:
     cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/counter/desktop.app.json
 
+# Install frontend dependencies for the HTTP/API Workbench example.
+install-http-workbench-frontend:
+    npm.cmd --prefix examples/http-workbench install
+
+# Build the Rabbita + Vite frontend for the HTTP/API Workbench example.
+build-http-workbench-frontend:
+    npm.cmd --prefix examples/http-workbench run build
+
+# Run the desktop framework HTTP/API Workbench example.
+run-http-workbench-example: build-http-workbench-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/http-workbench/src/host --target native
+
+# Package the HTTP/API Workbench example as a portable Windows app directory.
+package-http-workbench-example: build-http-workbench-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/http-workbench/desktop.app.json
+
+# Install frontend dependencies for the Markdown Notes example.
+install-markdown-notes-frontend:
+    npm.cmd --prefix examples/markdown-notes install
+
+# Build the Luna + Vite frontend for the Markdown Notes example.
+build-markdown-notes-frontend:
+    npm.cmd --prefix examples/markdown-notes run build
+
+# Run the desktop framework Markdown Notes example.
+run-markdown-notes-example: build-markdown-notes-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/markdown-notes/src/host --target native
+
+# Package the Markdown Notes example as a portable Windows app directory.
+package-markdown-notes-example: build-markdown-notes-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/markdown-notes/desktop.app.json
+
 # Build the MoonBit JS frontend for the dialogs desktop example.
 build-dialogs-example-frontend:
     moon build examples/dialogs/src/frontend --target js

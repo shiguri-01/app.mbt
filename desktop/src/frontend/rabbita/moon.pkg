@@ -1,0 +1,8 @@
+import {
+  "moonbit-community/rabbita/cmd",
+  "moonbitlang/core/json",
+  "shiguri-01/desktop/frontend",
+  "shiguri-01/desktop/ipc",
+}
+
+supported_targets = "+js"

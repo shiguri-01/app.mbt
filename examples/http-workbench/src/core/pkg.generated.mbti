@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "shiguri-01/desktop-http-workbench-example/core"
+
+import {
+  "shiguri-01/desktop-http-workbench-example/contract",
+}
+
+// Values
+pub fn append_header(Array[@contract.Header]) -> Array[@contract.Header]
+
+pub fn capped_history(Array[@contract.HistoryEntry], @contract.HistoryEntry) -> Array[@contract.HistoryEntry]
+
+pub fn default_request() -> @contract.SavedRequest
+
+pub fn default_state() -> @contract.WorkbenchState
+
+pub fn delete_saved_request(Array[@contract.SavedRequest], String) -> Array[@contract.SavedRequest]
+
+pub fn display_name(@contract.SavedRequest) -> String
+
+pub fn enabled_headers(Array[@contract.Header]) -> Map[String, String]
+
+pub fn remove_header(Array[@contract.Header], Int) -> Array[@contract.Header]
+
+pub fn update_header(Array[@contract.Header], Int, (@contract.Header) -> @contract.Header) -> Array[@contract.Header]
+
+pub fn upsert_saved_request(Array[@contract.SavedRequest], @contract.SavedRequest, new_id~ : String) -> (Array[@contract.SavedRequest], @contract.SavedRequest)
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+
