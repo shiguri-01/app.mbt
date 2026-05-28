@@ -3,85 +3,96 @@ set shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 default:
     @just --list
 
-# Check every workspace member on its supported targets.
+# Core workspace tasks.
+
+# Check every workspace member on every supported target.
 check:
     moon check --target all
 
-# Run every workspace member's native tests.
+# Run every workspace member's tests on every supported target.
 test:
-    cmd.exe /C tools\msvc-native.cmd moon test --target native -v
+    cmd.exe /C tools\msvc-native.cmd moon test --target all -v
 
-# Run the basic webview example.
-run-webview-example:
-    cmd.exe /C tools\msvc-native.cmd moon run webview/src/examples/basic --target native
-
-# Build the MoonBit JS frontend for the counter desktop example.
-build-counter-example-frontend:
-    moon build examples/counter/src/frontend --target js
-
-# Run the desktop framework counter example.
-run-counter-example: build-counter-example-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run examples/counter/src/host --target native
-
-# Package the counter example as a portable Windows app directory.
-package-counter-example:
-    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/counter/desktop.app.json
-
-# Install frontend dependencies for the HTTP/API Workbench example.
-install-http-workbench-frontend:
-    npm.cmd --prefix examples/http-workbench install
-
-# Build the Rabbita + Vite frontend for the HTTP/API Workbench example.
-build-http-workbench-frontend:
-    npm.cmd --prefix examples/http-workbench run build
-
-# Run the desktop framework HTTP/API Workbench example.
-run-http-workbench-example: build-http-workbench-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run examples/http-workbench/src/host --target native
-
-# Package the HTTP/API Workbench example as a portable Windows app directory.
-package-http-workbench-example: build-http-workbench-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/http-workbench/desktop.app.json
-
-# Install frontend dependencies for the Markdown Notes example.
-install-markdown-notes-frontend:
-    npm.cmd --prefix examples/markdown-notes install
-
-# Build the Luna + Vite frontend for the Markdown Notes example.
-build-markdown-notes-frontend:
-    npm.cmd --prefix examples/markdown-notes run build
-
-# Run the desktop framework Markdown Notes example.
-run-markdown-notes-example: build-markdown-notes-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run examples/markdown-notes/src/host --target native
-
-# Package the Markdown Notes example as a portable Windows app directory.
-package-markdown-notes-example: build-markdown-notes-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/markdown-notes/desktop.app.json
-
-# Build the MoonBit JS frontend for the dialogs desktop example.
-build-dialogs-example-frontend:
-    moon build examples/dialogs/src/frontend --target js
-
-# Run the native message dialog example.
-run-dialogs-example: build-dialogs-example-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run examples/dialogs/src/host --target native
-
-# Build the MoonBit JS frontend for the file dialogs desktop example.
-build-file-dialogs-example-frontend:
-    moon build examples/file-dialogs/src/frontend --target js
-
-# Run the native file dialog example.
-run-file-dialogs-example: build-file-dialogs-example-frontend
-    cmd.exe /C tools\msvc-native.cmd moon run examples/file-dialogs/src/host --target native
-
-# Refresh generated package interfaces.
-info:
-    moon info --target all
-
-# Format MoonBit package files and sources.
+# Format all MoonBit package files and sources in the workspace.
 fmt:
     moon fmt
 
-# Fast local verification that does not open a GUI window.
-verify: check test
+# Check formatting without changing source files.
+fmt-check:
+    moon fmt --check
+
+# Refresh generated package interfaces for every supported target.
+info:
+    moon info --target all
+
+# Run the full non-GUI workspace verification suite.
+verify: check test fmt-check
+
+# Example tasks.
+
+prepare-example-http-workbench:
+    npm.cmd --prefix examples/http-workbench install
+
+prepare-example-markdown-notes:
+    npm.cmd --prefix examples/markdown-notes install
+
+build-example-webview:
+    cmd.exe /C tools\msvc-native.cmd moon build webview/src/examples/basic --target native
+
+build-example-counter: _build-example-counter-frontend
+    cmd.exe /C tools\msvc-native.cmd moon build examples/counter/src/host --target native
+
+build-example-dialogs: _build-example-dialogs-frontend
+    cmd.exe /C tools\msvc-native.cmd moon build examples/dialogs/src/host --target native
+
+build-example-file-dialogs: _build-example-file-dialogs-frontend
+    cmd.exe /C tools\msvc-native.cmd moon build examples/file-dialogs/src/host --target native
+
+build-example-http-workbench: _build-example-http-workbench-frontend
+    cmd.exe /C tools\msvc-native.cmd moon build examples/http-workbench/src/host --target native
+
+build-example-markdown-notes: _build-example-markdown-notes-frontend
+    cmd.exe /C tools\msvc-native.cmd moon build examples/markdown-notes/src/host --target native
+
+# Run examples. These recipes open GUI windows.
+run-example-webview:
+    cmd.exe /C tools\msvc-native.cmd moon run webview/src/examples/basic --target native
+
+run-example-counter: _build-example-counter-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/counter/src/host --target native
+
+run-example-dialogs: _build-example-dialogs-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/dialogs/src/host --target native
+
+run-example-file-dialogs: _build-example-file-dialogs-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/file-dialogs/src/host --target native
+
+run-example-http-workbench: _build-example-http-workbench-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/http-workbench/src/host --target native
+
+run-example-markdown-notes: _build-example-markdown-notes-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run examples/markdown-notes/src/host --target native
+
+package-example-counter:
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/counter/desktop.app.json
+
+package-example-http-workbench: _build-example-http-workbench-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/http-workbench/desktop.app.json
+
+package-example-markdown-notes: _build-example-markdown-notes-frontend
+    cmd.exe /C tools\msvc-native.cmd moon run packager/src --target native -- package examples/markdown-notes/desktop.app.json
+
+_build-example-counter-frontend:
+    moon build examples/counter/src/frontend --target js
+
+_build-example-dialogs-frontend:
+    moon build examples/dialogs/src/frontend --target js
+
+_build-example-file-dialogs-frontend:
+    moon build examples/file-dialogs/src/frontend --target js
+
+_build-example-http-workbench-frontend:
+    npm.cmd --prefix examples/http-workbench run build
+
+_build-example-markdown-notes-frontend:
+    npm.cmd --prefix examples/markdown-notes run build
