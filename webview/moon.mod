@@ -8,7 +8,7 @@ repository = "https://github.com/shiguri-01/app.mbt"
 
 license = "Apache-2.0"
 
-keywords = [ "webview", "gui", "native", "ffi" ]
+keywords = [ "webview" ]
 
 description = "Low-level MoonBit bindings to webview/webview"
 
