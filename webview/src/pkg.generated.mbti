@@ -25,6 +25,8 @@ pub(all) suberror WebViewError {
 #external
 pub type NativeWindow
 
+type RawWebView
+
 pub(all) enum SizeHint {
   None
   Min
@@ -32,7 +34,10 @@ pub(all) enum SizeHint {
   Fixed
 } derive(Eq, @debug.Debug)
 
-pub type WebView
+pub struct WebView {
+  // private fields
+}
+pub fn WebView::WebView(debug? : Bool) -> Self raise WebViewError
 pub fn WebView::bind(Self, String, (String, String) -> Unit) -> Unit raise WebViewError
 pub fn WebView::close_window(Self) -> Unit raise WebViewError
 pub fn WebView::destroy(Self) -> Unit raise WebViewError
@@ -47,7 +52,6 @@ pub fn WebView::maximize_window(Self) -> Unit raise WebViewError
 pub fn WebView::minimize_window(Self) -> Unit raise WebViewError
 pub fn WebView::native_window(Self) -> NativeWindow raise WebViewError
 pub fn WebView::navigate(Self, String) -> Unit raise WebViewError
-pub fn WebView::new(debug? : Bool) -> Self raise WebViewError
 pub fn WebView::on_window_event(Self, (WindowEvent) -> Unit) -> Unit raise WebViewError
 pub fn WebView::restore_window(Self) -> Unit raise WebViewError
 pub fn WebView::return_(Self, String, Int, String) -> Unit raise WebViewError

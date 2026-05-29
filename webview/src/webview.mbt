@@ -1,9 +1,9 @@
 ///|
-/// Create a new top-level webview window.
-pub fn WebView::new(debug? : Bool = false) -> WebView raise WebViewError {
-  let view = ffi_create(debug)
-  if view.is_valid() {
-    view
+/// Create a top-level webview window.
+pub fn WebView::WebView(debug? : Bool = false) -> WebView raise WebViewError {
+  let raw = ffi_create(debug)
+  if ffi_is_valid(raw) {
+    { raw, }
   } else {
     raise CreationFailed
   }
@@ -12,7 +12,7 @@ pub fn WebView::new(debug? : Bool = false) -> WebView raise WebViewError {
 ///|
 /// Return whether this handle currently owns a live native webview.
 pub fn WebView::is_valid(self : WebView) -> Bool {
-  ffi_is_valid(self)
+  ffi_is_valid(self.raw)
 }
 
 ///|
@@ -24,8 +24,8 @@ pub fn WebView::is_valid(self : WebView) -> Bool {
 pub fn WebView::native_window(
   self : WebView,
 ) -> NativeWindow raise WebViewError {
-  if ffi_has_native_window(self) {
-    ffi_get_native_window(self)
+  if ffi_has_native_window(self.raw) {
+    ffi_get_native_window(self.raw)
   } else {
     raise InvalidState
   }
@@ -34,13 +34,13 @@ pub fn WebView::native_window(
 ///|
 /// Destroy the native webview if it has not already been destroyed.
 pub fn WebView::destroy(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_destroy(self))
+  check_status(ffi_destroy(self.raw))
 }
 
 ///|
 /// Run the GUI event loop until the webview is terminated.
 pub fn WebView::run(self : WebView) -> Unit raise WebViewError {
-  let status = ffi_run(self)
+  let status = ffi_run(self.raw)
   // Keep the external object alive for the whole blocking native run call.
   ignore(self.is_valid())
   check_status(status)
@@ -49,7 +49,7 @@ pub fn WebView::run(self : WebView) -> Unit raise WebViewError {
 ///|
 /// Stop the GUI event loop. This can be called from another thread.
 pub fn WebView::terminate(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_terminate(self))
+  check_status(ffi_terminate(self.raw))
 }
 
 ///|
@@ -58,7 +58,7 @@ pub fn WebView::set_title(
   self : WebView,
   title : String,
 ) -> Unit raise WebViewError {
-  check_status(ffi_set_title(self, @utf8.encode(title)))
+  check_status(ffi_set_title(self.raw, @utf8.encode(title)))
 }
 
 ///|
@@ -69,7 +69,7 @@ pub fn WebView::set_size(
   height : Int,
   hint? : SizeHint = None,
 ) -> Unit raise WebViewError {
-  check_status(ffi_set_size(self, width, height, hint.to_int()))
+  check_status(ffi_set_size(self.raw, width, height, hint.to_int()))
 }
 
 ///|
@@ -78,7 +78,7 @@ pub fn WebView::navigate(
   self : WebView,
   url : String,
 ) -> Unit raise WebViewError {
-  check_status(ffi_navigate(self, @utf8.encode(url)))
+  check_status(ffi_navigate(self.raw, @utf8.encode(url)))
 }
 
 ///|
@@ -87,19 +87,19 @@ pub fn WebView::set_html(
   self : WebView,
   html : String,
 ) -> Unit raise WebViewError {
-  check_status(ffi_set_html(self, @utf8.encode(html)))
+  check_status(ffi_set_html(self.raw, @utf8.encode(html)))
 }
 
 ///|
 /// Inject JavaScript to run before `window.onload` on future page loads.
 pub fn WebView::init(self : WebView, js : String) -> Unit raise WebViewError {
-  check_status(ffi_init(self, @utf8.encode(js)))
+  check_status(ffi_init(self.raw, @utf8.encode(js)))
 }
 
 ///|
 /// Evaluate JavaScript in the current page.
 pub fn WebView::eval(self : WebView, js : String) -> Unit raise WebViewError {
-  check_status(ffi_eval(self, @utf8.encode(js)))
+  check_status(ffi_eval(self.raw, @utf8.encode(js)))
 }
 
 ///|
@@ -114,7 +114,7 @@ pub fn WebView::bind(
 ) -> Unit raise WebViewError {
   check_status(
     ffi_bind(
-      self,
+      self.raw,
       @utf8.encode(name),
       (callback, id, req) => callback(id, req),
       (id, req) => handler(@utf8.decode_lossy(id), @utf8.decode_lossy(req)),
@@ -128,7 +128,7 @@ pub fn WebView::unbind(
   self : WebView,
   name : String,
 ) -> Unit raise WebViewError {
-  check_status(ffi_unbind(self, @utf8.encode(name)))
+  check_status(ffi_unbind(self.raw, @utf8.encode(name)))
 }
 
 ///|
@@ -142,7 +142,9 @@ pub fn WebView::return_(
   status : Int,
   result : String,
 ) -> Unit raise WebViewError {
-  check_status(ffi_return(self, @utf8.encode(id), status, @utf8.encode(result)))
+  check_status(
+    ffi_return(self.raw, @utf8.encode(id), status, @utf8.encode(result)),
+  )
 }
 
 ///|
@@ -154,55 +156,55 @@ pub fn WebView::dispatch(
   self : WebView,
   handler : () -> Unit,
 ) -> Unit raise WebViewError {
-  check_status(ffi_dispatch(self, callback => callback(), handler))
+  check_status(ffi_dispatch(self.raw, callback => callback(), handler))
 }
 
 ///|
 /// Close the native top-level window without asking the runtime to confirm.
 pub fn WebView::close_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_close_window(self))
+  check_status(ffi_close_window(self.raw))
 }
 
 ///|
 /// Focus the native top-level window.
 pub fn WebView::focus_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_focus_window(self))
+  check_status(ffi_focus_window(self.raw))
 }
 
 ///|
 /// Minimize the native top-level window.
 pub fn WebView::minimize_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_minimize_window(self))
+  check_status(ffi_minimize_window(self.raw))
 }
 
 ///|
 /// Maximize the native top-level window.
 pub fn WebView::maximize_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_maximize_window(self))
+  check_status(ffi_maximize_window(self.raw))
 }
 
 ///|
 /// Restore the native top-level window from minimized or maximized state.
 pub fn WebView::restore_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_restore_window(self))
+  check_status(ffi_restore_window(self.raw))
 }
 
 ///|
 /// Show the native top-level window.
 pub fn WebView::show_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_show_window(self))
+  check_status(ffi_show_window(self.raw))
 }
 
 ///|
 /// Hide the native top-level window.
 pub fn WebView::hide_window(self : WebView) -> Unit raise WebViewError {
-  check_status(ffi_hide_window(self))
+  check_status(ffi_hide_window(self.raw))
 }
 
 ///|
 /// Return whether the native top-level window has been closed.
 pub fn WebView::is_window_closed(self : WebView) -> Bool {
-  ffi_is_window_closed(self)
+  ffi_is_window_closed(self.raw)
 }
 
 ///|
@@ -212,7 +214,7 @@ pub fn WebView::on_window_event(
   handler : (WindowEvent) -> Unit,
 ) -> Unit raise WebViewError {
   check_status(
-    ffi_set_window_event_handler(self, (callback, code) => callback(code), code => {
+    ffi_set_window_event_handler(self.raw, (callback, code) => callback(code), code => {
       match WindowEvent::from_int(code) {
         Some(event) => handler(event)
         None => ()

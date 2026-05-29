@@ -233,7 +233,7 @@ pub fn App::create_window(
     Some(lifecycle) => lifecycle
     None => WindowLifecycle::empty()
   }
-  let view = @webview.WebView::new(debug=options.debug) catch {
+  let view = @webview.WebView(debug=options.debug) catch {
     err => {
       raise_webview(err)
       abort("unreachable")

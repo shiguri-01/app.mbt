@@ -1,6 +1,12 @@
 ///|
-/// Opaque handle to a native webview instance.
-pub type WebView
+/// Opaque native webview handle used by the FFI bridge.
+type RawWebView
+
+///|
+/// Handle to a native webview instance.
+pub struct WebView {
+  priv raw : RawWebView
+}
 
 ///|
 #external

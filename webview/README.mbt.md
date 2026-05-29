@@ -19,7 +19,7 @@ The module provides:
 
 ```mbt check
 fn main {
-  try! @webview.WebView::new(debug=true)
+  try! @webview.WebView(debug=true)
     ..set_title("MoonBit webview")
     ..set_size(800, 600)
     ..set_html("<h1>Hello from MoonBit</h1>")
