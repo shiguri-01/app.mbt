@@ -18,4 +18,5 @@ supported_targets = "+native"
 
 options(
   source: "src",
+  exclude: [ "src/examples" ],
 )
