@@ -36,8 +36,20 @@ moon run src/examples/basic --target native
 ## Native Build Notes
 
 Runnable packages must link the C++ runtime and platform libraries.
-On Windows, the bundled package configuration uses `cl` for the C++ stub
-and links the WebView2-related platform libraries.
+On Windows, the bundled package configuration uses `cl` for the C++ stub.
+Runnable packages that import `shiguri-01/webview` should also link the
+WebView2-related platform libraries in their `moon.pkg`:
+
+```
+options(
+  "is-main": true,
+  link: {
+    "native": {
+      "cc-link-flags": "advapi32.lib ole32.lib shell32.lib shlwapi.lib user32.lib version.lib",
+    },
+  },
+)
+```
 
 ## License and Credits
 
