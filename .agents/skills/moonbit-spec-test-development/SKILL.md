@@ -4,7 +4,7 @@ metadata:
     github-path: skills/moonbit-spec-test-development
     github-ref: refs/heads/master
     github-repo: https://github.com/moonbitlang/skills
-    github-tree-sha: 23664b5d369bdeab6f9e5f6c815de680e894ada0
+    github-tree-sha: 4bfc3a03856f22bede03447c3994d361362e16b8
 name: moonbit-spec-test-development
 ---
 # MoonBit Spec & Test Development
