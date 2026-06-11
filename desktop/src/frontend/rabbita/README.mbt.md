@@ -34,16 +34,11 @@ let increment_endpoint : @ipc.IpcEndpoint[IncrementRequest, CountChangedReply] =
 ///|
 /// Real apps usually map the response to a message command here.
 pub fn increment_cmd(client : @frontend.Client) -> @cmd.Cmd {
-  request_cmd(
-    client~,
-    endpoint=increment_endpoint,
-    body=IncrementRequest::{ amount: 1 },
-    on_response=response => {
-      match response {
-        _ => @cmd.none
-      }
-    },
-  )
+  request_cmd(client~, endpoint=increment_endpoint, body={ amount: 1 }, on_response=response => {
+    match response {
+      _ => @cmd.none
+    }
+  })
 }
 ```
 

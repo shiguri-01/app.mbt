@@ -34,7 +34,7 @@ fn send_http_cmd(
   @desktop_rabbita.request_cmd(
     client~,
     endpoint=@contract.send_http_endpoint,
-    body=@contract.SendHttpRequest::{ request, },
+    body={ request, },
     on_response=response => emit(RequestSent(response)),
   )
 }

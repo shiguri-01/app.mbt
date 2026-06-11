@@ -8,8 +8,6 @@ test "increment request can be encoded as json" {
 
 ///|
 test "counter endpoint carries command id" {
-  assert_true(
-    increment_endpoint.command_id() == @ipc.CommandId("counter.increment"),
-  )
-  assert_true(reset_endpoint.command_id() == @ipc.CommandId("counter.reset"))
+  assert_true(increment_endpoint.command_id() == CommandId("counter.increment"))
+  assert_true(reset_endpoint.command_id() == CommandId("counter.reset"))
 }

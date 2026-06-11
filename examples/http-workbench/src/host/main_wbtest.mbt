@@ -1,12 +1,12 @@
 ///|
 test "method mapping covers all variants" {
-  assert_true(method_to_request_method(Get) == @http.RequestMethod::Get)
-  assert_true(method_to_request_method(Post) == @http.RequestMethod::Post)
-  assert_true(method_to_request_method(Put) == @http.RequestMethod::Put)
-  assert_true(method_to_request_method(Patch) == @http.RequestMethod::Patch)
-  assert_true(method_to_request_method(Delete) == @http.RequestMethod::Delete)
-  assert_true(method_to_request_method(Head) == @http.RequestMethod::Head)
-  assert_true(method_to_request_method(Options) == @http.RequestMethod::Options)
+  assert_true(method_to_request_method(Get) == Get)
+  assert_true(method_to_request_method(Post) == Post)
+  assert_true(method_to_request_method(Put) == Put)
+  assert_true(method_to_request_method(Patch) == Patch)
+  assert_true(method_to_request_method(Delete) == Delete)
+  assert_true(method_to_request_method(Head) == Head)
+  assert_true(method_to_request_method(Options) == Options)
 }
 
 ///|

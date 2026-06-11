@@ -6,7 +6,7 @@ fn[T] json_decode_error(
   path : @json.JsonPath,
   message : String,
 ) -> T raise @json.JsonDecodeError {
-  raise @json.JsonDecodeError((path, message))
+  raise JsonDecodeError((path, message))
 }
 
 ///|

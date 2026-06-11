@@ -34,10 +34,10 @@ fn dialog_choice_from_runtime(
   choice : @desktop.MessageDialogResult,
 ) -> @shared.DialogChoice {
   match choice {
-    @desktop.MessageDialogResult::Ok => ChoiceOk
-    @desktop.MessageDialogResult::Cancel => ChoiceCancel
-    @desktop.MessageDialogResult::Yes => ChoiceYes
-    @desktop.MessageDialogResult::No => ChoiceNo
+    Ok => ChoiceOk
+    Cancel => ChoiceCancel
+    Yes => ChoiceYes
+    No => ChoiceNo
   }
 }
 

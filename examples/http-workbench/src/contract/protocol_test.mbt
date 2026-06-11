@@ -1,13 +1,13 @@
 ///|
 test "workbench endpoints carry stable command ids" {
   assert_true(
-    load_state_endpoint.command_id() == @ipc.CommandId("workbench.load_state"),
+    load_state_endpoint.command_id() == CommandId("workbench.load_state"),
   )
   assert_true(
-    save_state_endpoint.command_id() == @ipc.CommandId("workbench.save_state"),
+    save_state_endpoint.command_id() == CommandId("workbench.save_state"),
   )
   assert_true(
-    send_http_endpoint.command_id() == @ipc.CommandId("workbench.send_http"),
+    send_http_endpoint.command_id() == CommandId("workbench.send_http"),
   )
 }
 
@@ -18,15 +18,13 @@ test "workbench state json roundtrip" {
     name: "HTTPBin",
     http_method: Get,
     url: "https://httpbin.org/get",
-    headers: [
-      Header::{ name: "Accept", value: "application/json", enabled: true },
-    ],
+    headers: [{ name: "Accept", value: "application/json", enabled: true }],
     body: "",
   }
   let state = WorkbenchState::{
     saved_requests: [draft],
     recent_history: [
-      HistoryEntry::{
+      {
         id: "hist-1",
         name: "GET httpbin",
         http_method: Get,
@@ -46,21 +44,19 @@ test "workbench state json roundtrip" {
 ///|
 test "send request and reply json roundtrip" {
   let request = SendHttpRequest::{
-    request: SavedRequest::{
+    request: {
       id: "draft",
       name: "HTTPBin",
       http_method: Get,
       url: "https://httpbin.org/get",
-      headers: [
-        Header::{ name: "Accept", value: "application/json", enabled: true },
-      ],
+      headers: [{ name: "Accept", value: "application/json", enabled: true }],
       body: "",
     },
   }
   let reply = SendHttpReply::{
     status: Some(200),
     status_text: "OK",
-    headers: [ResponseHeader::{ name: "content-type", value: "text/plain" }],
+    headers: [{ name: "content-type", value: "text/plain" }],
     body: "ok",
     duration_ms: 8L,
     error: None,

@@ -1,18 +1,12 @@
 ///|
 /// Return the initial draft request shown by the example.
 pub fn default_request() -> @contract.SavedRequest {
-  @contract.SavedRequest::{
+  {
     id: "draft",
     name: "New request",
     http_method: Get,
     url: "https://httpbin.org/get",
-    headers: [
-      @contract.Header::{
-        name: "Accept",
-        value: "application/json",
-        enabled: true,
-      },
-    ],
+    headers: [{ name: "Accept", value: "application/json", enabled: true }],
     body: "",
   }
 }
@@ -20,31 +14,21 @@ pub fn default_request() -> @contract.SavedRequest {
 ///|
 fn sample_requests() -> Array[@contract.SavedRequest] {
   [
-    @contract.SavedRequest::{
+    {
       id: "sample-get",
       name: "GET httpbin",
       http_method: Get,
       url: "https://httpbin.org/get",
-      headers: [
-        @contract.Header::{
-          name: "Accept",
-          value: "application/json",
-          enabled: true,
-        },
-      ],
+      headers: [{ name: "Accept", value: "application/json", enabled: true }],
       body: "",
     },
-    @contract.SavedRequest::{
+    {
       id: "sample-post",
       name: "POST echo",
       http_method: Post,
       url: "https://httpbin.org/post",
       headers: [
-        @contract.Header::{
-          name: "Content-Type",
-          value: "application/json",
-          enabled: true,
-        },
+        { name: "Content-Type", value: "application/json", enabled: true },
       ],
       body: "{\n  \"message\": \"hello\"\n}",
     },
@@ -68,7 +52,7 @@ pub fn append_header(
   headers : Array[@contract.Header],
 ) -> Array[@contract.Header] {
   let next = headers.copy()
-  next.push(@contract.Header::{ name: "", value: "", enabled: true })
+  next.push({ name: "", value: "", enabled: true })
   next
 }
 

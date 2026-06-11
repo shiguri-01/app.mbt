@@ -37,7 +37,7 @@ pub fn file_name(path : String?) -> String {
 ///|
 /// Return empty startup state.
 pub fn default_startup_state() -> @contract.StartupState {
-  @contract.StartupState::{ recent_files: [], last_file: None }
+  { recent_files: [], last_file: None }
 }
 
 ///|
@@ -61,8 +61,5 @@ pub fn add_recent(
 pub fn app_state_from_startup(
   state : @contract.StartupState,
 ) -> @contract.AppState {
-  @contract.AppState::{
-    recent_files: state.recent_files,
-    last_file: state.last_file,
-  }
+  { recent_files: state.recent_files, last_file: state.last_file }
 }

@@ -45,6 +45,7 @@ extern "js" fn install_listener(
 
 ///|
 /// Create a frontend IPC client using the default desktop bridge.
+#warnings("-unnecessary_annotation")
 pub fn Client::Client() -> Client {
   Client::{  }
 }

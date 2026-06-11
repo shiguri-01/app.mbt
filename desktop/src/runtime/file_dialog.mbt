@@ -10,7 +10,7 @@ pub(all) struct FileFilter {
 
 ///|
 fn FileFilter::to_shell(self : FileFilter) -> @shell.FileFilter {
-  @shell.FileFilter::{ name: self.name, extensions: self.extensions }
+  { name: self.name, extensions: self.extensions }
 }
 
 ///|

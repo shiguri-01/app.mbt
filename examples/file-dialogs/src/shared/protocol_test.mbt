@@ -1,7 +1,7 @@
 ///|
 test "file dialog endpoint carries command id" {
   assert_true(
-    open_files_endpoint.command_id() == @ipc.CommandId("file_dialog.open_files"),
+    open_files_endpoint.command_id() == CommandId("file_dialog.open_files"),
   )
 }
 

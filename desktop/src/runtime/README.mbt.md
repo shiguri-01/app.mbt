@@ -18,12 +18,12 @@ native dialogs, window lifecycle callbacks, and optional window restoration.
 ///|
 /// Pass this value to `App::create_window` from the runtime startup callback.
 pub fn main_window_options() -> @runtime.WindowOptions {
-  @runtime.WindowOptions(
+  WindowOptions(
     key="main",
     title="MoonBit Desktop",
     width=800,
     height=600,
-    load=@runtime.Load::Html("<h1>Hello</h1>"),
+    load=Html("<h1>Hello</h1>"),
   )
 }
 ```

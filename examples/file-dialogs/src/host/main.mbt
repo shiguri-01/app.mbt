@@ -84,9 +84,7 @@ fn save_sample_file(
       match write_sample_file_sync(path) {
         Ok(_) => Selected([path])
         Err(message) =>
-          raise @desktop.DesktopError::InvalidState(
-            "failed to write selected file: \{message}",
-          )
+          raise InvalidState("failed to write selected file: \{message}")
       }
   }
 }

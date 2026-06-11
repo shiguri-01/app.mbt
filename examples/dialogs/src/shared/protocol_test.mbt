@@ -1,7 +1,7 @@
 ///|
 test "dialog endpoint carries command id" {
   assert_true(
-    ask_question_endpoint.command_id() == @ipc.CommandId("dialog.ask_question"),
+    ask_question_endpoint.command_id() == CommandId("dialog.ask_question"),
   )
 }
 

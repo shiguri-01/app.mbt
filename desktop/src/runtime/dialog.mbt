@@ -12,10 +12,10 @@ fn MessageDialogKind::to_shell(
   self : MessageDialogKind,
 ) -> @shell.MessageDialogKind {
   match self {
-    Info => @shell.MessageDialogKind::Info
-    Warning => @shell.MessageDialogKind::Warning
-    Error => @shell.MessageDialogKind::Error
-    Question => @shell.MessageDialogKind::Question
+    Info => Info
+    Warning => Warning
+    Error => Error
+    Question => Question
   }
 }
 
@@ -33,10 +33,10 @@ fn MessageDialogButtons::to_shell(
   self : MessageDialogButtons,
 ) -> @shell.MessageDialogButtons {
   match self {
-    Ok => @shell.MessageDialogButtons::Ok
-    OkCancel => @shell.MessageDialogButtons::OkCancel
-    YesNo => @shell.MessageDialogButtons::YesNo
-    YesNoCancel => @shell.MessageDialogButtons::YesNoCancel
+    Ok => Ok
+    OkCancel => OkCancel
+    YesNo => YesNo
+    YesNoCancel => YesNoCancel
   }
 }
 
@@ -54,10 +54,10 @@ fn MessageDialogResult::from_shell(
   result : @shell.MessageDialogResult,
 ) -> MessageDialogResult {
   match result {
-    @shell.MessageDialogResult::Ok => Ok
-    @shell.MessageDialogResult::Cancel => Cancel
-    @shell.MessageDialogResult::Yes => Yes
-    @shell.MessageDialogResult::No => No
+    Ok => Ok
+    Cancel => Cancel
+    Yes => Yes
+    No => No
   }
 }
 

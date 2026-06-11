@@ -28,9 +28,7 @@ fn CounterModel::render(self : CounterModel) -> Unit {
 
 ///|
 async fn CounterModel::increment(self : CounterModel, amount : Int) -> Unit {
-  let response = self.client.request(@shared.increment_endpoint, @shared.IncrementRequest::{
-    amount,
-  })
+  let response = self.client.request(@shared.increment_endpoint, { amount, })
   self.handle_count_response(response)
 }
 

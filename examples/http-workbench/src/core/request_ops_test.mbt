@@ -6,8 +6,8 @@ test "enabled headers skip disabled and blank names" {
       value: "application/json",
       enabled: true,
     },
-    @contract.Header::{ name: "  ", value: "ignored", enabled: true },
-    @contract.Header::{ name: "X-Skip", value: "ignored", enabled: false },
+    { name: "  ", value: "ignored", enabled: true },
+    { name: "X-Skip", value: "ignored", enabled: false },
   ]
   let result = enabled_headers(headers)
   assert_true(result["Accept"] == "application/json")

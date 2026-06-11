@@ -32,11 +32,9 @@ fn NotesModel::sync_window_state(self : NotesModel) -> Unit {
   let dirty = (self.dirty)()
   if self.reported_dirty.get() != dirty {
     self.reported_dirty.set(dirty)
-    self.client.request_callback(
-      @contract.set_dirty_endpoint,
-      @contract.DirtyState::{ dirty, },
-      _ => (),
-    )
+    self.client.request_callback(@contract.set_dirty_endpoint, { dirty, }, _ => {
+      ()
+    })
   }
   let suffix = if dirty { " *" } else { "" }
   @dom.document().setTitle(self.title.get() + suffix + " - Markdown Notes")
@@ -191,11 +189,9 @@ fn NotesModel::open_recent(self : NotesModel, path : String) -> Unit {
   guard self.can_start_file_task() else {  }
   guard self.can_discard_current_document() else {  }
   self.start_file_task()
-  self.client.request_callback(
-    @contract.open_file_endpoint,
-    @contract.OpenFileRequest::{ path, },
-    response => self.handle_open_reply(response),
-  )
+  self.client.request_callback(@contract.open_file_endpoint, { path, }, response => {
+    self.handle_open_reply(response)
+  })
 }
 
 ///|
@@ -204,10 +200,7 @@ fn NotesModel::save(self : NotesModel) -> Unit {
   self.start_file_task()
   self.client.request_callback(
     @contract.save_file_endpoint,
-    @contract.SaveFileRequest::{
-      path: self.path.get(),
-      content: self.content.get(),
-    },
+    { path: self.path.get(), content: self.content.get() },
     response => self.handle_save_reply(response),
   )
 }
@@ -218,10 +211,7 @@ fn NotesModel::save_as(self : NotesModel) -> Unit {
   self.start_file_task()
   self.client.request_callback(
     @contract.save_file_as_endpoint,
-    @contract.SaveFileRequest::{
-      path: self.path.get(),
-      content: self.content.get(),
-    },
+    { path: self.path.get(), content: self.content.get() },
     response => self.handle_save_reply(response),
   )
 }
@@ -243,7 +233,7 @@ fn create_model() -> NotesModel {
   let content = signal(@core.welcome_markdown())
   let saved_content = signal(@core.welcome_markdown())
   let dirty = memo(fn() { content.get() != saved_content.get() })
-  NotesModel::{
+  {
     client: Client(),
     path: signal(None),
     title: signal(@core.file_name(None)),

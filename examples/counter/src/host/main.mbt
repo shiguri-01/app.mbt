@@ -43,7 +43,7 @@ fn handle_command(
   request : @shared.IncrementRequest,
 ) -> (Int, @shared.CountChangedReply) {
   let next = count + request.amount
-  (next, @shared.CountChangedReply::{ count: next })
+  (next, { count: next })
 }
 
 ///|
@@ -80,9 +80,9 @@ fn main {
       .handle(@shared.reset_endpoint, handler=_request => {
         @async.sleep(1)
         count.val = 0
-        @shared.CountChangedReply::{ count: 0 }
+        { count: 0 }
       })
-      .handle(@shared.set_title_endpoint, handler=request => @shared.WindowTitleChangedReply::{
+      .handle(@shared.set_title_endpoint, handler=request => {
         title: request.title,
       })
     window.mount_ipc(router)

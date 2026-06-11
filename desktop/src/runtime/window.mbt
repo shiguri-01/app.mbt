@@ -153,19 +153,19 @@ fn Window::configure_native_window(self : Window) -> Unit raise DesktopError {
     self.height,
     hint=if self.visible && !self.maximized && !self.minimized {
       if self.is_resizable() {
-        @webview.None
+        None
       } else {
-        @webview.Fixed
+        Fixed
       }
     } else {
-      @webview.None
+      None
     },
   ) catch {
     err => raise_webview(err)
   }
   match (self.min_width, self.min_height) {
     (Some(width), Some(height)) =>
-      self.view.set_size(width, height, hint=@webview.Min) catch {
+      self.view.set_size(width, height, hint=Min) catch {
         err => raise_webview(err)
       }
     _ => ()

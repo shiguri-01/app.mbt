@@ -45,8 +45,8 @@ fn load_frontend_html() -> String raise {
 ///|
 fn markdown_filters() -> Array[@desktop.FileFilter] {
   [
-    @desktop.FileFilter::{ name: "Markdown", extensions: ["md", "markdown"] },
-    @desktop.FileFilter::{ name: "Text", extensions: ["txt"] },
+    { name: "Markdown", extensions: ["md", "markdown"] },
+    { name: "Text", extensions: ["txt"] },
   ]
 }
 
@@ -67,10 +67,7 @@ async fn load_state() -> @contract.StartupState {
   let path = state_file_path()
   guard @fs.exists(path) else { @core.default_startup_state() }
   let app_state = read_app_state(path) catch { _ => default_app_state() }
-  @contract.StartupState::{
-    recent_files: app_state.recent_files,
-    last_file: app_state.last_file,
-  }
+  { recent_files: app_state.recent_files, last_file: app_state.last_file }
 }
 
 ///|
@@ -88,7 +85,7 @@ async fn save_state(state : @contract.StartupState) -> Unit {
 ///|
 async fn remember_file(path : String) -> Unit {
   let state = load_state()
-  save_state(@contract.StartupState::{
+  save_state({
     recent_files: @core.add_recent(state.recent_files, path),
     last_file: Some(path),
   })
@@ -103,7 +100,7 @@ async fn read_markdown_file(
   if remember {
     remember_file(path)
   }
-  @contract.OpenDocument::{ path, name: @core.file_name(Some(path)), content }
+  { path, name: @core.file_name(Some(path)), content }
 }
 
 ///|
@@ -113,7 +110,7 @@ async fn write_markdown_file(
 ) -> @contract.SavedFile {
   @fs.write_file(path, content, create_mode=CreateOrTruncate)
   remember_file(path)
-  @contract.SavedFile::{ path, name: @core.file_name(Some(path)) }
+  { path, name: @core.file_name(Some(path)) }
 }
 
 ///|
@@ -159,11 +156,8 @@ fn main {
       .handle(@contract.load_startup_state_endpoint, handler=_ => load_state())
       .handle(@contract.open_file_dialog_endpoint, handler=_ => {
         match window.open_file_dialog(filters=markdown_filters()) {
-          Some(path) =>
-            @contract.OpenDialogReply::{
-              document: Some(read_markdown_file(path)),
-            }
-          None => @contract.OpenDialogReply::{ document: None }
+          Some(path) => { document: Some(read_markdown_file(path)) }
+          None => { document: None }
         }
       })
       .handle(@contract.open_file_endpoint, handler=request => {
@@ -172,9 +166,7 @@ fn main {
       .handle(@contract.save_file_endpoint, handler=request => {
         match request.path {
           Some(path) =>
-            @contract.SaveFileReply::{
-              file: Some(write_markdown_file(path, request.content)),
-            }
+            { file: Some(write_markdown_file(path, request.content)) }
           None =>
             match
               window.save_file_dialog(
@@ -182,10 +174,8 @@ fn main {
                 default_name=@core.file_name(None),
               ) {
               Some(path) =>
-                @contract.SaveFileReply::{
-                  file: Some(write_markdown_file(path, request.content)),
-                }
-              None => @contract.SaveFileReply::{ file: None }
+                { file: Some(write_markdown_file(path, request.content)) }
+              None => { file: None }
             }
         }
       })
@@ -196,10 +186,8 @@ fn main {
             default_name=@core.file_name(request.path),
           ) {
           Some(path) =>
-            @contract.SaveFileReply::{
-              file: Some(write_markdown_file(path, request.content)),
-            }
-          None => @contract.SaveFileReply::{ file: None }
+            { file: Some(write_markdown_file(path, request.content)) }
+          None => { file: None }
         }
       })
       .handle(@contract.set_dirty_endpoint, handler=state => {

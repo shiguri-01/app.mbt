@@ -48,13 +48,13 @@ pub fn method_to_request_method(
   http_method : @contract.HttpMethod,
 ) -> @http.RequestMethod {
   match http_method {
-    Get => @http.RequestMethod::Get
-    Post => @http.RequestMethod::Post
-    Put => @http.RequestMethod::Put
-    Patch => @http.RequestMethod::Patch
-    Delete => @http.RequestMethod::Delete
-    Head => @http.RequestMethod::Head
-    Options => @http.RequestMethod::Options
+    Get => Get
+    Post => Post
+    Put => Put
+    Patch => Patch
+    Delete => Delete
+    Head => Head
+    Options => Options
   }
 }
 
@@ -141,7 +141,7 @@ pub async fn save_state_to_path(
     state.to_json().stringify(),
     create_mode=CreateOrTruncate,
   )
-  @contract.SaveStateReply::{ saved: true, message: "Saved" }
+  { saved: true, message: "Saved" }
 }
 
 ///|
@@ -151,7 +151,7 @@ async fn handle_send_http(
   let start = @async.now()
   let (response, body, duration) = perform_http_request(request.request) catch {
     err =>
-      return @contract.SendHttpReply::{
+      return {
         status: None,
         status_text: "",
         headers: [],
@@ -160,7 +160,7 @@ async fn handle_send_http(
         error: Some("\{to_repr(err)}"),
       }
   }
-  @contract.SendHttpReply::{
+  {
     status: Some(response.code),
     status_text: response.reason,
     headers: response_headers(response.headers),

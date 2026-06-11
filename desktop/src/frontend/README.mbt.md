@@ -40,7 +40,7 @@ let increment_endpoint : @ipc.IpcEndpoint[IncrementRequest, CountChangedReply] =
 ///|
 /// Real apps update frontend state from the typed response.
 pub fn request_increment(client : @frontend.Client) -> Unit {
-  client.request_callback(increment_endpoint, IncrementRequest::{ amount: 1 }, response => {
+  client.request_callback(increment_endpoint, { amount: 1 }, response => {
     match response {
       Ok(_) => ()
       Err(_) => ()
